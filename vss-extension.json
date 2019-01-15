@@ -1,0 +1,44 @@
+{
+    "manifestVersion": 1,
+    "id": "doist-estimate",
+    "publisher": "Doist",
+    "version": "1.0.1",
+    "name": "Estimate by Doist",
+    "description": "Backlog estimation",
+    "public": false,
+    "categories": ["Azure Repos"],
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "my-hub",
+            "type": "ms.vss-web.hub",
+            "targets": [
+                "ms.vss-work-web.work-hub-group"
+            ],
+            "properties": {
+                "name": "Estimate (Experimental)",
+                "uri": "estimate-hub.html"
+            }
+        }
+    ],
+    "files": [
+        {
+            "path": "estimate-hub.html",
+            "addressable": true
+        },
+        {
+            "path": "node_modules/vss-web-extension-sdk/lib",
+            "addressable": true,
+            "packagePath": "lib"
+        },
+        {
+
+            "path": "dist",
+            "addressable": true
+        }
+    ]
+}
