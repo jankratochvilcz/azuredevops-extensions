@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "office-ui-fabric-react": "^6.124.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "vss-web-extension-sdk": "^5.141.0"
