@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "doist-estimate",
     "publisher": "Doist",
-    "version": "1.0.4",
+    "version": "1.0.10",
     "name": "Estimate by Doist",
     "description": "Backlog estimation",
     "public": false,
