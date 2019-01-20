@@ -2,11 +2,15 @@
     "manifestVersion": 1,
     "id": "doist-estimate",
     "publisher": "Doist",
-    "version": "1.0.1",
+    "version": "1.0.4",
     "name": "Estimate by Doist",
     "description": "Backlog estimation",
     "public": false,
     "categories": ["Azure Repos"],
+    "scopes": [
+        "vso.profile",
+        "vso.work_full"
+    ],
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
