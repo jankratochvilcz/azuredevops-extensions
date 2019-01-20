@@ -1,7 +1,9 @@
 const path = require("path");
 const webpack = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
+  target: "web",
   entry: "./src/index.js",
   mode: "development",
   module: {
@@ -24,11 +26,18 @@ module.exports = {
     publicPath: "/dist/",
     filename: "bundle.js"
   },
+  externals: [
+    /^VSS\/.*/, /^TFS\/.*/
+  ],
+  devtool: "inline-source-map",
   devServer: {
-    contentBase: path.join(__dirname, "/"),
-    port: 3000,
-    publicPath: "http://localhost:3000/dist/",
-    hotOnly: true
+    https: true
   },
-  plugins: [new webpack.HotModuleReplacementPlugin()]
+  plugins: [
+    new CopyWebpackPlugin([
+      { from: "./node_modules/vss-web-extension-sdk/lib/VSS.SDK.min.js", to: "lib/VSS.SDK.min.js" },
+      { from: "./node_modules/office-ui-fabric-react/dist/css/fabric.min.css", to: "lib/fabric.min.css" },
+      { from: "./src/*.html", to: "./" },
+      { from: "./vss-extension.json", to: "vss-extension.json" }
+  ])]
 };

@@ -4,10 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "debug": "webpack-dev-server --mode development",
-    "build": "webpack --mode production",
-    "package": "webpack --mode production && tfx extension create"
+    "clean:vsix": "rimraf *.vsix",
+    "clean": "npm run clean:vsix && rimraf dist",
+    "dev": "webpack-dev-server --hot --progress --colors --https --port 3000",
+    "package:dev": "node ./scripts/packageDev",
+    "publish:dev": "npm run clean:vsix && npm run package:dev && node ./scripts/packageDev",
+    "build:release": "npm run clean && mkdir dist && webpack --progress --colors --config webpack.prod.config.js --output-path ./dist -p",
+    "package:release": "npm run build:release && node ./scripts/packageRelease"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +31,9 @@
     "style-loader": "^0.23.0",
     "webpack": "^4.19.1",
     "webpack-cli": "^3.1.1",
-    "webpack-dev-server": "^3.1.8"
+    "webpack-dev-server": "^3.1.8",
+    "rimraf": "^2.6.2",
+    "copy-webpack-plugin": "^4.2.3",
+    "cpx": "^1.5.0"
   }
 }
