@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App.js";
+import { initializeIcons } from '@uifabric/icons';
 
 console.log("VSS init");
 
@@ -16,9 +17,11 @@ VSS.init({
     }
 });
 
+initializeIcons();
+
 VSS.ready(function () {
     console.log("VSS ready");
-    
+
     ReactDOM.render(
         <App />, 
         document.getElementById("root"));
