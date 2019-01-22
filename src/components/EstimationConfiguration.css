@@ -1,0 +1,18 @@
+.component-root {
+    display: grid;
+    grid-template-columns: auto [main-content] 500px auto;
+}
+
+.main-content {
+    grid-column: main-content;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content-child {
+    margin-bottom: 12px;
+}
+
+.go-to-session-button {
+    margin-left: auto;
+}

@@ -79,42 +79,45 @@ class EstimationConfiguration extends Component {
     }
 
     render() {
-        if(this.state.redirectToSession) {
+        if (this.state.redirectToSession) {
             return <Redirect to="/session/" />;
         }
 
         return (
-            
-            <div>
-                <h2>
-                    Configure Estimation Session
-                </h2>
+            <div className="component-root">
+                <div className="main-content">
+                    <h2 className="main-content-child">
+                        Configure Estimation Session
+                    </h2>
 
-                <Dropdown
-                    placeholder="Loading interations ..."
-                    label="Iteration"
-                    selectedKey={this.state.selectedIteration != null ? this.state.selectedIteration.id : null}
-                    options={_.first(this.state.availableIterations, 5).map(x => {
-                        return {
-                            key: x.id,
-                            text: x.name
-                        }
-                    })} />
+                    <Dropdown
+                        placeholder="Loading interations ..."
+                        className="main-content-child"
+                        label="Iteration"
+                        selectedKey={this.state.selectedIteration != null ? this.state.selectedIteration.id : null}
+                        options={_.first(this.state.availableIterations, 5).map(x => {
+                            return {
+                                key: x.id,
+                                text: x.name
+                            }
+                        })} />
 
-                <Dropdown
-                    label="Deck"
-                    selectedKey={this.state.selectedDeck != null ? this.state.selectedDeck.key : null}
-                    options={this.state.availableCardDecks.map(x => {
-                        return {
-                            key: x.key,
-                            text: x.name
-                        }
-                    })} />
+                    <Dropdown
+                        label="Deck"
+                        className="main-content-child"
+                        selectedKey={this.state.selectedDeck != null ? this.state.selectedDeck.key : null}
+                        options={this.state.availableCardDecks.map(x => {
+                            return {
+                                key: x.key,
+                                text: x.name
+                            }
+                        })} />
 
-                <PrimaryButton
-                    style={{ marginTop: "12px" }}
-                    onClick={this.goToSession}
-                    text="Estimate" />
+                    <PrimaryButton
+                        className="main-content-child go-to-session-button"
+                        onClick={this.goToSession}
+                        text="Start Estimating" />
+                </div>
             </div>
         );
     }
