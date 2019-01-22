@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import _ from 'underscore'
 
 import { Dropdown } from 'office-ui-fabric-react/lib/Dropdown';
-import { Button, PrimaryButton } from "office-ui-fabric-react";
+import { PrimaryButton } from "office-ui-fabric-react";
+import { Redirect } from 'react-router';
 
 import "./EstimationConfiguration.css"
 
@@ -12,6 +13,7 @@ class EstimationConfiguration extends Component {
 
         this.loadIterations = this.loadIterations.bind(this);
         this.toggleIsAvailableCardDecksHintVisible = this.toggleIsAvailableCardDecksHintVisible.bind(this);
+        this.goToSession = this.goToSession.bind(this);
 
         const availableCardDecks = [
             {
@@ -25,7 +27,8 @@ class EstimationConfiguration extends Component {
             selectedIteration: null,
             availableCardDecks: availableCardDecks,
             selectedDeck: _.first(availableCardDecks),
-            isAvailableCardDecksHintVisible: false
+            isAvailableCardDecksHintVisible: false,
+            redirectToSession: false
         }
     }
 
@@ -61,6 +64,13 @@ class EstimationConfiguration extends Component {
         });
     }
 
+    // https://stackoverflow.com/a/35354844
+    goToSession() {
+        this.setState({
+            redirectToSession: true
+        })
+    }
+
     executeOnVssWorkClient(action) {
         VSS.require(["VSS/Service", "TFS/Work/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
             var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.WorkHttpClient);
@@ -69,8 +79,13 @@ class EstimationConfiguration extends Component {
     }
 
     render() {
+        if(this.state.redirectToSession) {
+            return <Redirect to="/session/" />;
+        }
+
         return (
-            <div className="App">
+            
+            <div>
                 <h2>
                     Configure Estimation Session
                 </h2>
@@ -98,8 +113,8 @@ class EstimationConfiguration extends Component {
 
                 <PrimaryButton
                     style={{ marginTop: "12px" }}
+                    onClick={this.goToSession}
                     text="Estimate" />
-
             </div>
         );
     }
