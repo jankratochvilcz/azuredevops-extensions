@@ -1,0 +1,14 @@
+.poker-card {
+    background: #deecf9;
+    border: 1px solid #d0d0d0;
+    margin: 12px;
+    width: 80px;
+    height: 110px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.poker-card-title {
+    font-size: large;
+}

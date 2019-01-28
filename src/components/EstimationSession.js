@@ -1,34 +1,35 @@
 import React, { Component } from "react";
 import "./EstimationSession.css"
 import UserStoryList from "./UserStoryList";
+import PokerCard from "./PokerCard";
 
 class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
+        this.onSelectedWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
+
         this.state = {
-            workItems: []
+            workItems: [],
+            cardValues: [0, 1, 2, 3, 5, 8, 13, 21],
+            selectedUserStoryId: null
         }
     }
 
     componentDidMount() {
-        console.log(this.props);
         var wiql = {
-            query: "SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '" + this.props.match.params.iterationPath + "'"
+            query: "SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '"
+                + this.props.match.params.iterationPath + "'"
         };
-        console.log(wiql);
 
         this.executeOnVssWorkClient(client => {
             client
                 .queryByWiql(wiql)
                 .then((result => {
                     var workItemIds = result.workItems.map(x => x.id);
-                    console.log(workItemIds)
                     client.getWorkItems(workItemIds).then((workItemsResult => {
-                        console.log(workItemsResult);
-
                         var workItemObjects = workItemsResult.map(x => ({
-                            id: x.fields["System.Id"],
+                            id: x.id,
                             title: x.fields["System.Title"],
                             storyPoints: x.fields["Microsoft.VSTS.Scheduling.StoryPoints"],
                             stackRank: x.fields["Microsoft.VSTS.Common.StackRank"],
@@ -51,6 +52,14 @@ class EstimationSession extends Component {
         });
     }
 
+    onSelectedWorkItemIdChanged(workItemId) {
+        console.log(workItemId);
+
+        this.setState({
+            selectedUserStoryId: workItemId
+        })
+    }
+
     render() {
         return (
             <div className="component-root">
@@ -59,25 +68,37 @@ class EstimationSession extends Component {
                         <UserStoryList
                             title="Remaining"
                             columns={["title", "createdBy"]}
+                            selectedUserStoryId={this.state.selectedUserStoryId}
+                            onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
                             items={this.state.workItems.filter(x => x.storyPoints == null)} />
                     </div>
                     <div className="voted-row">
                         <UserStoryList
                             title="Scored"
-                            columns={["title", "createdBy"]}
+                            columns={["title", "storyPoints"]}
+                            selectedUserStoryId={this.state.selectedUserStoryId}
+                            onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
                             items={this.state.workItems.filter(x => x.storyPoints != null)} />
                     </div>
                     <div className="abandoned-row">
                         <UserStoryList
                             title="Abandoned"
+                            selectedUserStoryId={this.state.selectedUserStoryId}
+                            onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
                             columns={["title"]} />
                     </div>
                 </div>
                 <div className="center-pane">
-                    Center
+                    <h4>Your Vote</h4>
+                    <div className="poker-cards-container">
+                        {this.state.cardValues.map(cardValue => {
+                            return <PokerCard value={cardValue} />
+                        })}
+                    </div>
+                    <h4>Team Votes</h4>
                 </div>
                 <div className="right-pane">
-                    Right
+                    <h4>Work Item Details</h4>
                 </div>
             </div>
         )

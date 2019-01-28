@@ -1,7 +1,7 @@
 .component-root {
     display: grid;
     height: 100%;
-    grid-template-columns: [left-pane] 500px [center-pane] auto [right-pane] 500px;
+    grid-template-columns: [left-pane] 600px [center-pane] auto [right-pane] 500px;
     justify-items: stretch;
 }
 
@@ -12,8 +12,8 @@
 }
 
 .center-pane {
-    display: grid;
-    grid-column: center-pane;
+    display: flex;
+    flex-direction: column;
 }
 
 .right-pane {
@@ -32,4 +32,10 @@
 
 .abandoned-row {
     grid-row: abandoned-row;
+}
+
+.poker-cards-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
