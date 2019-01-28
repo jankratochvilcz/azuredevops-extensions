@@ -1,70 +1,13 @@
 import React, { Component } from "react";
-import { DetailsList, SelectionMode, CheckboxVisibility, PersonaSize, Persona } from "office-ui-fabric-react"
 import "./EstimationSession.css"
+import UserStoryList from "./UserStoryList";
 
 class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
-        const titleColumn = {
-            key: 'title',
-            name: 'Title',
-            fieldName: 'name',
-            minWidth: 210,
-            maxWidth: 600,
-            isRowHeader: true,
-            data: 'string',
-            isPadded: true,
-            onRender: item => {
-                return <span>{item.title}</span>;
-            }
-        };
-
-        const storyPointsColumn = {
-            key: 'storyPoints',
-            name: 'Points',
-            fieldName: 'storyPoints',
-            minWidth: 25,
-            maxWidth: 25,
-            data: 'string',
-            isPadded: true,
-            onRender: item => {
-                return <span>{item.storyPoints}</span>;
-            }
-        }
-
-        const stakeholdersColumn = {
-            key: 'createdBy',
-            name: 'By',
-            fieldName: 'createdBy',
-            minWidth: 24,
-            maxWidth: 24,
-            isPadded: true,
-            onRender: item => {
-                return (
-                    <Persona
-                        size={PersonaSize.size24}
-                        imageUrl={item.createdBy.imageUrl}
-                        personaName={item.createdBy.displayName} />
-                );
-            }
-        }
-
         this.state = {
-            workItems: [],
-            toVoteListConfiguration: [
-                titleColumn, stakeholdersColumn
-            ],
-            votedListConfiguration: [
-                titleColumn, storyPointsColumn
-            ]
-        }
-    }
-
-    getPersona(devOpsUser) {
-        return {
-            imageUrl: devOpsUser.createdBy.imageUrl,
-            personaName: devOpsUser.createdBy.displayName
+            workItems: []
         }
     }
 
@@ -113,31 +56,21 @@ class EstimationSession extends Component {
             <div className="component-root">
                 <div className="left-pane">
                     <div className="to-vote-row">
-                        <h4>Remaining</h4>
-                        <DetailsList
-                            items={this.state.workItems.filter(x => x.storyPoints == null)}
-                            compact={false}
-                            columns={this.state.toVoteListConfiguration}
-                            selectionMode={SelectionMode.single}
-                            checkboxVisibility={CheckboxVisibility.hidden}
-                            isCompactMode={true}
-                            setKey="id"
-                            isHeaderVisible={true} />
+                        <UserStoryList
+                            title="Remaining"
+                            columns={["title", "createdBy"]}
+                            items={this.state.workItems.filter(x => x.storyPoints == null)} />
                     </div>
                     <div className="voted-row">
-                        <h4>Scored</h4>
-                        <DetailsList
-                            items={this.state.workItems.filter(x => x.storyPoints != null)}
-                            compact={false}
-                            columns={this.state.votedListConfiguration}
-                            selectionMode={SelectionMode.single}
-                            checkboxVisibility={CheckboxVisibility.hidden}
-                            isCompactMode={true}
-                            setKey="id"
-                            isHeaderVisible={true} />
+                        <UserStoryList
+                            title="Scored"
+                            columns={["title", "createdBy"]}
+                            items={this.state.workItems.filter(x => x.storyPoints != null)} />
                     </div>
                     <div className="abandoned-row">
-                        <h4>Abandoned</h4>
+                        <UserStoryList
+                            title="Abandoned"
+                            columns={["title"]} />
                     </div>
                 </div>
                 <div className="center-pane">
