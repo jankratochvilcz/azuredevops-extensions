@@ -9,7 +9,7 @@
 .left-pane {
     display: grid;
     grid-column: left-pane;
-    grid-template-rows: [to-vote-row] 40% [voted-row] 40% [abandoned-row] 20%;
+    grid-template-rows: [to-vote-row] 3fr [voted-row] 3fr [abandoned-row] 1fr;
 }
 
 .center-pane {
@@ -17,12 +17,9 @@
     flex-direction: column;
 }
 
-.right-pane {
-    grid-column: right-pane;
-}
-
 .to-vote-row {
     grid-row: to-vote-row;
+    overflow: visible;
 }
 
 .voted-row {

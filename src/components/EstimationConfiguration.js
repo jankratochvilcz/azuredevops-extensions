@@ -14,6 +14,7 @@ class EstimationConfiguration extends Component {
         this.loadIterations = this.loadIterations.bind(this);
         this.toggleIsAvailableCardDecksHintVisible = this.toggleIsAvailableCardDecksHintVisible.bind(this);
         this.goToSession = this.goToSession.bind(this);
+        this.onSelectedIterationChanged = this.onSelectedIterationChanged.bind(this);
 
         const availableCardDecks = [
             {
@@ -78,6 +79,14 @@ class EstimationConfiguration extends Component {
         });
     }
 
+    onSelectedIterationChanged(meta, selection) {
+        var selectedIteration = _.find(this.state.availableIterations, x => x.id == selection.key);
+
+        this.setState({
+            selectedIteration: selectedIteration
+        })
+    }
+
     render() {
         if (this.state.redirectToSession) {
             return <Redirect 
@@ -94,6 +103,7 @@ class EstimationConfiguration extends Component {
                         placeholder="Loading interations ..."
                         className="main-content-child"
                         label="Iteration"
+                        onChange={this.onSelectedIterationChanged}
                         selectedKey={this.state.selectedIteration != null ? this.state.selectedIteration.id : null}
                         options={_.first(this.state.availableIterations, 5).map(x => {
                             return {
