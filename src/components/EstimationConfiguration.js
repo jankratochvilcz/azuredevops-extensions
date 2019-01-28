@@ -80,11 +80,11 @@ class EstimationConfiguration extends Component {
 
     render() {
         if (this.state.redirectToSession) {
-            return <Redirect to="/session/" />;
+            return <Redirect 
+                        to={"/session/" + this.state.selectedIteration.path} />;
         }
 
         return (
-            <div className="component-root">
                 <div className="main-content">
                     <h2 className="main-content-child">
                         Configure Estimation Session
@@ -118,7 +118,6 @@ class EstimationConfiguration extends Component {
                         onClick={this.goToSession}
                         text="Start Estimating" />
                 </div>
-            </div>
         );
     }
 }

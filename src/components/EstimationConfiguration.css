@@ -1,12 +1,9 @@
-.component-root {
-    display: grid;
-    grid-template-columns: auto [main-content] 500px auto;
-}
-
 .main-content {
     grid-column: main-content;
     display: flex;
     flex-direction: column;
+    margin: auto;
+    width: 400px;
 }
 
 .main-content-child {

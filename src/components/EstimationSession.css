@@ -1,0 +1,35 @@
+.component-root {
+    display: grid;
+    height: 100%;
+    grid-template-columns: [left-pane] 500px [center-pane] auto [right-pane] 500px;
+    justify-items: stretch;
+}
+
+.left-pane {
+    display: grid;
+    grid-column: left-pane;
+    grid-template-rows: [to-vote-row] 40% [voted-row] 40% [abandoned-row] 20%;
+}
+
+.center-pane {
+    display: grid;
+    grid-column: center-pane;
+}
+
+.right-pane {
+    display: grid;
+    grid-column: right-pane;
+}
+
+.to-vote-row {
+    grid-row: to-vote-row;
+}
+
+.voted-row {
+    grid-row: voted-row;
+    border-bottom: 1px;
+}
+
+.abandoned-row {
+    grid-row: abandoned-row;
+}

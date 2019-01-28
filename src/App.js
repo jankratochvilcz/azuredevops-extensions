@@ -12,7 +12,7 @@ class App extends Component {
             <Router>
                 <div className="App">
                     <Route path="/" component={EstimationConfiguration} />
-                    <Route path="/session/" component={EstimationSession} />
+                    <Route path="/session/:iterationPath" component={EstimationSession} />
                 </div>
             </Router>
         )
