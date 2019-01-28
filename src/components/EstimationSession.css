@@ -2,6 +2,7 @@
     display: grid;
     height: 100%;
     grid-template-columns: [left-pane] 1fr [center-pane] 1.5fr;
+    grid-column-gap: 10px;
     justify-items: stretch;
 }
 
@@ -43,4 +44,12 @@
     display: flex;
     flex-direction: column;
     margin-left: 10px;
+}
+
+.users-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-left: 10px;
+    margin-bottom: 36px;
 }

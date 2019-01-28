@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { PersonaSize, Persona, PersonaPresence } from "office-ui-fabric-react"
 import _ from "underscore";
 import "./EstimationSession.css"
 import UserStoryList from "./UserStoryList";
@@ -13,7 +14,8 @@ class EstimationSession extends Component {
         this.state = {
             workItems: [],
             cardValues: [0, 1, 2, 3, 5, 8, 13, 21],
-            selectedUserStory: null
+            selectedUserStory: null,
+            users: []
         }
     }
 
@@ -30,7 +32,7 @@ class EstimationSession extends Component {
 
                     var workItemIds = result.workItems.map(x => x.id);
                     client.getWorkItems(workItemIds).then((workItemsResult => {
-                        console.log(workItemsResult);
+
                         var workItemObjects = workItemsResult.map(x => ({
                             id: x.id,
                             url: x.url,
@@ -43,8 +45,13 @@ class EstimationSession extends Component {
                             workItemType: x.fields["System.WorkItemType"]
                         }))
 
+                        var users = _.uniq(
+                            workItemObjects.map(x => x.createdBy),
+                            x => x.displayName);
+
                         this.setState({
-                            workItems: workItemObjects
+                            workItems: workItemObjects,
+                            users: users
                         })
                     }))
                 }).bind(this));
@@ -100,18 +107,31 @@ class EstimationSession extends Component {
                         })}
                     </div>
                     <h4>Team Votes</h4>
-                    
+
+                    <div className="users-container">
+                        {this.state.users.map(user => {
+                            return (
+                                <Persona
+                                    size={PersonaSize.size40}
+                                    imageUrl={user.imageUrl}
+                                    text={user.displayName}
+                                    presence={PersonaPresence.away}
+                                    hidePersonaDetails={false} />
+                            )
+                        })}
+                    </div>
+
                     <h4>Work Item Details</h4>
                     {this.state.selectedUserStory &&
                         <div className="user-story-container">
                             <h3>
                                 <a href={this.state.selectedUserStory.url}>
-                                {this.state.selectedUserStory.workItemType} {this.state.selectedUserStory.id}
+                                    {this.state.selectedUserStory.workItemType} {this.state.selectedUserStory.id}
                                 </a>
                                 &nbsp;
                                 {this.state.selectedUserStory.title}
                             </h3>
-                            <div dangerouslySetInnerHTML={{__html: this.state.selectedUserStory.description}} />
+                            <div dangerouslySetInnerHTML={{ __html: this.state.selectedUserStory.description }} />
                         </div>}
                 </div>
             </div>
