@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import _ from "underscore";
 import "./EstimationSession.css"
 import UserStoryList from "./UserStoryList";
 import PokerCard from "./PokerCard";
@@ -12,7 +13,7 @@ class EstimationSession extends Component {
         this.state = {
             workItems: [],
             cardValues: [0, 1, 2, 3, 5, 8, 13, 21],
-            selectedUserStoryId: null
+            selectedUserStory: null
         }
     }
 
@@ -26,15 +27,20 @@ class EstimationSession extends Component {
             client
                 .queryByWiql(wiql)
                 .then((result => {
+
                     var workItemIds = result.workItems.map(x => x.id);
                     client.getWorkItems(workItemIds).then((workItemsResult => {
+                        console.log(workItemsResult);
                         var workItemObjects = workItemsResult.map(x => ({
                             id: x.id,
+                            url: x.url,
                             title: x.fields["System.Title"],
                             storyPoints: x.fields["Microsoft.VSTS.Scheduling.StoryPoints"],
                             stackRank: x.fields["Microsoft.VSTS.Common.StackRank"],
                             createdBy: x.fields["System.CreatedBy"],
-                            assignedTo: x.fields["System.AssignedTo"]
+                            assignedTo: x.fields["System.AssignedTo"],
+                            description: x.fields["System.Description"] || x.fields["Microsoft.VSTS.TCM.ReproSteps"],
+                            workItemType: x.fields["System.WorkItemType"]
                         }))
 
                         this.setState({
@@ -53,10 +59,8 @@ class EstimationSession extends Component {
     }
 
     onSelectedWorkItemIdChanged(workItemId) {
-        console.log(workItemId);
-
         this.setState({
-            selectedUserStoryId: workItemId
+            selectedUserStory: _.find(this.state.workItems, x => x.id == workItemId)
         })
     }
 
@@ -68,7 +72,7 @@ class EstimationSession extends Component {
                         <UserStoryList
                             title="Remaining"
                             columns={["title", "createdBy"]}
-                            selectedUserStoryId={this.state.selectedUserStoryId}
+                            selectedUserStoryId={this.state.selectedUserStory != null ? this.state.selectedUserStory.id : null}
                             onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
                             items={this.state.workItems.filter(x => x.storyPoints == null)} />
                     </div>
@@ -76,14 +80,14 @@ class EstimationSession extends Component {
                         <UserStoryList
                             title="Scored"
                             columns={["title", "storyPoints"]}
-                            selectedUserStoryId={this.state.selectedUserStoryId}
+                            selectedUserStoryId={this.state.selectedUserStory != null ? this.state.selectedUserStory.id : null}
                             onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
                             items={this.state.workItems.filter(x => x.storyPoints != null)} />
                     </div>
                     <div className="abandoned-row">
                         <UserStoryList
                             title="Abandoned"
-                            selectedUserStoryId={this.state.selectedUserStoryId}
+                            selectedUserStoryId={this.state.selectedUserStory != null ? this.state.selectedUserStory.id : null}
                             onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
                             columns={["title"]} />
                     </div>
@@ -96,9 +100,19 @@ class EstimationSession extends Component {
                         })}
                     </div>
                     <h4>Team Votes</h4>
-                </div>
-                <div className="right-pane">
+                    
                     <h4>Work Item Details</h4>
+                    {this.state.selectedUserStory &&
+                        <div className="user-story-container">
+                            <h3>
+                                <a href={this.state.selectedUserStory.url}>
+                                {this.state.selectedUserStory.workItemType} {this.state.selectedUserStory.id}
+                                </a>
+                                &nbsp;
+                                {this.state.selectedUserStory.title}
+                            </h3>
+                            <div dangerouslySetInnerHTML={{__html: this.state.selectedUserStory.description}} />
+                        </div>}
                 </div>
             </div>
         )

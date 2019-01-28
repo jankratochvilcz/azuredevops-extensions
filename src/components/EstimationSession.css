@@ -1,7 +1,7 @@
 .component-root {
     display: grid;
     height: 100%;
-    grid-template-columns: [left-pane] 600px [center-pane] auto [right-pane] 500px;
+    grid-template-columns: [left-pane] 1fr [center-pane] 1.5fr;
     justify-items: stretch;
 }
 
@@ -17,7 +17,6 @@
 }
 
 .right-pane {
-    display: grid;
     grid-column: right-pane;
 }
 
@@ -38,4 +37,10 @@
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+}
+
+.user-story-container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
 }
