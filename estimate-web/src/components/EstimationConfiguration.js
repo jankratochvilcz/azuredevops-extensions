@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { connect } from "react-redux"
 import _ from 'underscore'
 
 import { Dropdown } from 'office-ui-fabric-react/lib/Dropdown';
@@ -38,11 +39,9 @@ class EstimationConfiguration extends Component {
     }
 
     loadIterations() {
-        var context = VSS.getWebContext();
-
         var contextArg = {
-            teamId: context.team.id,
-            projectId: context.project.id
+            teamId: this.props.context.team.id,
+            projectId: this.props.context.project.id
         };
 
         this.executeOnVssWorkClient(client => {
@@ -132,4 +131,10 @@ class EstimationConfiguration extends Component {
     }
 }
 
-export default EstimationConfiguration;
+const mapStateToProps = state => {
+    return {
+        context: state.devOps.context
+    }
+}
+
+export default connect(mapStateToProps)(EstimationConfiguration);

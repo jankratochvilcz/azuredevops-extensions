@@ -1,7 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App.js";
+import { Provider } from 'react-redux'
+import thunk from 'redux-thunk'
 import { initializeIcons } from '@uifabric/icons';
+import { createStore, applyMiddleware } from "redux";
+
+import App from "./App.js";
+import reducer from "./reducers";
 
 VSS.init({
     setupModuleLoader: true,
@@ -18,8 +23,17 @@ VSS.init({
 initializeIcons();
 
 VSS.ready(function () {
+    const middleware = [ thunk ];
+
+    const store = createStore(
+        reducer,
+        applyMiddleware(...middleware)
+    );
+
     ReactDOM.render(
-        <App />, 
+        <Provider store={store}>
+            <App />
+        </Provider>, 
         document.getElementById("root"));
 
     VSS.notifyLoadSucceeded();

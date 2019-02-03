@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { connect } from  "react-redux"
 import { PersonaSize, Persona, PersonaPresence } from "office-ui-fabric-react"
 import _ from "underscore";
 import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr'
@@ -184,4 +185,10 @@ class EstimationSession extends Component {
     }
 }
 
-export default EstimationSession;
+const mapStateToProps = state => {
+    return {
+        context: state.devOps.context
+    }
+}
+
+export default connect(mapStateToProps)(EstimationSession);
