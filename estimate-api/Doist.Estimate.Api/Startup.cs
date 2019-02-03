@@ -8,14 +8,28 @@ namespace Doist.Estimate.Api
 {
     public class Startup
     {
+        private const string DefaultCorsPolicy = nameof(DefaultCorsPolicy);
+
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSignalRCore();
+            services.AddCors(options => options.AddPolicy(DefaultCorsPolicy,
+            builder =>
+            {
+                builder
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowAnyOrigin()
+                .AllowCredentials();
+            }));
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCors(DefaultCorsPolicy);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
