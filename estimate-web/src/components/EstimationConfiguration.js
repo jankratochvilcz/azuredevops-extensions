@@ -12,23 +12,12 @@ import "./EstimationConfiguration.css"
 class EstimationConfiguration extends Component {
     constructor(props) {
         super(props);
-
-        this.toggleIsAvailableCardDecksHintVisible = this.toggleIsAvailableCardDecksHintVisible.bind(this);
         this.goToSession = this.goToSession.bind(this);
         this.onSelectedIterationChanged = this.onSelectedIterationChanged.bind(this);
 
-        const availableCardDecks = [
-            {
-                key: "fibonacci",
-                name: "Fibonacci sequence",
-                about: "The available values are 0, 1, 2, 3, 5, 8, 13, 21. The fibonacci sequence is great at reflecting the inherent uncertainty when estimating larger items."
-            }
-        ];
         this.state = {
             selectedIteration: null,
-            availableCardDecks: availableCardDecks,
-            selectedDeck: _.first(availableCardDecks),
-            isAvailableCardDecksHintVisible: false,
+            selectedDeck: _.first(this.props.availableCardDecks),
             redirectToSession: false
         }
     }
@@ -47,24 +36,11 @@ class EstimationConfiguration extends Component {
         };
     }
 
-    toggleIsAvailableCardDecksHintVisible() {
-        this.setState({
-            isAvailableCardDecksHintVisible: !this.state.isAvailableCardDecksHintVisible
-        });
-    }
-
     // https://stackoverflow.com/a/35354844
     goToSession() {
         this.setState({
             redirectToSession: true
         })
-    }
-
-    executeOnVssWorkClient(action) {
-        VSS.require(["VSS/Service", "TFS/Work/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
-            var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.WorkHttpClient);
-            action(client);
-        });
     }
 
     onSelectedIterationChanged(meta, selection) {
@@ -104,7 +80,7 @@ class EstimationConfiguration extends Component {
                     label="Deck"
                     className="main-content-child"
                     selectedKey={this.state.selectedDeck != null ? this.state.selectedDeck.key : null}
-                    options={this.state.availableCardDecks.map(x => {
+                    options={this.props.availableCardDecks.map(x => {
                         return {
                             key: x.key,
                             text: x.name
@@ -124,7 +100,8 @@ const mapStateToProps = state => {
     return {
         teamId: state.devOps.context.team.id,
         projectId: state.devOps.context.project.id,
-        iterations: state.devOps.iterations
+        iterations: state.devOps.iterations,
+        availableCardDecks: state.enums.cardDecks
     }
 }
 
