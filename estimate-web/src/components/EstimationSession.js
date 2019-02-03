@@ -38,7 +38,6 @@ class EstimationSession extends Component {
                         ...x.identity,
                         connected: false
                     }));
-                    console.log(users);
 
                     this.setState({
                         users: users

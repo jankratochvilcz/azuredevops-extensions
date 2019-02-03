@@ -30,7 +30,6 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-    console.log(state);
     return {
         context: state.devOps.context
     }

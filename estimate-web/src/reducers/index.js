@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import { INITIALIZE_CONTEXT } from '../actions'
+import { INITIALIZE_CONTEXT, REQUEST_ITERATIONS, RECEIVE_ITERATIONS } from '../actions'
 
 const devOps = (state = {
     context: null
@@ -10,6 +10,13 @@ const devOps = (state = {
                 ...state,
                 context: action.context
             };
+        case REQUEST_ITERATIONS:
+            return state;
+        case RECEIVE_ITERATIONS:
+        return {
+            ...state,
+            iterations: action.iterations
+        }
         default:
             return state;
     }

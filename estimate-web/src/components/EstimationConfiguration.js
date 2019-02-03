@@ -6,13 +6,13 @@ import { Dropdown } from 'office-ui-fabric-react/lib/Dropdown';
 import { PrimaryButton } from "office-ui-fabric-react";
 import { Redirect } from 'react-router';
 
+import { getIterations } from '../actions'
 import "./EstimationConfiguration.css"
 
 class EstimationConfiguration extends Component {
     constructor(props) {
         super(props);
 
-        this.loadIterations = this.loadIterations.bind(this);
         this.toggleIsAvailableCardDecksHintVisible = this.toggleIsAvailableCardDecksHintVisible.bind(this);
         this.goToSession = this.goToSession.bind(this);
         this.onSelectedIterationChanged = this.onSelectedIterationChanged.bind(this);
@@ -25,7 +25,6 @@ class EstimationConfiguration extends Component {
             }
         ];
         this.state = {
-            availableIterations: [],
             selectedIteration: null,
             availableCardDecks: availableCardDecks,
             selectedDeck: _.first(availableCardDecks),
@@ -35,27 +34,17 @@ class EstimationConfiguration extends Component {
     }
 
     componentDidMount() {
-        this.loadIterations();
+        this.props.dispatch(getIterations(this.props.teamId, this.props.projectId));
     }
 
-    loadIterations() {
-        var contextArg = {
-            teamId: this.props.context.team.id,
-            projectId: this.props.context.project.id
+    static getDerivedStateFromProps(props, state) {
+        if(state.selectedIteration != null || props.iterations == null || !_.some(props.iterations))
+            return null;
+        
+        return {
+            ...state,
+            selectedIteration: props.iterations[0]
         };
-
-        this.executeOnVssWorkClient(client => {
-            client
-                .getTeamIterations(contextArg)
-                .then((result => {
-                    const availableIterations = _.sortBy(result, x => x.attributes.startDate).reverse();
-
-                    this.setState({
-                        availableIterations: availableIterations,
-                        selectedIteration: _.first(availableIterations)
-                    })
-                }).bind(this));
-        })
     }
 
     toggleIsAvailableCardDecksHintVisible() {
@@ -79,7 +68,7 @@ class EstimationConfiguration extends Component {
     }
 
     onSelectedIterationChanged(meta, selection) {
-        var selectedIteration = _.find(this.state.availableIterations, x => x.id == selection.key);
+        var selectedIteration = _.find(this.props.iterations, x => x.id == selection.key);
 
         this.setState({
             selectedIteration: selectedIteration
@@ -88,52 +77,54 @@ class EstimationConfiguration extends Component {
 
     render() {
         if (this.state.redirectToSession) {
-            return <Redirect 
-                        to={"/session/" + this.state.selectedIteration.path} />;
+            return <Redirect
+                to={"/session/" + this.state.selectedIteration.path} />;
         }
 
         return (
-                <div className="main-content">
-                    <h2 className="main-content-child">
-                        Configure Estimation Session
+            <div className="main-content">
+                <h2 className="main-content-child">
+                    Configure Estimation Session
                     </h2>
 
-                    <Dropdown
-                        placeholder="Loading interations ..."
-                        className="main-content-child"
-                        label="Iteration"
-                        onChange={this.onSelectedIterationChanged}
-                        selectedKey={this.state.selectedIteration != null ? this.state.selectedIteration.id : null}
-                        options={_.first(this.state.availableIterations, 5).map(x => {
-                            return {
-                                key: x.id,
-                                text: x.name
-                            }
-                        })} />
+                <Dropdown
+                    placeholder="Loading interations ..."
+                    className="main-content-child"
+                    label="Iteration"
+                    onChange={this.onSelectedIterationChanged}
+                    selectedKey={this.state.selectedIteration != null ? this.state.selectedIteration.id : null}
+                    options={_.first(this.props.iterations, 5).map(x => {
+                        return {
+                            key: x.id,
+                            text: x.name
+                        }
+                    })} />
 
-                    <Dropdown
-                        label="Deck"
-                        className="main-content-child"
-                        selectedKey={this.state.selectedDeck != null ? this.state.selectedDeck.key : null}
-                        options={this.state.availableCardDecks.map(x => {
-                            return {
-                                key: x.key,
-                                text: x.name
-                            }
-                        })} />
+                <Dropdown
+                    label="Deck"
+                    className="main-content-child"
+                    selectedKey={this.state.selectedDeck != null ? this.state.selectedDeck.key : null}
+                    options={this.state.availableCardDecks.map(x => {
+                        return {
+                            key: x.key,
+                            text: x.name
+                        }
+                    })} />
 
-                    <PrimaryButton
-                        className="main-content-child go-to-session-button"
-                        onClick={this.goToSession}
-                        text="Start Estimating" />
-                </div>
+                <PrimaryButton
+                    className="main-content-child go-to-session-button"
+                    onClick={this.goToSession}
+                    text="Start Estimating" />
+            </div>
         );
     }
 }
 
 const mapStateToProps = state => {
     return {
-        context: state.devOps.context
+        teamId: state.devOps.context.team.id,
+        projectId: state.devOps.context.project.id,
+        iterations: state.devOps.iterations
     }
 }
 
