@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { PersonaSize, Persona, PersonaPresence } from "office-ui-fabric-react"
 import _ from "underscore";
+import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr'
 import "./EstimationSession.css"
 import UserStoryList from "./UserStoryList";
 import PokerCard from "./PokerCard";
@@ -20,10 +21,29 @@ class EstimationSession extends Component {
     }
 
     componentDidMount() {
+        const iterationPath = this.props.match.params.iterationPath;
+        const context = VSS.getWebContext();
+
         var wiql = {
             query: "SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '"
-                + this.props.match.params.iterationPath + "'"
+                + iterationPath + "'"
         };
+
+        this.executeOnVssCoreClient(client => {
+            client
+                .getTeamMembersWithExtendedProperties(context.project.id, context.team.id)
+                .then((result => {
+                    const users = result.map(x => ({
+                        ...x.identity,
+                        connected: false
+                    }));
+                    console.log(users);
+
+                    this.setState({
+                        users: users
+                    });
+                })).bind(this)
+        })
 
         this.executeOnVssWorkClient(client => {
             client
@@ -43,24 +63,49 @@ class EstimationSession extends Component {
                             assignedTo: x.fields["System.AssignedTo"],
                             description: x.fields["System.Description"] || x.fields["Microsoft.VSTS.TCM.ReproSteps"],
                             workItemType: x.fields["System.WorkItemType"]
-                        }))
-
-                        var users = _.uniq(
-                            workItemObjects.map(x => x.createdBy),
-                            x => x.displayName);
+                        }));
 
                         this.setState({
-                            workItems: workItemObjects,
-                            users: users
-                        })
+                            workItems: workItemObjects
+                        });
                     }))
                 }).bind(this));
+        });
+
+        var connection = new HubConnectionBuilder()
+            .withUrl("https://localhost:44378/estimate")
+            .configureLogging(LogLevel.Information)
+            .build();
+
+        connection.start().then(function() {
+            connection.invoke("join", {
+                groupName: iterationPath,
+                userId: context.user.id
+            });
+        });
+
+        connection.on("groupUpdated", args => {
+            const users = this.state.users;
+            users.forEach(user => {
+                user.connected = _.some(args.presentUserIds, x => user.id == x);
+            });
+
+            this.setState({
+                users: users
+            });
         })
     }
 
     executeOnVssWorkClient(action) {
         VSS.require(["VSS/Service", "TFS/WorkItemTracking/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
             var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.WorkItemTrackingHttpClient);
+            action(client);
+        });
+    }
+
+    executeOnVssCoreClient(action) {
+        VSS.require(["VSS/Service", "TFS/Core/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
+            var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.CoreHttpClient);
             action(client);
         });
     }
@@ -106,18 +151,17 @@ class EstimationSession extends Component {
                             return <PokerCard value={cardValue} />
                         })}
                     </div>
-                    <h4>Team Votes</h4>
+                    <h4>Team</h4>
 
                     <div className="users-container">
-                        {this.state.users.map(user => {
+                        {_.sortBy(this.state.users, x => !x.connected).map(user => {
                             return (
                                 <Persona
-                                    size={PersonaSize.size40}
+                                    size={user.connected ? PersonaSize.size40 : PersonaSize.size24 }
+                                    hidePersonaDetails={!user.connected}
                                     imageUrl={user.imageUrl}
                                     text={user.displayName}
-                                    style={{marginBottom: "10px"}}
-                                    presence={PersonaPresence.away}
-                                    hidePersonaDetails={false} />
+                                    presence={user.connected ? PersonaPresence.online : PersonaPresence.offline} />
                             )
                         })}
                     </div>

@@ -8,10 +8,10 @@ namespace Doist.Estimate.Api.Hubs.Responses
 {
     public class JoinResponse
     {
-        [JsonProperty("group_name")]
+        [JsonProperty("groupName")]
         public string GroupName { get; set; }
 
-        [JsonProperty("present_user_ids")]
+        [JsonProperty("presentUserIds")]
         public IEnumerable<string> PresentUserIds { get; set; }
     }
 }

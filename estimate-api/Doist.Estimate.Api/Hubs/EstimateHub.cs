@@ -34,7 +34,7 @@ namespace Doist.Estimate.Api.Hubs
                 PresentUserIds = groups[request.GroupName].Select(x => x.UserId)
             };
 
-            await Clients.Group(request.GroupName).SendCoreAsync("user_joined", new[] { response });
+            await Clients.Group(request.GroupName).SendCoreAsync("groupUpdated", new[] { response });
         }
     }
 }

@@ -54,3 +54,7 @@
     margin-left: 10px;
     margin-bottom: 36px;
 }
+
+.users-container > * {
+     margin: 10px 4px 4px 4px;
+}    
