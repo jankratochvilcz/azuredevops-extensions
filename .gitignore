@@ -9,5 +9,6 @@
 
 # .NET Core-related ignores
 
-*/obj/
-*/bin/
+*/*/obj/
+*/*/bin/
+*/.vs/
