@@ -1,6 +1,13 @@
+# React app-related ignores
+
 */dist/
 */lib/
 */node_modules/
 */.vscode/
 */*.vsix
 */package-lock.json
+
+# .NET Core-related ignores
+
+*/obj/
+*/bin/
