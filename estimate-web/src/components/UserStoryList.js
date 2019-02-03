@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { DetailsList, SelectionMode, CheckboxVisibility, PersonaSize, Persona, Selection } from "office-ui-fabric-react"
 import _ from "underscore"
+import "./UserStoryLists.css"
 
 class UserStoryList extends Component {
     constructor(props) {
@@ -88,22 +89,25 @@ class UserStoryList extends Component {
             ? this.props.items
             : [];
 
-        if(!_.some(items, x => x.id == this.props.selectedUserStoryId)) {
+        if (!_.some(items, x => x.id == this.props.selectedUserStoryId)) {
             this.state.selection.setAllSelected(false);
         }
 
         return (<div>
             <h4>{this.props.title} [{items.length}]</h4>
-            <DetailsList
-                items={items}
-                compact={false}
-                selection={this.state.selection}
-                columns={this.state.columns}
-                selectionMode={SelectionMode.single}
-                checkboxVisibility={CheckboxVisibility.hidden}
-                isCompactMode={true}
-                setKey="id"
-                isHeaderVisible={true} />
+            <div className="wrapper">
+                <DetailsList
+                    items={items}
+                    compact={false}
+                    selection={this.state.selection}
+                    columns={this.state.columns}
+                    selectionMode={SelectionMode.single}
+                    checkboxVisibility={CheckboxVisibility.hidden}
+                    isCompactMode={true}
+                    setKey="id"
+                    isHeaderVisible={true} />
+            </div>
+
         </div>);
     }
 }

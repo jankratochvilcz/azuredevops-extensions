@@ -13,7 +13,7 @@ class EstimationSession extends Component {
 
         this.state = {
             workItems: [],
-            cardValues: [0, 1, 2, 3, 5, 8, 13, 21],
+            cardValues: ["🆓", "1", "2", "3", "5", "8", "13", "21", "😵", "🍵"],
             selectedUserStory: null,
             users: []
         }
@@ -115,13 +115,14 @@ class EstimationSession extends Component {
                                     size={PersonaSize.size40}
                                     imageUrl={user.imageUrl}
                                     text={user.displayName}
+                                    style={{marginBottom: "10px"}}
                                     presence={PersonaPresence.away}
                                     hidePersonaDetails={false} />
                             )
                         })}
                     </div>
 
-                    <h4>Work Item Details</h4>
+                    <h4>Current Work Item</h4>
                     {this.state.selectedUserStory &&
                         <div className="user-story-container">
                             <h3>

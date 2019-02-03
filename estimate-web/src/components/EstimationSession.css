@@ -9,7 +9,7 @@
 .left-pane {
     display: grid;
     grid-column: left-pane;
-    grid-template-rows: [to-vote-row] 3fr [voted-row] 3fr [abandoned-row] 1fr;
+    grid-template-rows: [to-vote-row] 40vh [voted-row] 40vh [abandoned-row] 20vh;
 }
 
 .center-pane {
@@ -19,16 +19,20 @@
 
 .to-vote-row {
     grid-row: to-vote-row;
-    overflow: visible;
+    overflow-y: auto;
+    position: relative;
 }
 
 .voted-row {
     grid-row: voted-row;
-    border-bottom: 1px;
+    overflow-y: auto;
+    position: relative;
 }
 
 .abandoned-row {
     grid-row: abandoned-row;
+    overflow-y: auto;
+    position: relative;
 }
 
 .poker-cards-container {
