@@ -11,6 +11,9 @@ namespace Doist.Estimate.Api.Hubs
 {
     public class EstimateHub : Hub
     {
+        private const string GroupUpdatedMessageName = "groupUpdated";
+        private const string VotedMessageName = "voted";
+
         private static Dictionary<string, IEnumerable<EstimationUser>> groups = new Dictionary<string, IEnumerable<EstimationUser>>();
 
         public async Task Join(JoinRequest request)
@@ -34,7 +37,22 @@ namespace Doist.Estimate.Api.Hubs
                 PresentUserIds = groups[request.GroupName].Select(x => x.UserId)
             };
 
-            await Clients.Group(request.GroupName).SendCoreAsync("groupUpdated", new[] { response });
+            await Clients.Group(request.GroupName).SendCoreAsync(GroupUpdatedMessageName, new[] { response });
+        }
+
+        public async Task Vote(VoteRequest request)
+        {
+            if (!groups.TryGetValue(request.GroupName, out var users) || !users.Any(x => x.UserId == request.UserId))
+                return;
+
+            var response = new VoteResponse
+            {
+                GroupName = request.GroupName,
+                UserId = request.UserId,
+                Value = request.Value
+            };
+
+            await Clients.Group(request.GroupName).SendCoreAsync(VotedMessageName, new[] { response });
         }
     }
 }
