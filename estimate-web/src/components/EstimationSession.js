@@ -21,13 +21,13 @@ class EstimationSession extends Component {
 
     componentDidMount() {
         const iterationPath = this.props.match.params.iterationPath;
-        
-        this.props.dispatch(getTeam(this.props.context.team.id, this.props.context.project.id));
-        this.props.dispatch(getWorkItems(iterationPath));
+        const currentUserId = this.props.context.user.id;
 
-        // This is wrong. I need to have one big action that handles the whole workflow.
-        // The problem is that I need to connect to the group only after the team is loaded.
-        this.props.dispatch(connectToGroup(iterationPath, this.props.context.user.id));
+        this.props.dispatch(getTeam(
+            this.props.context.team.id,
+            this.props.context.project.id,
+            () => this.props.dispatch(connectToGroup(iterationPath, currentUserId))));
+        this.props.dispatch(getWorkItems(iterationPath));
     }
 
     onSelectedWorkItemIdChanged(workItemId) {

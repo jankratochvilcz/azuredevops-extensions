@@ -61,7 +61,7 @@ const receiveWorkItems = (iterationPath, result) => ({
     }))
 })
 
-export const getIterations = (teamId, projectId) => dispatch => {
+export const getIterations = (teamId, projectId, postAction) => dispatch => {
     dispatch(requestIterations());
 
     var getTeamIterationsArg = {
@@ -76,13 +76,18 @@ export const getIterations = (teamId, projectId) => dispatch => {
     });
 }
 
-export const getTeam = (teamId, projectId) => dispatch => {
+export const getTeam = (teamId, projectId, postAction) => dispatch => {
     dispatch(requestTeam());
 
     executeOnVssCoreClient(client => {
         client
             .getTeamMembersWithExtendedProperties(projectId, teamId)
-            .then(result => dispatch(receiveTeam(teamId, result)));
+            .then(result => {
+                dispatch(receiveTeam(teamId, result));
+                if(postAction != null) {
+                    postAction();
+                }
+            });
     });
 }
 
