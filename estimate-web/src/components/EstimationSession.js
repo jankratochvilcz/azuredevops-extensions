@@ -1,11 +1,12 @@
 import React, { Component } from "react";
-import { connect } from  "react-redux"
+import { connect } from "react-redux"
 import { PersonaSize, Persona, PersonaPresence } from "office-ui-fabric-react"
 import _ from "underscore";
-import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr'
 import "./EstimationSession.css"
 import UserStoryList from "./UserStoryList";
 import PokerCard from "./PokerCard";
+import { getTeam, getWorkItems } from "../actions";
+import { connectToGroup } from "../actions/estimation";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -14,105 +15,24 @@ class EstimationSession extends Component {
         this.onSelectedWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
 
         this.state = {
-            workItems: [],
-            cardValues: ["🆓", "1", "2", "3", "5", "8", "13", "21", "😵", "🍵"],
-            selectedUserStory: null,
-            users: []
+            selectedUserStory: null
         }
     }
 
     componentDidMount() {
         const iterationPath = this.props.match.params.iterationPath;
-        const context = VSS.getWebContext();
+        
+        this.props.dispatch(getTeam(this.props.context.team.id, this.props.context.project.id));
+        this.props.dispatch(getWorkItems(iterationPath));
 
-        var wiql = {
-            query: "SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '"
-                + iterationPath + "'"
-        };
-
-        this.executeOnVssCoreClient(client => {
-            client
-                .getTeamMembersWithExtendedProperties(context.project.id, context.team.id)
-                .then((result => {
-                    const users = result.map(x => ({
-                        ...x.identity,
-                        connected: false
-                    }));
-
-                    this.setState({
-                        users: users
-                    });
-                })).bind(this)
-        })
-
-        this.executeOnVssWorkClient(client => {
-            client
-                .queryByWiql(wiql)
-                .then((result => {
-
-                    var workItemIds = result.workItems.map(x => x.id);
-                    client.getWorkItems(workItemIds).then((workItemsResult => {
-
-                        var workItemObjects = workItemsResult.map(x => ({
-                            id: x.id,
-                            url: x.url,
-                            title: x.fields["System.Title"],
-                            storyPoints: x.fields["Microsoft.VSTS.Scheduling.StoryPoints"],
-                            stackRank: x.fields["Microsoft.VSTS.Common.StackRank"],
-                            createdBy: x.fields["System.CreatedBy"],
-                            assignedTo: x.fields["System.AssignedTo"],
-                            description: x.fields["System.Description"] || x.fields["Microsoft.VSTS.TCM.ReproSteps"],
-                            workItemType: x.fields["System.WorkItemType"]
-                        }));
-
-                        this.setState({
-                            workItems: workItemObjects
-                        });
-                    }))
-                }).bind(this));
-        });
-
-        var connection = new HubConnectionBuilder()
-            .withUrl("https://localhost:44378/estimate")
-            .configureLogging(LogLevel.Information)
-            .build();
-
-        connection.start().then(function() {
-            connection.invoke("join", {
-                groupName: iterationPath,
-                userId: context.user.id
-            });
-        });
-
-        connection.on("groupUpdated", args => {
-            const users = this.state.users;
-            users.forEach(user => {
-                user.connected = _.some(args.presentUserIds, x => user.id == x);
-            });
-
-            this.setState({
-                users: users
-            });
-        })
-    }
-
-    executeOnVssWorkClient(action) {
-        VSS.require(["VSS/Service", "TFS/WorkItemTracking/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
-            var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.WorkItemTrackingHttpClient);
-            action(client);
-        });
-    }
-
-    executeOnVssCoreClient(action) {
-        VSS.require(["VSS/Service", "TFS/Core/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
-            var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.CoreHttpClient);
-            action(client);
-        });
+        // This is wrong. I need to have one big action that handles the whole workflow.
+        // The problem is that I need to connect to the group only after the team is loaded.
+        this.props.dispatch(connectToGroup(iterationPath, this.props.context.user.id));
     }
 
     onSelectedWorkItemIdChanged(workItemId) {
         this.setState({
-            selectedUserStory: _.find(this.state.workItems, x => x.id == workItemId)
+            selectedUserStory: _.find(this.props.workItems, x => x.id == workItemId)
         })
     }
 
@@ -126,7 +46,7 @@ class EstimationSession extends Component {
                             columns={["title", "createdBy"]}
                             selectedUserStoryId={this.state.selectedUserStory != null ? this.state.selectedUserStory.id : null}
                             onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
-                            items={this.state.workItems.filter(x => x.storyPoints == null)} />
+                            items={this.props.workItems.filter(x => x.storyPoints == null)} />
                     </div>
                     <div className="voted-row">
                         <UserStoryList
@@ -134,7 +54,7 @@ class EstimationSession extends Component {
                             columns={["title", "storyPoints"]}
                             selectedUserStoryId={this.state.selectedUserStory != null ? this.state.selectedUserStory.id : null}
                             onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
-                            items={this.state.workItems.filter(x => x.storyPoints != null)} />
+                            items={this.props.workItems.filter(x => x.storyPoints != null)} />
                     </div>
                     <div className="abandoned-row">
                         <UserStoryList
@@ -147,17 +67,18 @@ class EstimationSession extends Component {
                 <div className="center-pane">
                     <h4>Your Vote</h4>
                     <div className="poker-cards-container">
-                        {this.state.cardValues.map(cardValue => {
-                            return <PokerCard value={cardValue} />
+                        {this.props.cardValues.map(cardValue => {
+                            return <PokerCard value={cardValue} key={cardValue} />
                         })}
                     </div>
                     <h4>Team</h4>
 
                     <div className="users-container">
-                        {_.sortBy(this.state.users, x => !x.connected).map(user => {
+                        {_.sortBy(this.props.users, x => !x.connected).map(user => {
                             return (
                                 <Persona
-                                    size={user.connected ? PersonaSize.size40 : PersonaSize.size24 }
+                                    key={user.id}
+                                    size={user.connected ? PersonaSize.size40 : PersonaSize.size24}
                                     hidePersonaDetails={!user.connected}
                                     imageUrl={user.imageUrl}
                                     text={user.displayName}
@@ -184,9 +105,12 @@ class EstimationSession extends Component {
     }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, ownProps) => {
     return {
-        context: state.devOps.context
+        context: state.devOps.context,
+        users: state.devOps.teams[state.devOps.context.team.id] || [],
+        workItems: state.devOps.workItems[ownProps.match.params.iterationPath] || [],
+        cardValues: state.enums.cardDecks[0].cardValues
     }
 }
 
