@@ -36,7 +36,8 @@ const receiveTeam = (teamId, response) => ({
     type: RECEIVE_TEAM,
     team: response.map(x => ({
         ...x.identity,
-        connected: false
+        connected: false,
+        votes: {}
     })),
     teamId: teamId
 });

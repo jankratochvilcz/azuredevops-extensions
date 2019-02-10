@@ -7,5 +7,7 @@
         public string UserId { get; set; }
 
         public string Value { get; set; }
+
+        public string WorkItemId { get; set; }
     }
 }

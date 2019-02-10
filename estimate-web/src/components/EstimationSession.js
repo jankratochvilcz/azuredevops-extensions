@@ -6,13 +6,14 @@ import "./EstimationSession.css"
 import UserStoryList from "./UserStoryList";
 import PokerCard from "./PokerCard";
 import { getTeam, getWorkItems } from "../actions";
-import { connectToGroup } from "../actions/estimation";
+import { connectToGroup, requestVote } from "../actions/estimation";
 
 class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
         this.onSelectedWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
+        this.cardClicked = this.cardClicked.bind(this);
 
         this.state = {
             selectedUserStory: null
@@ -34,6 +35,14 @@ class EstimationSession extends Component {
         this.setState({
             selectedUserStory: _.find(this.props.workItems, x => x.id == workItemId)
         })
+    }
+
+    cardClicked(value) {
+        this.props.dispatch(requestVote(
+            this.props.context.user.id,
+             this.props.match.params.iterationPath,
+             this.state.selectedUserStory.id,
+             value));
     }
 
     render() {
@@ -68,7 +77,10 @@ class EstimationSession extends Component {
                     <h4>Your Vote</h4>
                     <div className="poker-cards-container">
                         {this.props.cardValues.map(cardValue => {
-                            return <PokerCard value={cardValue} key={cardValue} />
+                            return <PokerCard 
+                                value={cardValue} 
+                                key={cardValue}
+                                onClick={() => cardClicked(cardValue)} />
                         })}
                     </div>
                     <h4>Team</h4>

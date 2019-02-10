@@ -49,7 +49,8 @@ namespace Doist.Estimate.Api.Hubs
             {
                 GroupName = request.GroupName,
                 UserId = request.UserId,
-                Value = request.Value
+                Value = request.Value,
+                WorkItemId = request.WorkItemId
             };
 
             await Clients.Group(request.GroupName).SendCoreAsync(VotedMessageName, new[] { response });

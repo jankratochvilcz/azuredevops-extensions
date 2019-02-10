@@ -1,7 +1,7 @@
 import _ from "underscore"
 
-import { INITIALIZE_CONTEXT, REQUEST_ITERATIONS, RECEIVE_ITERATIONS, RECEIVE_TEAM, RECEIVE_WORKITEMS } from '../actions'
-import { RECEIVE_GROUP_UPDATED } from '../actions/estimation';
+import { INITIALIZE_CONTEXT, RECEIVE_ITERATIONS, RECEIVE_TEAM, RECEIVE_WORKITEMS } from '../actions'
+import { RECEIVE_GROUP_UPDATED, RECEIVE_VOTE } from '../actions/estimation';
 
 const devOps = (state = {
     context: null,
@@ -37,15 +37,15 @@ const devOps = (state = {
             };
         case RECEIVE_GROUP_UPDATED:
             const teamsAsArray = Object.keys(state.teams).map(teamId => {
-                    var teamAltered = state.teams[teamId].map(user => ({
-                        ...user,
-                        connected: _.some(action.connectedUserIds, userId => user.id == userId)
-                    }));
+                var teamAltered = state.teams[teamId].map(user => ({
+                    ...user,
+                    connected: _.some(action.connectedUserIds, userId => user.id == userId)
+                }));
 
-                    return {
-                        key: teamId,
-                        value: teamAltered
-                    };
+                return {
+                    key: teamId,
+                    value: teamAltered
+                };
             });
 
             const teamsAltered = {};
@@ -56,6 +56,8 @@ const devOps = (state = {
                 ...state,
                 teams: teamsAltered
             };
+        case RECEIVE_VOTE:
+
         default:
             return state;
     }
