@@ -1,8 +1,8 @@
-import { HubConnectionBuilder, LogLevel } from '@aspnet/signalr'
+import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
 
-export const RECEIVE_GROUP_UPDATED = "ESTIMATION/RECEIVE_GROUP_UPDATED"
-export const REQUEST_VOTE = "ESTIMATION/REQUST_VOTE"
-export const RECEIVE_VOTE = "ESTIMATION/RECEIVE_VOTE"
+export const RECEIVE_GROUP_UPDATED = "ESTIMATION/RECEIVE_GROUP_UPDATED";
+export const REQUEST_VOTE = "ESTIMATION/REQUST_VOTE";
+export const RECEIVE_VOTE = "ESTIMATION/RECEIVE_VOTE";
 
 const groupUpdatedEventName = "groupUpdated";
 const votedEventName = "voted";
@@ -36,7 +36,7 @@ export const requestVote = (userId, iterationPath, workItemId, value) => {
         value: value,
         workItemId: workItemId
     });
-}
+};
 
 export const connectToGroup = (iterationPath, userId) => dispatch => {
     connection
@@ -48,9 +48,11 @@ export const connectToGroup = (iterationPath, userId) => dispatch => {
 
     connection.on(
         groupUpdatedEventName,
-        args => dispatch(receiveGroupUpdated(args.presentUserIds)));
+        args => dispatch(receiveGroupUpdated(args.presentUserIds))
+    );
 
     connection.on(
         votedEventName,
-        args => dispatch(receiveVote(args)));
-}
+        args => dispatch(receiveVote(args))
+    );
+};

@@ -3,9 +3,15 @@
     "rules": {
         "quotes": ["error", "double"],
         "linebreak-style": ["error", "windows"],
-        "indent": ["error", 4],
+        "indent": ["error", 4, { "SwitchCase": 1 }],
         "comma-dangle": ["error", "never"],
-        "object-shorthand": "off"
+        "object-shorthand": "off",
+        "arrow-parens": ["error", "as-needed"],
+        "react/jsx-indent": "off",
+        "react/jsx-indent-props": "off"
     },
-    "parser": "babel-eslint"
+    "parser": "babel-eslint",
+    "globals": {
+        "VSS": "readable"
+    }
 }

@@ -1,7 +1,33 @@
-import _ from "underscore"
+import _ from "underscore";
 
-import { INITIALIZE_CONTEXT, RECEIVE_ITERATIONS, RECEIVE_TEAM, RECEIVE_WORKITEMS } from '../actions'
-import { RECEIVE_GROUP_UPDATED, RECEIVE_VOTE } from '../actions/estimation';
+import {
+    INITIALIZE_CONTEXT,
+    RECEIVE_ITERATIONS,
+    RECEIVE_TEAM,
+    RECEIVE_WORKITEMS
+} from "../actions";
+
+import { RECEIVE_GROUP_UPDATED, RECEIVE_VOTE } from "../actions/estimation";
+
+function onReceiveGroupUpdated(state, action) {
+    const teamsAsArray = Object.keys(state.teams).map(teamId => {
+        const teamAltered = state.teams[teamId].map(user => ({
+            ...user,
+            connected: _.some(action.connectedUserIds, userId => user.id == userId)
+        }));
+        return {
+            key: teamId,
+            value: teamAltered
+        };
+    });
+    const teamsAltered = {};
+    teamsAsArray
+        .forEach(x => teamsAltered[x.key] = x.value);
+    return {
+        ...state,
+        teams: teamsAltered
+    };
+}
 
 const devOps = (state = {
     context: null,
@@ -36,31 +62,12 @@ const devOps = (state = {
                 }
             };
         case RECEIVE_GROUP_UPDATED:
-            const teamsAsArray = Object.keys(state.teams).map(teamId => {
-                var teamAltered = state.teams[teamId].map(user => ({
-                    ...user,
-                    connected: _.some(action.connectedUserIds, userId => user.id == userId)
-                }));
-
-                return {
-                    key: teamId,
-                    value: teamAltered
-                };
-            });
-
-            const teamsAltered = {};
-            teamsAsArray
-                .forEach(x => teamsAltered[x.key] = x.value);
-
-            return {
-                ...state,
-                teams: teamsAltered
-            };
+            return onReceiveGroupUpdated(state, action);
         case RECEIVE_VOTE:
-
+            break;
         default:
             return state;
     }
-}
+};
 
 export default devOps;

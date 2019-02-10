@@ -12,6 +12,6 @@ const enums = (state = {
         default:
             return state;
     }
-}
+};
 
 export default enums;

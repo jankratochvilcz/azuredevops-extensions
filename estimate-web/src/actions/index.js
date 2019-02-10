@@ -1,4 +1,4 @@
-import _ from "underscore"
+import _ from "underscore";
 
 // Synchronous actions
 export const INITIALIZE_CONTEXT = "DEVOPS/INITIALIZE_CONTEXT";
@@ -13,6 +13,27 @@ export const RECEIVE_TEAM = "DEVOPS/RECEIVE_TEAM";
 
 export const REQUEST_WORKITEMS = "DEVOPS/REQUEST_WORKITEMS";
 export const RECEIVE_WORKITEMS = "DEVOPS/RECEIVE_WORKITEMS";
+
+const executeOnVssWorkClient = action => {
+    VSS.require(["VSS/Service", "TFS/Work/RestClient"], (vssService, tfsWebApi) => {
+        const client = vssService.getCollectionClient(tfsWebApi.WorkHttpClient);
+        action(client);
+    });
+};
+
+const executeOnVssWorkItemTrackingClient = action => {
+    VSS.require(["VSS/Service", "TFS/WorkItemTracking/RestClient"], (vssService, tfsWebApi) => {
+        const client = vssService.getCollectionClient(tfsWebApi.WorkItemTrackingHttpClient);
+        action(client);
+    });
+};
+
+const executeOnVssCoreClient = action => {
+    VSS.require(["VSS/Service", "TFS/Core/RestClient"], (vssService, tfsWebApi) => {
+        const client = vssService.getCollectionClient(tfsWebApi.CoreHttpClient);
+        action(client);
+    });
+};
 
 export const initializeContext = () => ({
     type: INITIALIZE_CONTEXT,
@@ -60,12 +81,12 @@ const receiveWorkItems = (iterationPath, result) => ({
         description: x.fields["System.Description"] || x.fields["Microsoft.VSTS.TCM.ReproSteps"],
         workItemType: x.fields["System.WorkItemType"]
     }))
-})
+});
 
-export const getIterations = (teamId, projectId, postAction) => dispatch => {
+export const getIterations = (teamId, projectId) => dispatch => {
     dispatch(requestIterations());
 
-    var getTeamIterationsArg = {
+    const getTeamIterationsArg = {
         teamId,
         projectId
     };
@@ -75,7 +96,7 @@ export const getIterations = (teamId, projectId, postAction) => dispatch => {
             .getTeamIterations(getTeamIterationsArg)
             .then(result => dispatch(receiveIterations(result)));
     });
-}
+};
 
 export const getTeam = (teamId, projectId, postAction) => dispatch => {
     dispatch(requestTeam());
@@ -85,49 +106,30 @@ export const getTeam = (teamId, projectId, postAction) => dispatch => {
             .getTeamMembersWithExtendedProperties(projectId, teamId)
             .then(result => {
                 dispatch(receiveTeam(teamId, result));
-                if(postAction != null) {
+                if (postAction != null) {
                     postAction();
                 }
             });
     });
-}
+};
 
 export const getWorkItems = iterationPath => dispatch => {
     dispatch(requestWorkItems());
 
-    var wiql = {
-        query: "SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '"
-            + iterationPath + "'"
+    const wiql = {
+        query: `SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '${iterationPath}'`
     };
 
     executeOnVssWorkItemTrackingClient(client => {
         client
             .queryByWiql(wiql)
-            .then(result => {
-                var workItemIds = result.workItems.map(x => x.id);
+            .then(wiqlResult => {
+                const workItemIds = wiqlResult.workItems.map(x => x.id);
                 client.getWorkItems(workItemIds)
-                    .then(result => dispatch(receiveWorkItems(iterationPath, result)));
+                    .then(workItemsResult => dispatch(receiveWorkItems(
+                        iterationPath,
+                        workItemsResult
+                    )));
             });
     });
-}
-
-const executeOnVssWorkClient = action => {
-    VSS.require(["VSS/Service", "TFS/Work/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
-        var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.WorkHttpClient);
-        action(client);
-    });
-}
-
-const executeOnVssWorkItemTrackingClient = action => {
-    VSS.require(["VSS/Service", "TFS/WorkItemTracking/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
-        var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.WorkItemTrackingHttpClient);
-        action(client);
-    });
-}
-
-const executeOnVssCoreClient = action => {
-    VSS.require(["VSS/Service", "TFS/Core/RestClient"], function (VSS_Service, TFS_Wit_WebApi) {
-        var client = VSS_Service.getCollectionClient(TFS_Wit_WebApi.CoreHttpClient);
-        action(client);
-    });
-}
+};

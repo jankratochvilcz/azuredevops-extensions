@@ -1,8 +1,9 @@
 import React, { Component } from "react";
-import { connect } from "react-redux"
-import { PersonaSize, Persona, PersonaPresence } from "office-ui-fabric-react"
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import { PersonaSize, Persona, PersonaPresence } from "office-ui-fabric-react";
 import _ from "underscore";
-import "./EstimationSession.css"
+import "./EstimationSession.css";
 import UserStoryList from "./UserStoryList";
 import PokerCard from "./PokerCard";
 import { getTeam, getWorkItems } from "../actions";
@@ -17,35 +18,55 @@ class EstimationSession extends Component {
 
         this.state = {
             selectedUserStory: null
-        }
+        };
     }
 
     componentDidMount() {
-        const iterationPath = this.props.match.params.iterationPath;
-        const currentUserId = this.props.context.user.id;
+        const {
+            iterationPath,
+            teamId,
+            userId,
+            projectId,
+            dispatch
+        } = this.props;
 
-        this.props.dispatch(getTeam(
-            this.props.context.team.id,
-            this.props.context.project.id,
-            () => this.props.dispatch(connectToGroup(iterationPath, currentUserId))));
-        this.props.dispatch(getWorkItems(iterationPath));
+        dispatch(getTeam(
+            teamId,
+            projectId,
+            () => dispatch(connectToGroup(iterationPath, userId))
+        ));
+
+        dispatch(getWorkItems(iterationPath));
     }
 
     onSelectedWorkItemIdChanged(workItemId) {
+        const { workItems } = this.props;
+
         this.setState({
-            selectedUserStory: _.find(this.props.workItems, x => x.id == workItemId)
-        })
+            selectedUserStory: _.find(workItems, x => x.id === workItemId)
+        });
     }
 
     cardClicked(value) {
-        this.props.dispatch(requestVote(
-            this.props.context.user.id,
-             this.props.match.params.iterationPath,
-             this.state.selectedUserStory.id,
-             value));
+        const { dispatch, userId, iterationPath } = this.props;
+        const { selectedUserStory } = this.state;
+
+        if (selectedUserStory === null) {
+            return;
+        }
+
+        dispatch(requestVote(
+            userId,
+            iterationPath,
+            selectedUserStory.id,
+            value
+        ));
     }
 
     render() {
+        const { selectedUserStory } = this.state;
+        const { workItems, cardValues, users } = this.props;
+
         return (
             <div className="component-root">
                 <div className="left-pane">
@@ -53,77 +74,112 @@ class EstimationSession extends Component {
                         <UserStoryList
                             title="Remaining"
                             columns={["title", "createdBy"]}
-                            selectedUserStoryId={this.state.selectedUserStory != null ? this.state.selectedUserStory.id : null}
+                            selectedUserStoryId={(selectedUserStory != null
+                                ? selectedUserStory.id
+                                : null)}
                             onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
-                            items={this.props.workItems.filter(x => x.storyPoints == null)} />
+                            items={workItems.filter(x => x.storyPoints == null)}
+                        />
                     </div>
                     <div className="voted-row">
                         <UserStoryList
                             title="Scored"
                             columns={["title", "storyPoints"]}
-                            selectedUserStoryId={this.state.selectedUserStory != null ? this.state.selectedUserStory.id : null}
+                            selectedUserStoryId={(selectedUserStory != null
+                                ? selectedUserStory.id
+                                : null)}
                             onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
-                            items={this.props.workItems.filter(x => x.storyPoints != null)} />
+                            items={workItems.filter(x => x.storyPoints != null)}
+                        />
                     </div>
                     <div className="abandoned-row">
                         <UserStoryList
                             title="Abandoned"
-                            selectedUserStoryId={this.state.selectedUserStory != null ? this.state.selectedUserStory.id : null}
+                            selectedUserStoryId={(selectedUserStory != null
+                                ? selectedUserStory.id
+                                : null)}
                             onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
-                            columns={["title"]} />
+                            columns={["title"]}
+                        />
                     </div>
                 </div>
                 <div className="center-pane">
                     <h4>Your Vote</h4>
                     <div className="poker-cards-container">
-                        {this.props.cardValues.map(cardValue => {
-                            return <PokerCard 
-                                value={cardValue} 
+                        {cardValues.map(cardValue => (
+                            <PokerCard
+                                value={cardValue}
                                 key={cardValue}
-                                onClick={() => cardClicked(cardValue)} />
-                        })}
+                                onClick={() => this.cardClicked(cardValue)}
+                            />
+                        ))}
                     </div>
                     <h4>Team</h4>
 
                     <div className="users-container">
-                        {_.sortBy(this.props.users, x => !x.connected).map(user => {
-                            return (
-                                <Persona
-                                    key={user.id}
-                                    size={user.connected ? PersonaSize.size40 : PersonaSize.size24}
-                                    hidePersonaDetails={!user.connected}
-                                    imageUrl={user.imageUrl}
-                                    text={user.displayName}
-                                    presence={user.connected ? PersonaPresence.online : PersonaPresence.offline} />
-                            )
-                        })}
+                        {_.sortBy(users, x => !x.connected).map(user => (
+                            <Persona
+                                key={user.id}
+                                size={user.connected ? PersonaSize.size40 : PersonaSize.size24}
+                                hidePersonaDetails={!user.connected}
+                                imageUrl={user.imageUrl}
+                                text={user.displayName}
+                                presence={(user.connected
+                                    ? PersonaPresence.online
+                                    : PersonaPresence.offline)}
+                            />
+                        ))}
                     </div>
 
                     <h4>Current Work Item</h4>
-                    {this.state.selectedUserStory &&
-                        <div className="user-story-container">
-                            <h3>
-                                <a href={this.state.selectedUserStory.url}>
-                                    {this.state.selectedUserStory.workItemType} {this.state.selectedUserStory.id}
-                                </a>
-                                &nbsp;
-                                {this.state.selectedUserStory.title}
-                            </h3>
-                            <div dangerouslySetInnerHTML={{ __html: this.state.selectedUserStory.description }} />
-                        </div>}
+                    {selectedUserStory
+                        && (
+                            <div className="user-story-container">
+                                <h3>
+                                    <a href={selectedUserStory.url}>
+                                        <span>{selectedUserStory.workItemType}</span>
+                                        <span>&nbsp;</span>
+                                        <span>{selectedUserStory.id}</span>
+                                    </a>
+                                    <span>&nbsp;</span>
+                                    {selectedUserStory.title}
+                                </h3>
+                                <div dangerouslySetInnerHTML={{
+                                    __html: selectedUserStory.description
+                                }}
+                                />
+                            </div>
+                        )}
                 </div>
             </div>
-        )
+        );
     }
 }
 
-const mapStateToProps = (state, ownProps) => {
-    return {
-        context: state.devOps.context,
-        users: state.devOps.teams[state.devOps.context.team.id] || [],
-        workItems: state.devOps.workItems[ownProps.match.params.iterationPath] || [],
-        cardValues: state.enums.cardDecks[0].cardValues
-    }
-}
+const mapStateToProps = (state, ownProps) => ({
+    userId: state.devOps.context.user.id,
+    teamId: state.devOps.context.team.id,
+    projectId: state.devOps.context.project.id,
+    users: state.devOps.teams[state.devOps.context.team.id],
+    workItems: state.devOps.workItems[ownProps.match.params.iterationPath],
+    cardValues: state.enums.cardDecks[0].cardValues,
+    iterationPath: ownProps.match.params.iterationPath
+});
+
+EstimationSession.defaultProps = {
+    workItems: [],
+    users: []
+};
+
+EstimationSession.propTypes = {
+    iterationPath: PropTypes.string.isRequired,
+    userId: PropTypes.string.isRequired,
+    teamId: PropTypes.string.isRequired,
+    projectId: PropTypes.string.isRequired,
+    dispatch: PropTypes.func.isRequired,
+    workItems: PropTypes.arrayOf(PropTypes.object),
+    users: PropTypes.arrayOf(PropTypes.object),
+    cardValues: PropTypes.arrayOf(PropTypes.string).isRequired
+};
 
 export default connect(mapStateToProps)(EstimationSession);
