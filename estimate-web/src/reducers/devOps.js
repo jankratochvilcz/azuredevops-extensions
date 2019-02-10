@@ -9,11 +9,11 @@ import {
 
 import { RECEIVE_GROUP_UPDATED, RECEIVE_VOTE } from "../actions/estimation";
 
-function onReceiveGroupUpdated(state, action) {
+const onReceiveGroupUpdated = (state, action) => {
     const teamsAsArray = Object.keys(state.teams).map(teamId => {
         const teamAltered = state.teams[teamId].map(user => ({
             ...user,
-            connected: _.some(action.connectedUserIds, userId => user.id == userId)
+            connected: _.some(action.connectedUserIds, userId => user.id === userId)
         }));
         return {
             key: teamId,
@@ -27,12 +27,26 @@ function onReceiveGroupUpdated(state, action) {
         ...state,
         teams: teamsAltered
     };
-}
+};
+
+const onReceiveVote = (state, action) => ({
+    ...state,
+    votes: [
+        ...state.votes.filter(x => x.userId !== action.userId
+            || x.workItemId !== action.workItemId),
+        {
+            userId: action.userId,
+            workItemId: action.workItemId,
+            value: action.value
+        }
+    ]
+});
 
 const devOps = (state = {
     context: null,
     teams: {},
-    workItems: {}
+    workItems: {},
+    votes: []
 }, action) => {
     switch (action.type) {
         case INITIALIZE_CONTEXT:
@@ -64,7 +78,7 @@ const devOps = (state = {
         case RECEIVE_GROUP_UPDATED:
             return onReceiveGroupUpdated(state, action);
         case RECEIVE_VOTE:
-            break;
+            return onReceiveVote(state, action);
         default:
             return state;
     }

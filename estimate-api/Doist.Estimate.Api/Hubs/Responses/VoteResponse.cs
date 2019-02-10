@@ -14,6 +14,6 @@ namespace Doist.Estimate.Api.Hubs.Responses
         public string Value { get; set; }
 
         [JsonProperty("workItemId")]
-        public string WorkItemId { get; set; }
+        public int WorkItemId { get; set; }
     }
 }

@@ -22,10 +22,10 @@ const receiveGroupUpdated = connectedUserIds => ({
 });
 
 const receiveVote = args => ({
-    type: receiveVote,
+    type: RECEIVE_VOTE,
     iterationPath: args.groupName,
     userId: args.userId,
-    value: args.voteValue,
+    value: args.value,
     workItemId: args.workItemId
 });
 
