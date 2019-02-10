@@ -114,15 +114,23 @@ class EstimationSession extends Component {
                 </div>
                 <div className="center-pane">
                     <h4>Your Vote</h4>
-                    <div className="poker-cards-container">
-                        {cardValues.map(cardValue => (
-                            <PokerCard
-                                value={cardValue}
-                                key={cardValue}
-                                onClick={() => this.cardClicked(cardValue)}
-                            />
-                        ))}
+                    <div className="cards-alignment-container">
+                        <div className="poker-cards-container">
+                            {cardValues.map(cardValue => (
+                                <PokerCard
+                                    value={cardValue}
+                                    key={cardValue}
+                                    onClick={() => this.cardClicked(cardValue)}
+                                />
+                            ))}
+                        </div>
+                        {selectedWorkItem === null && (
+                            <div className="cards-overlay">
+                                <span className="cards-overlay-info">🏁 Pick a work item to start scoring</span>
+                            </div>
+                        )}
                     </div>
+
                     <h4>Team</h4>
 
                     <div className="users-container">
