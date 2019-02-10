@@ -48,19 +48,19 @@ class EstimationSession extends Component {
     }
 
     cardClicked(value) {
-        const { dispatch, userId, iterationPath } = this.props;
+        const { userId, iterationPath } = this.props;
         const { selectedUserStory } = this.state;
 
         if (selectedUserStory === null) {
             return;
         }
 
-        dispatch(requestVote(
+        requestVote(
             userId,
             iterationPath,
             selectedUserStory.id,
             value
-        ));
+        );
     }
 
     render() {
