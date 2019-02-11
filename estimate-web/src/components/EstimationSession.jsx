@@ -13,7 +13,12 @@ import {
     updateStoryPoints,
     removeStoryPoints
 } from "../actions";
-import { connectToGroup, requestVote, revealVotes } from "../actions/estimation";
+import {
+    connectToGroup,
+    requestVote,
+    revealVotes,
+    switchActiveWorkItem
+} from "../actions/estimation";
 import EstimatorPersona from "./EstimatorPersona";
 import { average } from "../utils/math";
 
@@ -21,15 +26,11 @@ class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
-        this.onSelectedWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
+        this.onactiveWorkItemIdChanged = this.onactiveWorkItemIdChanged.bind(this);
         this.cardClicked = this.cardClicked.bind(this);
         this.saveEstimate = this.saveEstimate.bind(this);
         this.resetEstimate = this.resetEstimate.bind(this);
         this.revealVotes = this.revealVotes.bind(this);
-
-        this.state = {
-            selectedWorkItemId: null
-        };
     }
 
     componentDidMount() {
@@ -56,75 +57,70 @@ class EstimationSession extends Component {
             .map(x => Number.parseInt(x.value, 10)));
     }
 
-    onSelectedWorkItemIdChanged(workItemId) {
-        this.setState({
-            selectedWorkItemId: workItemId
-        });
+    onactiveWorkItemIdChanged(workItemId) {
+        const { userId, iterationPath, dispatch } = this.props;
+        dispatch(switchActiveWorkItem(userId, iterationPath, workItemId));
     }
 
     saveEstimate(storyPoints) {
-        const { dispatch, iterationPath } = this.props;
-        const { selectedWorkItemId } = this.state;
+        const { dispatch, iterationPath, activeWorkItemId } = this.props;
 
         dispatch(updateStoryPoints(
-            selectedWorkItemId,
+            activeWorkItemId,
             storyPoints,
             iterationPath
         ));
     }
 
     resetEstimate() {
-        const { dispatch, iterationPath } = this.props;
-        const { selectedWorkItemId } = this.state;
+        const { dispatch, iterationPath, activeWorkItemId } = this.props;
 
         dispatch(removeStoryPoints(
-            selectedWorkItemId,
+            activeWorkItemId,
             iterationPath
         ));
     }
 
     revealVotes() {
-        const { iterationPath, userId } = this.props;
-        const { selectedWorkItemId } = this.state;
+        const { iterationPath, userId, activeWorkItemId } = this.props;
 
         revealVotes(
             userId,
             iterationPath,
-            selectedWorkItemId
+            activeWorkItemId
         );
     }
 
     cardClicked(value) {
-        const { userId, iterationPath } = this.props;
-        const { selectedWorkItemId } = this.state;
+        const { userId, iterationPath, activeWorkItemId } = this.props;
 
-        if (selectedWorkItemId === null) {
+        if (activeWorkItemId === null) {
             return;
         }
 
         requestVote(
             userId,
             iterationPath,
-            selectedWorkItemId,
+            activeWorkItemId,
             value
         );
     }
 
     render() {
-        const { selectedWorkItemId } = this.state;
         const {
             workItems,
             cardValues,
             users,
-            votes
+            votes,
+            activeWorkItemId
         } = this.props;
 
-        const selectedWorkItem = selectedWorkItemId !== null
-            ? _.find(workItems, x => x.id === selectedWorkItemId)
+        const selectedWorkItem = activeWorkItemId !== null
+            ? _.find(workItems, x => x.id === activeWorkItemId)
             : null;
 
-        const votesForSelectedWorkItem = selectedWorkItemId !== null
-            ? votes.filter(x => x.workItemId === selectedWorkItemId)
+        const votesForSelectedWorkItem = activeWorkItemId !== null
+            ? votes.filter(x => x.workItemId === activeWorkItemId)
             : [];
 
         const storyPoints = EstimationSession.getStoryPoints(votesForSelectedWorkItem);
@@ -139,8 +135,11 @@ class EstimationSession extends Component {
                             selectedUserStoryId={(selectedWorkItem != null
                                 ? selectedWorkItem.id
                                 : null)}
-                            onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
-                            items={workItems.filter(x => x.storyPoints == null)}
+                            onSelectedUserStoryIdChanged={this.onactiveWorkItemIdChanged}
+                            items={_.sortBy(
+                                workItems.filter(x => x.storyPoints == null),
+                                x => x.stackRank
+                            )}
                         />
                     </div>
                     <div className="voted-row">
@@ -150,8 +149,11 @@ class EstimationSession extends Component {
                             selectedUserStoryId={(selectedWorkItem != null
                                 ? selectedWorkItem.id
                                 : null)}
-                            onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
-                            items={workItems.filter(x => x.storyPoints != null)}
+                            onSelectedUserStoryIdChanged={this.onactiveWorkItemIdChanged}
+                            items={_.sortBy(
+                                workItems.filter(x => x.storyPoints != null),
+                                x => x.stackRank
+                            )}
                         />
                     </div>
                     <div className="abandoned-row">
@@ -160,7 +162,7 @@ class EstimationSession extends Component {
                             selectedUserStoryId={(selectedWorkItem != null
                                 ? selectedWorkItem.id
                                 : null)}
-                            onSelectedUserStoryIdChanged={this.onSelectedWorkItemIdChanged}
+                            onSelectedUserStoryIdChanged={this.onactiveWorkItemIdChanged}
                             columns={["title"]}
                         />
                     </div>
@@ -258,12 +260,14 @@ const mapStateToProps = (state, ownProps) => ({
     workItems: state.devOps.workItems[ownProps.match.params.iterationPath],
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,
-    votes: state.devOps.votes
+    votes: state.devOps.votes,
+    activeWorkItemId: state.devOps.activeWorkItemId
 });
 
 EstimationSession.defaultProps = {
     workItems: [],
-    users: []
+    users: [],
+    activeWorkItemId: null
 };
 
 EstimationSession.propTypes = {
@@ -275,7 +279,8 @@ EstimationSession.propTypes = {
     workItems: PropTypes.arrayOf(PropTypes.object),
     users: PropTypes.arrayOf(PropTypes.object),
     cardValues: PropTypes.arrayOf(PropTypes.string).isRequired,
-    votes: PropTypes.arrayOf(PropTypes.object).isRequired
+    votes: PropTypes.arrayOf(PropTypes.object).isRequired,
+    activeWorkItemId: PropTypes.number
 };
 
 export default connect(mapStateToProps)(EstimationSession);

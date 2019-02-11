@@ -4,7 +4,9 @@ export const RECEIVE_GROUP_UPDATED = "ESTIMATION/RECEIVE_GROUP_UPDATED";
 export const REQUEST_VOTE = "ESTIMATION/REQUST_VOTE";
 export const RECEIVE_VOTE = "ESTIMATION/RECEIVE_VOTE";
 export const RECEIVE_VOTES_REVEALED = "ESTIMATION/RECEIVE_VOTES_REVEALED";
-export const RECEIVE_ACTIVEWORKITEM_CHANGED = "RECEIVE_ACTIVEWORKITEM_CHANGED";
+
+export const REQUEST_ACTIVEWORKITEM_CHANGED = "REQUEST/ACTIVEWORKITEM_CHANGED";
+export const RECEIVE_ACTIVEWORKITEM_CHANGED = "RECEIVE/ACTIVEWORKITEM_CHANGED";
 
 const groupUpdatedEventName = "groupUpdated";
 const votedEventName = "voted";
@@ -59,6 +61,19 @@ export const revealVotes = (userId, iterationPath, workItemId) => {
         groupName: iterationPath,
         userId: userId,
         workItemId: workItemId
+    });
+};
+
+export const switchActiveWorkItem = (userId, iterationPath, workItemId) => {
+    connection.invoke("switchSelectedWorkItem", {
+        groupName: iterationPath,
+        userId: userId,
+        workItemId: workItemId
+    });
+
+    return receiveActiveWorkItemChanged({
+        workItemId: workItemId,
+        iterationPath: iterationPath
     });
 };
 

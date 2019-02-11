@@ -8,7 +8,12 @@ import {
     RECEIVE_WORKITEM_UPDATE
 } from "../actions";
 
-import { RECEIVE_GROUP_UPDATED, RECEIVE_VOTE, RECEIVE_VOTES_REVEALED } from "../actions/estimation";
+import {
+    RECEIVE_GROUP_UPDATED,
+    RECEIVE_VOTE,
+    RECEIVE_VOTES_REVEALED,
+    RECEIVE_ACTIVEWORKITEM_CHANGED
+} from "../actions/estimation";
 
 const onReceiveGroupUpdated = (state, action) => {
     const teamsAsArray = Object.keys(state.teams).map(teamId => {
@@ -82,7 +87,8 @@ const devOps = (state = {
     context: null,
     teams: {},
     workItems: {},
-    votes: []
+    votes: [],
+    activeWorkItemId: null
 }, action) => {
     switch (action.type) {
         case INITIALIZE_CONTEXT:
@@ -119,6 +125,11 @@ const devOps = (state = {
             return onReceiveVote(state, action);
         case RECEIVE_VOTES_REVEALED:
             return onReceiveVotesRevealed(state, action);
+        case RECEIVE_ACTIVEWORKITEM_CHANGED:
+            return {
+                ...state,
+                activeWorkItemId: action.workItemId
+            };
         default:
             return state;
     }
