@@ -112,6 +112,7 @@ class EstimationSession extends Component {
             cardValues,
             users,
             votes,
+            userId,
             activeWorkItemId
         } = this.props;
 
@@ -175,6 +176,10 @@ class EstimationSession extends Component {
                                 <PokerCard
                                     value={cardValue}
                                     key={cardValue}
+                                    selected={_.some(
+                                        votes,
+                                        x => x.userId === userId && x.value === cardValue
+                                    )}
                                     onClick={() => this.cardClicked(cardValue)}
                                 />
                             ))}

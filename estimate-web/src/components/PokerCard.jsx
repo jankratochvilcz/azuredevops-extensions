@@ -4,11 +4,17 @@ import PropTypes from "prop-types";
 import "./PokerCard.css";
 
 const PokerCard = props => {
-    const { onClick, value } = props;
+    const { onClick, value, selected } = props;
+
+    const classNames = ["poker-card"];
+
+    if (selected) {
+        classNames.push("active");
+    }
 
     return (
         <div
-            className="poker-card"
+            className={classNames.join(" ")}
             onClick={() => onClick()}
             onKeyDown={() => onClick()}
             role="button"
@@ -23,7 +29,8 @@ const PokerCard = props => {
 
 PokerCard.propTypes = {
     onClick: PropTypes.func.isRequired,
-    value: PropTypes.string.isRequired
+    value: PropTypes.string.isRequired,
+    selected: PropTypes.bool.isRequired
 };
 
 export default PokerCard;

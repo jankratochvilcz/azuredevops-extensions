@@ -9,6 +9,12 @@
     align-items: center;
 }
 
+.active {
+    background: #0078d4;
+    color: white;
+    border: 1px solid #f8f8f8;
+}
+
 .poker-card-title {
     font-size: large;
 }
