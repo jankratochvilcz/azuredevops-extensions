@@ -2,12 +2,20 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import _ from "underscore";
+import { PrimaryButton, DefaultButton } from "office-ui-fabric-react";
+
 import "./EstimationSession.css";
 import UserStoryList from "./UserStoryList";
 import PokerCard from "./PokerCard";
-import { getTeam, getWorkItems } from "../actions";
+import {
+    getTeam,
+    getWorkItems,
+    updateStoryPoints,
+    removeStoryPoints
+} from "../actions";
 import { connectToGroup, requestVote } from "../actions/estimation";
 import EstimatorPersona from "./EstimatorPersona";
+import { average } from "../utils/math";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -15,6 +23,8 @@ class EstimationSession extends Component {
 
         this.onSelectedWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
         this.cardClicked = this.cardClicked.bind(this);
+        this.saveEstimate = this.saveEstimate.bind(this);
+        this.resetEstimate = this.resetEstimate.bind(this);
 
         this.state = {
             selectedWorkItem: null
@@ -39,12 +49,39 @@ class EstimationSession extends Component {
         dispatch(getWorkItems(iterationPath));
     }
 
+    static getStoryPoints(votes) {
+        return average(votes
+            .filter(x => !Number.isNaN(x.value))
+            .map(x => Number.parseInt(x.value, 10)));
+    }
+
     onSelectedWorkItemIdChanged(workItemId) {
         const { workItems } = this.props;
 
         this.setState({
             selectedWorkItem: _.find(workItems, x => x.id === workItemId)
         });
+    }
+
+    saveEstimate(storyPoints) {
+        const { dispatch, iterationPath } = this.props;
+        const { selectedWorkItem } = this.state;
+
+        dispatch(updateStoryPoints(
+            selectedWorkItem.id,
+            storyPoints,
+            iterationPath
+        ));
+    }
+
+    resetEstimate() {
+        const { dispatch, iterationPath } = this.props;
+        const { selectedWorkItem } = this.state;
+
+        dispatch(removeStoryPoints(
+            selectedWorkItem.id,
+            iterationPath
+        ));
     }
 
     cardClicked(value) {
@@ -75,6 +112,8 @@ class EstimationSession extends Component {
         const votesForSelectedWorkItem = selectedWorkItem !== null
             ? votes.filter(x => x.workItemId === selectedWorkItem.id)
             : [];
+
+        const storyPoints = EstimationSession.getStoryPoints(votesForSelectedWorkItem);
 
         return (
             <div className="component-root">
@@ -126,7 +165,7 @@ class EstimationSession extends Component {
                         </div>
                         {selectedWorkItem === null && (
                             <div className="cards-overlay">
-                                <span className="cards-overlay-info">🏁 Pick a work item to start scoring</span>
+                                <span className="cards-overlay-info">Pick a work item to start scoring</span>
                             </div>
                         )}
                     </div>
@@ -139,10 +178,25 @@ class EstimationSession extends Component {
                                 key={user.id}
                                 user={user}
                                 vote={_.some(votesForSelectedWorkItem, x => x.userId === user.id)
-                                    ? _.find(votesForSelectedWorkItem, x => x.userId === user.id).value
+                                    ? _.find(votesForSelectedWorkItem, x => x.userId === user.id)
+                                        .value
                                     : null}
                             />
                         ))}
+                    </div>
+
+                    <h4>Dealer</h4>
+                    <div>
+                        <PrimaryButton
+                            onClick={() => this.saveEstimate(storyPoints)}
+                            text={`Save ${storyPoints} story points`}
+                        />
+
+                        <DefaultButton
+                            text="Reset story points and revote"
+                            onClick={() => this.resetEstimate()}
+                        />
+
                     </div>
 
                     <h4>Current Work Item</h4>

@@ -13,5 +13,8 @@
     "parser": "babel-eslint",
     "globals": {
         "VSS": "readable"
+    },
+    "env": {
+        "browser": true
     }
 }

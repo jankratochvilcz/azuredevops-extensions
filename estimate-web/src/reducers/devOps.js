@@ -4,7 +4,8 @@ import {
     INITIALIZE_CONTEXT,
     RECEIVE_ITERATIONS,
     RECEIVE_TEAM,
-    RECEIVE_WORKITEMS
+    RECEIVE_WORKITEMS,
+    RECEIVE_WORKITEM_UPDATE
 } from "../actions";
 
 import { RECEIVE_GROUP_UPDATED, RECEIVE_VOTE } from "../actions/estimation";
@@ -42,6 +43,22 @@ const onReceiveVote = (state, action) => ({
     ]
 });
 
+const onReceiveWorkItemUpdate = (state, action) => {
+    const previousWorkItems = state.workItems[action.iterationPath];
+    const updatedWorkItems = [
+        ...previousWorkItems.filter(x => x.id !== action.workItem.id),
+        action.workItem
+    ];
+
+    return {
+        ...state,
+        workItems: {
+            ...state.workItems,
+            [action.iterationPath]: updatedWorkItems
+        }
+    };
+};
+
 const devOps = (state = {
     context: null,
     teams: {},
@@ -75,6 +92,8 @@ const devOps = (state = {
                     [action.iterationPath]: action.workItems
                 }
             };
+        case RECEIVE_WORKITEM_UPDATE:
+            return onReceiveWorkItemUpdate(state, action);
         case RECEIVE_GROUP_UPDATED:
             return onReceiveGroupUpdated(state, action);
         case RECEIVE_VOTE:

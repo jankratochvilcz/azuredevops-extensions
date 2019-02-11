@@ -13,6 +13,7 @@ export const RECEIVE_TEAM = "DEVOPS/RECEIVE_TEAM";
 
 export const REQUEST_WORKITEMS = "DEVOPS/REQUEST_WORKITEMS";
 export const RECEIVE_WORKITEMS = "DEVOPS/RECEIVE_WORKITEMS";
+export const RECEIVE_WORKITEM_UPDATE = "DEVOPS/RECEIVE_WORKITEM_UPDATE";
 
 const executeOnVssWorkClient = action => {
     VSS.require(["VSS/Service", "TFS/Work/RestClient"], (vssService, tfsWebApi) => {
@@ -34,6 +35,18 @@ const executeOnVssCoreClient = action => {
         action(client);
     });
 };
+
+const parseWorkItem = apiWorkItem => ({
+    id: apiWorkItem.id,
+    url: apiWorkItem.url,
+    title: apiWorkItem.fields["System.Title"],
+    storyPoints: apiWorkItem.fields["Microsoft.VSTS.Scheduling.StoryPoints"],
+    stackRank: apiWorkItem.fields["Microsoft.VSTS.Common.StackRank"],
+    createdBy: apiWorkItem.fields["System.CreatedBy"],
+    assignedTo: apiWorkItem.fields["System.AssignedTo"],
+    description: apiWorkItem.fields["System.Description"] || apiWorkItem.fields["Microsoft.VSTS.TCM.ReproSteps"],
+    workItemType: apiWorkItem.fields["System.WorkItemType"]
+});
 
 export const initializeContext = () => ({
     type: INITIALIZE_CONTEXT,
@@ -70,18 +83,25 @@ const requestWorkItems = () => ({
 const receiveWorkItems = (iterationPath, result) => ({
     type: RECEIVE_WORKITEMS,
     iterationPath: iterationPath,
-    workItems: result.map(x => ({
-        id: x.id,
-        url: x.url,
-        title: x.fields["System.Title"],
-        storyPoints: x.fields["Microsoft.VSTS.Scheduling.StoryPoints"],
-        stackRank: x.fields["Microsoft.VSTS.Common.StackRank"],
-        createdBy: x.fields["System.CreatedBy"],
-        assignedTo: x.fields["System.AssignedTo"],
-        description: x.fields["System.Description"] || x.fields["Microsoft.VSTS.TCM.ReproSteps"],
-        workItemType: x.fields["System.WorkItemType"]
-    }))
+    workItems: result.map(x => parseWorkItem(x))
 });
+
+const receiveWorkitemUpdate = (workItem, iterationPath) => ({
+    type: RECEIVE_WORKITEM_UPDATE,
+    workItem: workItem,
+    iterationPath: iterationPath
+});
+
+const updateWorkItem = (payload, iterationPath, workItemId) => dispatch => {
+    executeOnVssWorkItemTrackingClient(client => {
+        client
+            .updateWorkItem(payload, workItemId)
+            .then(workItem => dispatch(receiveWorkitemUpdate(
+                parseWorkItem(workItem),
+                iterationPath
+            )));
+    });
+};
 
 export const getIterations = (teamId, projectId) => dispatch => {
     dispatch(requestIterations());
@@ -133,3 +153,18 @@ export const getWorkItems = iterationPath => dispatch => {
             });
     });
 };
+
+export const updateStoryPoints = (workItemId, storyPoints, iterationPath) => (
+    dispatch => updateWorkItem([
+        {
+            op: "add",
+            path: "/fields/Microsoft.VSTS.Scheduling.StoryPoints",
+            value: storyPoints
+        }], iterationPath, workItemId)(dispatch));
+
+export const removeStoryPoints = (workItemId, iterationPath) => (
+    dispatch => updateWorkItem([
+        {
+            op: "remove",
+            path: "/fields/Microsoft.VSTS.Scheduling.StoryPoints"
+        }], iterationPath, workItemId)(dispatch));
