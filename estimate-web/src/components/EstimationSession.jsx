@@ -63,13 +63,37 @@ class EstimationSession extends Component {
     }
 
     saveEstimate(storyPoints) {
-        const { dispatch, iterationPath, activeWorkItemId } = this.props;
+        const {
+            dispatch,
+            iterationPath,
+            activeWorkItemId,
+            workItems,
+            userId
+        } = this.props;
 
         dispatch(updateStoryPoints(
             activeWorkItemId,
             storyPoints,
             iterationPath
         ));
+
+        const sortedWorkItemsLeft = _.sortBy(
+            workItems.filter(x => x.storyPoints == null),
+            x => x.stackRank
+        );
+
+        const currentWorkItemIndex = _.findIndex(
+            sortedWorkItemsLeft,
+            x => x.id === activeWorkItemId
+        );
+
+        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItemsLeft.length - 1) {
+            return;
+        }
+
+        const nextWorkItem = _.first(_.rest(sortedWorkItemsLeft, currentWorkItemIndex + 1));
+
+        dispatch(switchActiveWorkItem(userId, iterationPath, nextWorkItem.id));
     }
 
     resetEstimate() {
@@ -157,19 +181,9 @@ class EstimationSession extends Component {
                             )}
                         />
                     </div>
-                    <div className="abandoned-row">
-                        <UserStoryList
-                            title="Abandoned"
-                            selectedUserStoryId={(selectedWorkItem != null
-                                ? selectedWorkItem.id
-                                : null)}
-                            onSelectedUserStoryIdChanged={this.onactiveWorkItemIdChanged}
-                            columns={["title"]}
-                        />
-                    </div>
                 </div>
                 <div className="center-pane">
-                    <h4>Your Vote</h4>
+                    <h4>Voting</h4>
                     <div className="cards-alignment-container">
                         <div className="poker-cards-container">
                             {cardValues.map(cardValue => (
@@ -191,8 +205,6 @@ class EstimationSession extends Component {
                         )}
                     </div>
 
-                    <h4>Team</h4>
-
                     <div className="users-container">
                         {_.sortBy(users, x => !x.connected).map(user => (
                             <EstimatorPersona
@@ -209,12 +221,12 @@ class EstimationSession extends Component {
                         ))}
                     </div>
 
-                    <h4>Dealer</h4>
-                    <div>
+                    <div className="voting-control-container">
                         {selectedWorkItem !== null && !selectedWorkItem.votesRevealed && (
                             <PrimaryButton
                                 onClick={() => this.revealVotes()}
                                 text="Reveal votes"
+                                disabled={!_.some(votesForSelectedWorkItem)}
                             />
                         )}
                         {selectedWorkItem !== null && selectedWorkItem.votesRevealed && (
@@ -222,17 +234,17 @@ class EstimationSession extends Component {
                                 <PrimaryButton
                                     onClick={() => this.saveEstimate(storyPoints)}
                                     text={`Save ${storyPoints} story points`}
+                                    style={{ marginRight: "10px" }}
                                 />
 
                                 <DefaultButton
-                                    text="Reset story points and revote"
+                                    text="Reset &amp; revote"
                                     onClick={() => this.resetEstimate()}
                                 />
                             </div>
                         )}
                     </div>
 
-                    <h4>Current Work Item</h4>
                     {selectedWorkItem
                         && (
                             <div className="user-story-container">

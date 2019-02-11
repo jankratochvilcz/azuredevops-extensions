@@ -9,7 +9,8 @@
 .left-pane {
     display: grid;
     grid-column: left-pane;
-    grid-template-rows: [to-vote-row] 40vh [voted-row] 40vh [abandoned-row] 20vh;
+    grid-template-rows: [to-vote-row] 50vh [voted-row] 50vh;
+    border-right: 1px solid lightgray;
 }
 
 .center-pane {
@@ -29,12 +30,6 @@
     position: relative;
 }
 
-.abandoned-row {
-    grid-row: abandoned-row;
-    overflow-y: auto;
-    position: relative;
-}
-
 .poker-cards-container {
     display: flex;
     flex-direction: row;
@@ -45,14 +40,18 @@
     display: flex;
     flex-direction: column;
     margin-left: 10px;
+    margin-top: 10px;
+    border-top: 1px solid lightgray;
 }
 
 .users-container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    margin-top: 10px;
     margin-left: 10px;
     margin-bottom: 36px;
+    align-items: center;
 }
 
 .users-container > * {
@@ -66,7 +65,7 @@
     position: absolute;
     left: 0;
     top: 0;
-    opacity: 0.75;
+    opacity: 0.9;
     font-size: large;
     display: flex;
     justify-content: center;
@@ -80,4 +79,8 @@
 .cards-overlay-info {
     margin-top: auto;
     margin-bottom: auto;
+}
+
+.voting-control-container {
+    margin-left: 10px;
 }
