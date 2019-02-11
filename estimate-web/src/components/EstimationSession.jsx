@@ -250,7 +250,7 @@ class EstimationSession extends Component {
                     {selectedWorkItem
                         && (
                             <div className="user-story-container">
-                                <h3>
+                                <h4 style={{ marginLeft: 0 }}>
                                     <a href={selectedWorkItem.url}>
                                         <span>{selectedWorkItem.workItemType}</span>
                                         <span>&nbsp;</span>
@@ -258,7 +258,7 @@ class EstimationSession extends Component {
                                     </a>
                                     <span>&nbsp;</span>
                                     {selectedWorkItem.title}
-                                </h3>
+                                </h4>
                                 <div dangerouslySetInnerHTML={{
                                     __html: selectedWorkItem.description
                                 }}
