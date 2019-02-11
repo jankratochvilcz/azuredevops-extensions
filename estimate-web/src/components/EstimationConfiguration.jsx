@@ -8,7 +8,7 @@ import { PrimaryButton } from "office-ui-fabric-react";
 import { Redirect } from "react-router";
 
 import { getIterations } from "../actions";
-import "./EstimationConfiguration.css";
+import "./EstimationConfiguration.less";
 
 class EstimationConfiguration extends Component {
     constructor(props) {

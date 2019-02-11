@@ -1,3 +1,5 @@
+@import "../Resources.less";
+
 .component-root {
     display: grid;
     height: 100%;
@@ -10,7 +12,7 @@
     display: grid;
     grid-column: left-pane;
     grid-template-rows: [to-vote-row] 50vh [voted-row] 50vh;
-    border-right: 1px solid lightgray;
+    border-right: @base-border;
 }
 
 .center-pane {
@@ -39,18 +41,18 @@
 .user-story-container {
     display: flex;
     flex-direction: column;
-    margin-left: 10px;
-    margin-top: 10px;
-    border-top: 1px solid lightgray;
+    margin-left: @base-margin;
+    margin-top: @base-margin;
+    border-top: @base-border;
 }
 
 .users-container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-bottom: 36px;
+    margin-top: @base-margin;
+    margin-left: @base-margin;
+    margin-bottom: @margin-extra-large;
     align-items: center;
 }
 
@@ -59,7 +61,7 @@
 }    
 
 .cards-overlay {
-    background: #f4f4f4;
+    background: @background-light;
     height: 100%;
     width: 100%;
     position: absolute;
@@ -82,5 +84,6 @@
 }
 
 .voting-control-container {
-    margin-left: 10px;
+    margin-left: @base-margin;
+    margin-bottom: @base-margin;
 }

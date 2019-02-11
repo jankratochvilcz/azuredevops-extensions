@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import "./PokerCard.css";
+import "./PokerCard.less";
 
 const PokerCard = props => {
     const { onClick, value, selected } = props;
@@ -9,7 +9,7 @@ const PokerCard = props => {
     const classNames = ["poker-card"];
 
     if (selected) {
-        classNames.push("active");
+        classNames.push("card-selected");
     }
 
     return (
@@ -20,7 +20,7 @@ const PokerCard = props => {
             role="button"
             tabIndex="0"
         >
-            <span className="poker-card-title">
+            <span>
                 {value}
             </span>
         </div>

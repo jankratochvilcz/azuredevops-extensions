@@ -1,7 +1,14 @@
 import React, { Component } from "react";
-import { DetailsList, SelectionMode, CheckboxVisibility, PersonaSize, Persona, Selection } from "office-ui-fabric-react"
-import _ from "underscore"
-import "./UserStoryLists.css"
+import {
+    DetailsList,
+    SelectionMode,
+    CheckboxVisibility,
+    PersonaSize,
+    Persona,
+    Selection
+} from "office-ui-fabric-react";
+import _ from "underscore";
+import "./UserStoryLists.less";
 
 class UserStoryList extends Component {
     constructor(props) {
@@ -9,7 +16,7 @@ class UserStoryList extends Component {
 
         this.selectionChanged = this.selectionChanged.bind(this);
 
-        var columns = [
+        const columns = [
             {
                 key: 'id',
                 name: 'Id',
@@ -19,9 +26,7 @@ class UserStoryList extends Component {
                 isRowHeader: true,
                 data: 'string',
                 isPadded: false,
-                onRender: item => {
-                    return <span>{item.id}</span>;
-                }
+                onRender: item => <span>{item.id}</span>
             },
             {
                 key: 'title',
@@ -32,9 +37,7 @@ class UserStoryList extends Component {
                 isRowHeader: true,
                 data: 'string',
                 isPadded: true,
-                onRender: item => {
-                    return <span>{item.title}</span>;
-                }
+                onRender: item => <span>{item.title}</span>
             },
             {
                 key: 'storyPoints',
@@ -44,9 +47,7 @@ class UserStoryList extends Component {
                 maxWidth: 25,
                 data: 'string',
                 isPadded: true,
-                onRender: item => {
-                    return <span>{item.storyPoints}</span>;
-                }
+                onRender: item => <span>{item.storyPoints}</span>
             },
             {
                 key: 'createdBy',
@@ -55,21 +56,20 @@ class UserStoryList extends Component {
                 minWidth: 24,
                 maxWidth: 24,
                 isPadded: true,
-                onRender: item => {
-                    return (
-                        <Persona
-                            size={PersonaSize.size24}
-                            imageUrl={item.createdBy.imageUrl}
-                            personaName={item.createdBy.displayName} />
-                    );
-                }
+                onRender: item => (
+                    <Persona
+                        size={PersonaSize.size24}
+                        imageUrl={item.createdBy.imageUrl}
+                        personaName={item.createdBy.displayName}
+                    />
+                )
             }
         ]
 
         this.state = {
-            columns: columns.filter(x => x.key == "id" || _.some(
+            columns: columns.filter(x => x.key === "id" || _.some(
                 this.props.columns,
-                propColumnName => propColumnName == x.key)),
+                propColumnName => propColumnName === x.key)),
             selection: new Selection({
                 onSelectionChanged: this.selectionChanged
             })
@@ -93,22 +93,24 @@ class UserStoryList extends Component {
             this.state.selection.setAllSelected(false);
         }
 
-        return (<div>
-            <h4>{this.props.title} [{items.length}]</h4>
-            <div className="wrapper">
-                <DetailsList
-                    items={items}
-                    compact={false}
-                    selection={this.state.selection}
-                    columns={this.state.columns}
-                    selectionMode={SelectionMode.single}
-                    checkboxVisibility={CheckboxVisibility.hidden}
-                    isCompactMode={true}
-                    setKey="id"
-                    isHeaderVisible={true} />
+        return (
+            <div>
+                <h4>{this.props.title} [{items.length}]</h4>
+                <div>
+                    <DetailsList
+                        items={items}
+                        compact={false}
+                        selection={this.state.selection}
+                        columns={this.state.columns}
+                        selectionMode={SelectionMode.single}
+                        checkboxVisibility={CheckboxVisibility.hidden}
+                        isCompactMode={true}
+                        setKey="id"
+                        isHeaderVisible={true} 
+                    />
+                </div>
             </div>
-
-        </div>);
+        );
     }
 }
 

@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import { connect } from 'react-redux'
+import { connect } from "react-redux";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import EstimationConfiguration from "./components/EstimationConfiguration";
 
-import "./App.css";
+import "./App.less";
 import EstimationSession from "./components/EstimationSession";
 import { initializeContext } from "./actions";
 

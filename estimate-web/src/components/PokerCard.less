@@ -1,0 +1,26 @@
+@import "../Resources.less";
+@import "../Transitions.less";
+
+@card-scale: scale(1.2, 1.2);
+
+.poker-card {
+    .container-light();
+    .container-centered();
+    margin: @base-margin;
+    width: 60px;
+    height: 80px;
+    font-size: 12pt;
+    transition: @transition-default, transform 0.2s ease;
+}
+
+.poker-card:hover {
+    border-color: @color-primary;
+    cursor: pointer;
+    transform: @card-scale;
+}
+
+.card-selected {
+    .container-accent();
+    border-color: @color-primary;
+    transform: @card-scale;
+}

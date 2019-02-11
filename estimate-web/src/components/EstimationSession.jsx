@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import _ from "underscore";
 import { PrimaryButton, DefaultButton } from "office-ui-fabric-react";
 
-import "./EstimationSession.css";
+import "./EstimationSession.less";
 import UserStoryList from "./UserStoryList";
 import PokerCard from "./PokerCard";
 import {
@@ -192,7 +192,9 @@ class EstimationSession extends Component {
                                     key={cardValue}
                                     selected={_.some(
                                         votes,
-                                        x => x.userId === userId && x.value === cardValue
+                                        x => x.userId === userId
+                                            && x.workItemId === activeWorkItemId
+                                            && x.value === cardValue
                                     )}
                                     onClick={() => this.cardClicked(cardValue)}
                                 />

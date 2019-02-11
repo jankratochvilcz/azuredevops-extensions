@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { PersonaSize, Persona, PersonaPresence } from "office-ui-fabric-react";
 
-import "./EstimatorPersona.css";
+import "./EstimatorPersona.less";
 
 
 class EstimatorPersona extends Component {
