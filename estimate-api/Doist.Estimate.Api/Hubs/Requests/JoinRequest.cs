@@ -1,9 +1,6 @@
 ﻿namespace Doist.Estimate.Api.Hubs.Requests
 {
-    public class JoinRequest
+    public class JoinRequest : RequestBase
     {
-        public string GroupName { get; set; }
-
-        public string UserId { get; set; }
     }
 }

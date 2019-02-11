@@ -8,7 +8,7 @@ import {
     RECEIVE_WORKITEM_UPDATE
 } from "../actions";
 
-import { RECEIVE_GROUP_UPDATED, RECEIVE_VOTE } from "../actions/estimation";
+import { RECEIVE_GROUP_UPDATED, RECEIVE_VOTE, RECEIVE_VOTES_REVEALED } from "../actions/estimation";
 
 const onReceiveGroupUpdated = (state, action) => {
     const teamsAsArray = Object.keys(state.teams).map(teamId => {
@@ -59,6 +59,25 @@ const onReceiveWorkItemUpdate = (state, action) => {
     };
 };
 
+const onReceiveVotesRevealed = (state, action) => {
+    const previousWorkItems = state.workItems[action.iterationPath];
+    const updatedWorkItems = [
+        ...previousWorkItems.filter(x => x.id !== action.workItemId),
+        {
+            ..._.find(previousWorkItems, x => x.id === action.workItemId),
+            votesRevealed: true
+        }
+    ];
+
+    return {
+        ...state,
+        workItems: {
+            ...state.workItems,
+            [action.iterationPath]: updatedWorkItems
+        }
+    };
+};
+
 const devOps = (state = {
     context: null,
     teams: {},
@@ -98,6 +117,8 @@ const devOps = (state = {
             return onReceiveGroupUpdated(state, action);
         case RECEIVE_VOTE:
             return onReceiveVote(state, action);
+        case RECEIVE_VOTES_REVEALED:
+            return onReceiveVotesRevealed(state, action);
         default:
             return state;
     }

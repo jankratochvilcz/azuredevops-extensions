@@ -13,7 +13,7 @@ import {
     updateStoryPoints,
     removeStoryPoints
 } from "../actions";
-import { connectToGroup, requestVote } from "../actions/estimation";
+import { connectToGroup, requestVote, revealVotes } from "../actions/estimation";
 import EstimatorPersona from "./EstimatorPersona";
 import { average } from "../utils/math";
 
@@ -25,9 +25,10 @@ class EstimationSession extends Component {
         this.cardClicked = this.cardClicked.bind(this);
         this.saveEstimate = this.saveEstimate.bind(this);
         this.resetEstimate = this.resetEstimate.bind(this);
+        this.revealVotes = this.revealVotes.bind(this);
 
         this.state = {
-            selectedWorkItem: null
+            selectedWorkItemId: null
         };
     }
 
@@ -56,19 +57,17 @@ class EstimationSession extends Component {
     }
 
     onSelectedWorkItemIdChanged(workItemId) {
-        const { workItems } = this.props;
-
         this.setState({
-            selectedWorkItem: _.find(workItems, x => x.id === workItemId)
+            selectedWorkItemId: workItemId
         });
     }
 
     saveEstimate(storyPoints) {
         const { dispatch, iterationPath } = this.props;
-        const { selectedWorkItem } = this.state;
+        const { selectedWorkItemId } = this.state;
 
         dispatch(updateStoryPoints(
-            selectedWorkItem.id,
+            selectedWorkItemId,
             storyPoints,
             iterationPath
         ));
@@ -76,32 +75,43 @@ class EstimationSession extends Component {
 
     resetEstimate() {
         const { dispatch, iterationPath } = this.props;
-        const { selectedWorkItem } = this.state;
+        const { selectedWorkItemId } = this.state;
 
         dispatch(removeStoryPoints(
-            selectedWorkItem.id,
+            selectedWorkItemId,
             iterationPath
         ));
     }
 
+    revealVotes() {
+        const { iterationPath, userId } = this.props;
+        const { selectedWorkItemId } = this.state;
+
+        revealVotes(
+            userId,
+            iterationPath,
+            selectedWorkItemId
+        );
+    }
+
     cardClicked(value) {
         const { userId, iterationPath } = this.props;
-        const { selectedWorkItem } = this.state;
+        const { selectedWorkItemId } = this.state;
 
-        if (selectedWorkItem === null) {
+        if (selectedWorkItemId === null) {
             return;
         }
 
         requestVote(
             userId,
             iterationPath,
-            selectedWorkItem.id,
+            selectedWorkItemId,
             value
         );
     }
 
     render() {
-        const { selectedWorkItem } = this.state;
+        const { selectedWorkItemId } = this.state;
         const {
             workItems,
             cardValues,
@@ -109,8 +119,12 @@ class EstimationSession extends Component {
             votes
         } = this.props;
 
-        const votesForSelectedWorkItem = selectedWorkItem !== null
-            ? votes.filter(x => x.workItemId === selectedWorkItem.id)
+        const selectedWorkItem = selectedWorkItemId !== null
+            ? _.find(workItems, x => x.id === selectedWorkItemId)
+            : null;
+
+        const votesForSelectedWorkItem = selectedWorkItemId !== null
+            ? votes.filter(x => x.workItemId === selectedWorkItemId)
             : [];
 
         const storyPoints = EstimationSession.getStoryPoints(votesForSelectedWorkItem);
@@ -177,6 +191,9 @@ class EstimationSession extends Component {
                             <EstimatorPersona
                                 key={user.id}
                                 user={user}
+                                votesRevealed={(selectedWorkItem != null
+                                    ? selectedWorkItem.votesRevealed
+                                    : false)}
                                 vote={_.some(votesForSelectedWorkItem, x => x.userId === user.id)
                                     ? _.find(votesForSelectedWorkItem, x => x.userId === user.id)
                                         .value
@@ -187,16 +204,25 @@ class EstimationSession extends Component {
 
                     <h4>Dealer</h4>
                     <div>
-                        <PrimaryButton
-                            onClick={() => this.saveEstimate(storyPoints)}
-                            text={`Save ${storyPoints} story points`}
-                        />
+                        {selectedWorkItem !== null && !selectedWorkItem.votesRevealed && (
+                            <PrimaryButton
+                                onClick={() => this.revealVotes()}
+                                text="Reveal votes"
+                            />
+                        )}
+                        {selectedWorkItem !== null && selectedWorkItem.votesRevealed && (
+                            <div>
+                                <PrimaryButton
+                                    onClick={() => this.saveEstimate(storyPoints)}
+                                    text={`Save ${storyPoints} story points`}
+                                />
 
-                        <DefaultButton
-                            text="Reset story points and revote"
-                            onClick={() => this.resetEstimate()}
-                        />
-
+                                <DefaultButton
+                                    text="Reset story points and revote"
+                                    onClick={() => this.resetEstimate()}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <h4>Current Work Item</h4>

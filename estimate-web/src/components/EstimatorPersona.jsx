@@ -9,7 +9,7 @@ class EstimatorPersona extends Component {
     constructor(props) {
         super(props);
 
-        this.renderAvatarCoin = this.renderAvatarCoin.bind(this);
+        this.renderVote = this.renderVote.bind(this);
     }
 
     static getPresence(connected, vote) {
@@ -22,14 +22,14 @@ class EstimatorPersona extends Component {
             : PersonaPresence.away;
     }
 
-    renderAvatarCoin() {
+    renderVote() {
         const { vote } = this.props;
 
         return <div className="voted-persona">{vote}</div>;
     }
 
     render() {
-        const { user, vote } = this.props;
+        const { user, vote, votesRevealed } = this.props;
 
         return (
             <Persona
@@ -38,7 +38,7 @@ class EstimatorPersona extends Component {
                 hidePersonaDetails={!user.connected}
                 imageUrl={user.imageUrl}
                 text={user.displayName}
-                onRenderCoin={vote != null ? this.renderAvatarCoin : undefined}
+                onRenderCoin={vote != null && votesRevealed ? this.renderVote : undefined}
                 presence={EstimatorPersona.getPresence(user.connected, vote)}
             />
         );
@@ -46,12 +46,14 @@ class EstimatorPersona extends Component {
 }
 
 EstimatorPersona.defaultProps = {
-    vote: null
+    vote: null,
+    votesRevealed: false
 };
 
 EstimatorPersona.propTypes = {
     user: PropTypes.object.isRequired,
-    vote: PropTypes.string
+    vote: PropTypes.string,
+    votesRevealed: PropTypes.bool
 };
 
 export default EstimatorPersona;

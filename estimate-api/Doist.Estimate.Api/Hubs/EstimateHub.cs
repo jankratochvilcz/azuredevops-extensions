@@ -13,6 +13,8 @@ namespace Doist.Estimate.Api.Hubs
     {
         private const string GroupUpdatedMessageName = "groupUpdated";
         private const string VotedMessageName = "voted";
+        private const string RevealedMessageName = "revealed";
+        private const string SwitchToWorkItemMessageName = "switched";
 
         private static Dictionary<string, IEnumerable<EstimationUser>> groups = new Dictionary<string, IEnumerable<EstimationUser>>();
 
@@ -36,13 +38,12 @@ namespace Doist.Estimate.Api.Hubs
                 GroupName = request.GroupName,
                 PresentUserIds = groups[request.GroupName].Select(x => x.UserId)
             };
-
-            await Clients.Group(request.GroupName).SendCoreAsync(GroupUpdatedMessageName, new[] { response });
+            await SendToGroup(GroupUpdatedMessageName, request, response);
         }
 
         public async Task Vote(VoteRequest request)
         {
-            if (!groups.TryGetValue(request.GroupName, out var users) || !users.Any(x => x.UserId == request.UserId))
+            if (IsInvalidRequest(request))
                 return;
 
             var response = new VoteResponse
@@ -53,7 +54,43 @@ namespace Doist.Estimate.Api.Hubs
                 WorkItemId = request.WorkItemId
             };
 
-            await Clients.Group(request.GroupName).SendCoreAsync(VotedMessageName, new[] { response });
+            await SendToGroup(VotedMessageName, request, response);
         }
+
+        public async Task Reveal(RevealRequest request)
+        {
+            if (IsInvalidRequest(request))
+                return;
+
+            var response = new RevealResponse
+            {
+                GroupName = request.GroupName,
+                UserId = request.UserId,
+                WorkItemId = request.WorkItemId
+            };
+
+            await SendToGroup(RevealedMessageName, request, response);
+        }
+
+        public async Task SwitchSelectedWorkItem(SwitchSelectedWorkItemRequest request)
+        {
+            if (IsInvalidRequest(request))
+                return;
+
+            var response = new SwitchSelectedWorkItemResponse
+            {
+                GroupName = request.GroupName,
+                UserId = request.UserId,
+                WorkItemId = request.WorkItemId
+            };
+
+            await SendToGroup(SwitchToWorkItemMessageName, request, response);
+        }
+
+        private bool IsInvalidRequest(RequestBase request)
+            => !groups.TryGetValue(request.GroupName, out var users) || !users.Any(x => x.UserId == request.UserId);
+
+        private Task SendToGroup<TResponse>(string messageName, RequestBase request, TResponse response) where TResponse : class
+            => Clients.Group(request.GroupName).SendCoreAsync(messageName, new[] { response });
     }
 }

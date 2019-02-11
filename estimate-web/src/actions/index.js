@@ -45,7 +45,8 @@ const parseWorkItem = apiWorkItem => ({
     createdBy: apiWorkItem.fields["System.CreatedBy"],
     assignedTo: apiWorkItem.fields["System.AssignedTo"],
     description: apiWorkItem.fields["System.Description"] || apiWorkItem.fields["Microsoft.VSTS.TCM.ReproSteps"],
-    workItemType: apiWorkItem.fields["System.WorkItemType"]
+    workItemType: apiWorkItem.fields["System.WorkItemType"],
+    votesRevealed: false
 });
 
 export const initializeContext = () => ({
