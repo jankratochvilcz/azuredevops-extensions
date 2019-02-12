@@ -137,7 +137,8 @@ class EstimationSession extends Component {
             users,
             votes,
             userId,
-            activeWorkItemId
+            activeWorkItemId,
+            workItemsUrlRoot
         } = this.props;
 
         const selectedWorkItem = activeWorkItemId !== null
@@ -244,7 +245,7 @@ class EstimationSession extends Component {
                         && (
                             <div className="user-story-container">
                                 <h4 style={{ marginLeft: 0 }}>
-                                    <a href={selectedWorkItem.url}>
+                                    <a href={`${workItemsUrlRoot}${selectedWorkItem.id}`}>
                                         <span>{selectedWorkItem.workItemType}</span>
                                         <span>&nbsp;</span>
                                         <span>{selectedWorkItem.id}</span>
@@ -273,7 +274,8 @@ const mapStateToProps = (state, ownProps) => ({
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,
     votes: state.devOps.votes,
-    activeWorkItemId: state.devOps.activeWorkItemId
+    activeWorkItemId: state.devOps.activeWorkItemId,
+    workItemsUrlRoot: `${state.devOps.context.collection.uri}${state.devOps.context.project.name}/_workitems/edit/`
 });
 
 EstimationSession.defaultProps = {
@@ -287,6 +289,7 @@ EstimationSession.propTypes = {
     userId: PropTypes.string.isRequired,
     teamId: PropTypes.string.isRequired,
     projectId: PropTypes.string.isRequired,
+    workItemsUrlRoot: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
     workItems: PropTypes.arrayOf(PropTypes.object),
     users: PropTypes.arrayOf(PropTypes.object),
