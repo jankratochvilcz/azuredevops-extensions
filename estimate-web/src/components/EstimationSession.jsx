@@ -20,7 +20,7 @@ import {
     switchActiveWorkItem
 } from "../actions/estimation";
 import EstimatorPersona from "./EstimatorPersona";
-import { average } from "../utils/math";
+import { average, sum } from "../utils/math";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -150,35 +150,28 @@ class EstimationSession extends Component {
 
         const storyPoints = EstimationSession.getStoryPoints(votesForSelectedWorkItem);
 
+        const workItemsOrdered = _.sortBy(workItems, x => x.stackRank);
+        const storyPointsTotal = Math.round(sum(workItems
+            .filter(x => x.storyPoints !== null && x.storyPoints !== undefined)
+            .map(x => x.storyPoints)));
+
         return (
             <div className="component-root">
                 <div className="left-pane">
                     <div className="to-vote-row">
+                        <div className="work-items-title-row">
+                            <h4>Work Items</h4>
+                            <div>{`${workItemsOrdered.length} work items left`}</div>
+                            <div>{`${storyPointsTotal} total story points`}</div>
+                        </div>
                         <UserStoryList
-                            title="Remaining"
-                            columns={["title", "createdBy"]}
-                            selectedUserStoryId={(selectedWorkItem != null
-                                ? selectedWorkItem.id
-                                : null)}
-                            onSelectedUserStoryIdChanged={this.onactiveWorkItemIdChanged}
-                            items={_.sortBy(
-                                workItems.filter(x => x.storyPoints == null),
-                                x => x.stackRank
-                            )}
-                        />
-                    </div>
-                    <div className="voted-row">
-                        <UserStoryList
-                            title="Scored"
+                            title="Work Items"
                             columns={["title", "storyPoints"]}
                             selectedUserStoryId={(selectedWorkItem != null
                                 ? selectedWorkItem.id
                                 : null)}
                             onSelectedUserStoryIdChanged={this.onactiveWorkItemIdChanged}
-                            items={_.sortBy(
-                                workItems.filter(x => x.storyPoints != null),
-                                x => x.stackRank
-                            )}
+                            items={workItemsOrdered}
                         />
                     </div>
                 </div>

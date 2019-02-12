@@ -3,8 +3,6 @@ import {
     DetailsList,
     SelectionMode,
     CheckboxVisibility,
-    PersonaSize,
-    Persona,
     Selection
 } from "office-ui-fabric-react";
 import _ from "underscore";
@@ -48,21 +46,6 @@ class UserStoryList extends Component {
                 data: 'string',
                 isPadded: true,
                 onRender: item => <span>{item.storyPoints}</span>
-            },
-            {
-                key: 'createdBy',
-                name: 'By',
-                fieldName: 'createdBy',
-                minWidth: 24,
-                maxWidth: 24,
-                isPadded: true,
-                onRender: item => (
-                    <Persona
-                        size={PersonaSize.size24}
-                        imageUrl={item.createdBy.imageUrl}
-                        personaName={item.createdBy.displayName}
-                    />
-                )
             }
         ]
 
@@ -77,7 +60,7 @@ class UserStoryList extends Component {
     }
 
     selectionChanged() {
-        var currentSelection = this.state.selection.getSelection();
+        const currentSelection = this.state.selection.getSelection();
         if (currentSelection.length == 1 && this.props.onSelectedUserStoryIdChanged != null) {
             const selectedWorkItemId = currentSelection[0];
             this.props.onSelectedUserStoryIdChanged(selectedWorkItemId.id);
@@ -94,22 +77,17 @@ class UserStoryList extends Component {
         }
 
         return (
-            <div>
-                <h4>{this.props.title} [{items.length}]</h4>
-                <div>
-                    <DetailsList
-                        items={items}
-                        compact={false}
-                        selection={this.state.selection}
-                        columns={this.state.columns}
-                        selectionMode={SelectionMode.single}
-                        checkboxVisibility={CheckboxVisibility.hidden}
-                        isCompactMode={true}
-                        setKey="id"
-                        isHeaderVisible={true} 
-                    />
-                </div>
-            </div>
+            <DetailsList
+                items={items}
+                compact={false}
+                selection={this.state.selection}
+                columns={this.state.columns}
+                selectionMode={SelectionMode.single}
+                checkboxVisibility={CheckboxVisibility.hidden}
+                isCompactMode={true}
+                setKey="id"
+                isHeaderVisible={true} 
+            />
         );
     }
 }

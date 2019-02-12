@@ -11,13 +11,39 @@
 .left-pane {
     display: grid;
     grid-column: left-pane;
-    grid-template-rows: [to-vote-row] 50vh [voted-row] 50vh;
+    grid-template-rows: [to-vote-row] 100vh;
     border-right: @base-border;
 }
 
 .center-pane {
     display: flex;
     flex-direction: column;
+}
+
+.work-items-title-row {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    margin-top: @margin-large;
+    margin-bottom: @margin-large;
+}
+
+.work-items-title-row > div {
+    color: @foreground-light;
+    font-size: small;
+    font-weight: lighter;
+    margin-right: @base-margin;
+}
+
+.work-items-title-row > h4 {
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: @margin-large;
+}
+
+.work-items-title-row > h4, div {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .to-vote-row {
