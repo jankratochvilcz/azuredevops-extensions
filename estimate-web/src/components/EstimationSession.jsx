@@ -24,6 +24,7 @@ import {
 } from "../actions/estimation";
 import EstimatorPersona from "./EstimatorPersona";
 import { average, sum } from "../utils/math";
+import UserStoryDetail from "./UserStoryDetail";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -140,8 +141,7 @@ class EstimationSession extends Component {
             users,
             votes,
             userId,
-            activeWorkItemId,
-            workItemsUrlRoot
+            activeWorkItemId
         } = this.props;
 
         const selectedWorkItem = activeWorkItemId !== null
@@ -244,20 +244,7 @@ class EstimationSession extends Component {
                         )}
                     </div>
 
-                    {selectedWorkItem
-                        && (
-                            <div className="user-story-container">
-                                <h4 style={{ marginLeft: "0", marginBottom: "0" }}>{selectedWorkItem.title}</h4>
-                                <a href={`${workItemsUrlRoot}${selectedWorkItem.id}`} className="user-story-title-row">
-                                    <span>{`${selectedWorkItem.workItemType.toLowerCase()} #${selectedWorkItem.id} by ${selectedWorkItem.createdBy.displayName}`}</span>
-                                </a>
-
-                                <div dangerouslySetInnerHTML={{
-                                    __html: selectedWorkItem.description
-                                }}
-                                />
-                            </div>
-                        )}
+                    {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
                 </div>
             </div>
         );
@@ -273,8 +260,7 @@ const mapStateToProps = (state, ownProps) => ({
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,
     votes: state.devOps.votes,
-    activeWorkItemId: state.devOps.activeWorkItemId,
-    workItemsUrlRoot: `${state.devOps.context.collection.uri}${state.devOps.context.project.name}/_workitems/edit/`
+    activeWorkItemId: state.devOps.activeWorkItemId
 });
 
 EstimationSession.defaultProps = {
@@ -288,7 +274,6 @@ EstimationSession.propTypes = {
     userId: PropTypes.string.isRequired,
     teamId: PropTypes.string.isRequired,
     projectId: PropTypes.string.isRequired,
-    workItemsUrlRoot: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
     workItems: PropTypes.arrayOf(PropTypes.object),
     users: PropTypes.arrayOf(PropTypes.object),
