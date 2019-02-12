@@ -2,7 +2,10 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import _ from "underscore";
-import { PrimaryButton, DefaultButton } from "office-ui-fabric-react";
+import {
+    PrimaryButton,
+    DefaultButton
+} from "office-ui-fabric-react";
 
 import "./EstimationSession.less";
 import UserStoryList from "./UserStoryList";
@@ -223,36 +226,32 @@ class EstimationSession extends Component {
                                 onClick={() => this.revealVotes()}
                                 text="Reveal votes"
                                 disabled={!_.some(votesForSelectedWorkItem)}
+                                style={{ marginRight: "10px" }}
                             />
                         )}
                         {selectedWorkItem !== null && selectedWorkItem.votesRevealed && (
-                            <div>
-                                <PrimaryButton
-                                    onClick={() => this.saveEstimate(storyPoints)}
-                                    text={`Save ${storyPoints} story points`}
-                                    style={{ marginRight: "10px" }}
-                                />
-
-                                <DefaultButton
-                                    text="Reset &amp; revote"
-                                    onClick={() => this.resetEstimate()}
-                                />
-                            </div>
+                            <PrimaryButton
+                                onClick={() => this.saveEstimate(storyPoints)}
+                                text={`Save ${storyPoints} story points`}
+                                style={{ marginRight: "10px" }}
+                            />
+                        )}
+                        {selectedWorkItem !== null && selectedWorkItem.storyPoints !== undefined && (
+                            <DefaultButton
+                                text="Reset &amp; revote"
+                                onClick={() => this.resetEstimate()}
+                            />
                         )}
                     </div>
 
                     {selectedWorkItem
                         && (
                             <div className="user-story-container">
-                                <h4 style={{ marginLeft: 0 }}>
-                                    <a href={`${workItemsUrlRoot}${selectedWorkItem.id}`}>
-                                        <span>{selectedWorkItem.workItemType}</span>
-                                        <span>&nbsp;</span>
-                                        <span>{selectedWorkItem.id}</span>
-                                    </a>
-                                    <span>&nbsp;</span>
-                                    {selectedWorkItem.title}
-                                </h4>
+                                <h4 style={{ marginLeft: "0", marginBottom: "0" }}>{selectedWorkItem.title}</h4>
+                                <a href={`${workItemsUrlRoot}${selectedWorkItem.id}`} className="user-story-title-row">
+                                    <span>{`${selectedWorkItem.workItemType.toLowerCase()} #${selectedWorkItem.id} by ${selectedWorkItem.createdBy.displayName}`}</span>
+                                </a>
+
                                 <div dangerouslySetInnerHTML={{
                                     __html: selectedWorkItem.description
                                 }}

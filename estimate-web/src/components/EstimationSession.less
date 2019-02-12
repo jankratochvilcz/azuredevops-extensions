@@ -32,24 +32,27 @@
     color: @foreground-light;
     font-size: small;
     font-weight: lighter;
-    margin-right: @base-margin;
 }
 
-.work-items-title-row > h4 {
+.work-items-title-row > * {
     margin-top: 0;
     margin-bottom: 0;
     margin-right: @margin-large;
-}
-
-.work-items-title-row > h4, div {
-    margin-top: 0;
-    margin-bottom: 0;
 }
 
 .to-vote-row {
     grid-row: to-vote-row;
     overflow-y: auto;
     position: relative;
+}
+
+.user-story-title-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: @base-margin;
+    margin-bottom: @margin-large;
+    color: @color-primary;
 }
 
 .voted-row {
