@@ -1,4 +1,5 @@
 import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
+import { connectionStarting, disconnected, connected } from "./connection";
 
 export const RECEIVE_GROUP_UPDATED = "ESTIMATION/RECEIVE_GROUP_UPDATED";
 export const REQUEST_VOTE = "ESTIMATION/REQUST_VOTE";
@@ -77,13 +78,26 @@ export const switchActiveWorkItem = (userId, iterationPath, workItemId) => {
     });
 };
 
-export const connectToGroup = (iterationPath, userId) => dispatch => {
+export const connect = (iterationPath, userId) => dispatch => {
+    dispatch(connectionStarting());
+
     connection
         .start()
-        .then(() => connection.invoke("join", {
-            groupName: iterationPath,
-            userId: userId
-        }));
+        .then(() => {
+            dispatch(connected());
+
+            connection
+                .invoke("join", {
+                    groupName: iterationPath,
+                    userId: userId
+                })
+                .catch(() => dispatch(disconnected()));
+        })
+        .catch(x => console.log(x));
+};
+
+const registerConnectionHandlers = () => dispatch => {
+    connection.onclose(() => dispatch(disconnected()));
 
     connection.on(
         groupUpdatedEventName,
@@ -104,4 +118,11 @@ export const connectToGroup = (iterationPath, userId) => dispatch => {
         switchedActiveWorkItemEventName,
         args => dispatch(receiveActiveWorkItemChanged(args))
     );
+};
+
+export const connectToGroup = (iterationPath, userId) => dispatch => {
+    dispatch(connectionStarting());
+
+    connect(iterationPath, userId)(dispatch);
+    registerConnectionHandlers()(dispatch);
 };

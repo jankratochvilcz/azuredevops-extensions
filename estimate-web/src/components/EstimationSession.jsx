@@ -25,6 +25,7 @@ import {
 import EstimatorPersona from "./EstimatorPersona";
 import { average, sum } from "../utils/math";
 import UserStoryDetail from "./UserStoryDetail";
+import ConnectionStatus from "./ConnectionStatus";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -180,7 +181,10 @@ class EstimationSession extends Component {
                     </div>
                 </div>
                 <div className="center-pane">
-                    <h4>Voting</h4>
+                    <div className="vote-title-container">
+                        <h4 className="vote-title-text">Voting</h4>
+                        <ConnectionStatus />
+                    </div>
                     <div className="cards-alignment-container">
                         <div className="poker-cards-container">
                             {cardValues.map(cardValue => (

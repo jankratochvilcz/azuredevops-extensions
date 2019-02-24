@@ -1,0 +1,25 @@
+@import "../resources/Measurements.less";
+@import "../resources/ColorsPalette.less";
+
+.connection-status-container {
+    padding: @margin-small;
+    border-radius: @border-radius-base;
+    display: inline;
+    font-size: x-small;
+}
+
+.connection-status-connecting {
+    .connection-status-container();
+    background: @yellow-light;
+}
+
+.connection-status-connected {
+    .connection-status-container();
+    background: @green-light;
+}
+
+.connection-status-disconnected {
+    .connection-status-container();
+    background: @red-dark;
+    color: @white;
+}
