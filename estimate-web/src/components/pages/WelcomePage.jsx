@@ -7,10 +7,10 @@ import { Dropdown } from "office-ui-fabric-react/lib/Dropdown";
 import { PrimaryButton } from "office-ui-fabric-react";
 import { Redirect } from "react-router";
 
-import { getIterations } from "../actions";
-import "./EstimationConfiguration.less";
+import { getIterations } from "../../actions";
+import "./WelcomePage.less";
 
-class EstimationConfiguration extends Component {
+class WelcomePage extends Component {
     constructor(props) {
         super(props);
 
@@ -114,7 +114,7 @@ class EstimationConfiguration extends Component {
     }
 }
 
-EstimationConfiguration.propTypes = {
+WelcomePage.propTypes = {
     availableCardDecks: PropTypes.arrayOf(PropTypes.object).isRequired,
     teamId: PropTypes.string.isRequired,
     projectId: PropTypes.string.isRequired,
@@ -122,7 +122,7 @@ EstimationConfiguration.propTypes = {
     iterations: PropTypes.arrayOf(PropTypes.object)
 };
 
-EstimationConfiguration.defaultProps = {
+WelcomePage.defaultProps = {
     iterations: []
 };
 
@@ -133,4 +133,4 @@ const mapStateToProps = state => ({
     availableCardDecks: state.enums.cardDecks
 });
 
-export default connect(mapStateToProps)(EstimationConfiguration);
+export default connect(mapStateToProps)(WelcomePage);

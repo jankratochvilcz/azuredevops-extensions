@@ -6,7 +6,7 @@ import {
     Selection
 } from "office-ui-fabric-react";
 import _ from "underscore";
-import "./UserStoryLists.less";
+import "./UserStoryList.less";
 
 class UserStoryList extends Component {
     constructor(props) {

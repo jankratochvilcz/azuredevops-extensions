@@ -7,25 +7,25 @@ import {
     DefaultButton
 } from "office-ui-fabric-react";
 
-import "./EstimationSession.less";
-import UserStoryList from "./UserStoryList";
-import PokerCard from "./PokerCard";
+import "./EstimatePage.less";
+import UserStoryList from "../UserStoryList";
+import PokerCard from "../PokerCard";
 import {
     getTeam,
     getWorkItems,
     updateStoryPoints,
     removeStoryPoints
-} from "../actions";
+} from "../../actions";
 import {
     connectToGroup,
     requestVote,
     revealVotes,
     switchActiveWorkItem
-} from "../actions/estimation";
-import EstimatorPersona from "./EstimatorPersona";
-import { average, sum } from "../utils/math";
-import UserStoryDetail from "./UserStoryDetail";
-import ConnectionStatus from "./ConnectionStatus";
+} from "../../actions/estimation";
+import EstimatorPersona from "../EstimatorPersona";
+import { average, sum } from "../../utils/math";
+import UserStoryDetail from "../UserStoryDetail";
+import ConnectionStatus from "../ConnectionStatus";
 
 class EstimationSession extends Component {
     constructor(props) {
