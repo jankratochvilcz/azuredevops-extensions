@@ -1,5 +1,7 @@
-@import "../Resources.less";
-@import "../Transitions.less";
+@import "../resources/Transitions.less";
+@import "../resources/Containers.less";
+@import "../resources/ColorsPalette.less";
+@import "../resources/Measurements.less";
 
 @card-scale: scale(1.2, 1.2);
 
@@ -14,13 +16,13 @@
 }
 
 .poker-card:hover {
-    border-color: @color-primary;
+    border-color: @theme-primary;
     cursor: pointer;
     transform: @card-scale;
 }
 
 .card-selected {
     .container-accent();
-    border-color: @color-primary;
+    border-color: @theme-primary;
     transform: @card-scale;
 }
