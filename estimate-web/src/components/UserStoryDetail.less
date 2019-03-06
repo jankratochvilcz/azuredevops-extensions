@@ -10,6 +10,11 @@
     border-top: @base-border;
 }
 
+// Prevents horizontal image overflow and taking over the whole UI
+.user-story-container img {
+    max-width: 100%;
+}
+
 .user-story-title-row {
     display: flex;
     flex-direction: row;
