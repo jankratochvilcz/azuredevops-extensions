@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "doist-estimate",
     "publisher": "Doist",
-    "version": "1.0.32",
+    "version": "1.0.33",
     "name": "Estimate by Doist",
     "description": "Backlog estimation",
     "public": false,
@@ -35,11 +35,6 @@
             "addressable": true
         },
         {
-            "path": "lib",
-            "addressable": true
-        },
-        {
-
             "path": "dist",
             "addressable": true
         }
