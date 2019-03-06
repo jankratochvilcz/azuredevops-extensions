@@ -1,5 +1,6 @@
 import user from "./user";
 import { RECEIVE_GROUP_UPDATED } from "../actions/estimation";
+import { STATUS_CHANGED } from "../actions/connection";
 
 describe("User reducer", () => {
     const sampleInitialState = [
@@ -52,6 +53,24 @@ describe("User reducer", () => {
         ], {
             type: RECEIVE_GROUP_UPDATED,
             connectedUserIds: []
+        }));
+
+        expectation.toHaveLength(1);
+        expectation.toEqual(expect.arrayContaining([expect.objectContaining({
+            id: 1,
+            isConnected: false
+        })]));
+    });
+
+    test("Marks everyone as disconnected on disconnection", () => {
+        const expectation = expect(user([
+            {
+                id: 1,
+                isConnected: true
+            }
+        ], {
+            type: STATUS_CHANGED,
+            isDisconnected: true
         }));
 
         expectation.toHaveLength(1);

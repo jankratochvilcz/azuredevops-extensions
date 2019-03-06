@@ -224,7 +224,7 @@ class EstimationSession extends Component {
                         </div>
 
                         <div className="users-container">
-                            {_.sortBy(users, x => !x.connected).map(user => (
+                            {_.sortBy(users, x => !x.isConnected).map(user => (
                                 <EstimatorPersona
                                     key={user.id}
                                     user={user}

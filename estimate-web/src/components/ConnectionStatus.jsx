@@ -16,7 +16,7 @@ const ConnectionStatus = props => {
         return <div className="connection-status-connecting">Connecting</div>;
     }
 
-    return <div className="connection-status-disconnected">Disconnected</div>;
+    return <div className="connection-status-disconnected">Disconnected (you might need to refresh the page)</div>;
 };
 
 const mapStateToProps = state => {

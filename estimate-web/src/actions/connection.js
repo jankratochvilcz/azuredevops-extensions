@@ -12,5 +12,5 @@ export const connected = () => ({
 
 export const disconnected = () => ({
     type: STATUS_CHANGED,
-    isConnecting: false
+    isDisconnected: true
 });
