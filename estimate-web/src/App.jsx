@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Route } from "react-router-dom";
+import PropTypes from "prop-types";
 
 import EstimationConfiguration from "./components/EstimationConfiguration";
 
@@ -10,12 +11,15 @@ import { initializeContext } from "./actions";
 
 class App extends Component {
     componentDidMount() {
-        this.props.dispatch(initializeContext());
+        const { dispatch } = this.props;
+        dispatch(initializeContext());
     }
 
     render() {
-        if(this.props.context == null) {
-            return <div>App loading ...</div>
+        const { projectId } = this.props;
+
+        if (projectId === null) {
+            return <div>App loading ...</div>;
         }
 
         return (
@@ -25,14 +29,21 @@ class App extends Component {
                     <Route path="/session/:iterationPath" component={EstimationSession} />
                 </div>
             </Router>
-        )
+        );
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        context: state.devOps.context
-    }
-}
+App.defaultProps = {
+    projectId: null
+};
+
+App.propTypes = {
+    dispatch: PropTypes.func.isRequired,
+    projectId: PropTypes.string
+};
+
+const mapStateToProps = state => ({
+    projectId: state.applicationContext.projectId
+});
 
 export default connect(mapStateToProps)(App);

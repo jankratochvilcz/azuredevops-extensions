@@ -12,8 +12,8 @@ class EstimatorPersona extends Component {
         this.renderVote = this.renderVote.bind(this);
     }
 
-    static getPresence(connected, vote) {
-        if (!connected) {
+    static getPresence(isConnected, vote) {
+        if (!isConnected) {
             return PersonaPresence.offline;
         }
 
@@ -34,12 +34,12 @@ class EstimatorPersona extends Component {
         return (
             <Persona
                 key={user.id}
-                size={user.connected ? PersonaSize.size40 : PersonaSize.size24}
-                hidePersonaDetails={!user.connected}
+                size={user.isConnected ? PersonaSize.size40 : PersonaSize.size24}
+                hidePersonaDetails={!user.isConnected}
                 imageUrl={user.imageUrl}
                 text={user.displayName}
                 onRenderCoin={vote != null && votesRevealed ? this.renderVote : undefined}
-                presence={EstimatorPersona.getPresence(user.connected, vote)}
+                presence={EstimatorPersona.getPresence(user.isConnected, vote)}
             />
         );
     }

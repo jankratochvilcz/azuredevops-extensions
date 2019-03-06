@@ -2,18 +2,15 @@ export const STATUS_CHANGED = "CONNECTION/STATUS_CHANGED";
 
 export const connectionStarting = () => ({
     type: STATUS_CHANGED,
-    isConnecting: true,
-    isConnected: false
+    isConnecting: true
 });
 
 export const connected = () => ({
     type: STATUS_CHANGED,
-    isConnecting: false,
-    isConnected: true
+    isConnecting: false
 });
 
 export const disconnected = () => ({
     type: STATUS_CHANGED,
-    isConnecting: false,
-    isConnected: false
+    isConnecting: false
 });

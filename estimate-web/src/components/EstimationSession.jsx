@@ -142,7 +142,8 @@ class EstimationSession extends Component {
             users,
             votes,
             userId,
-            activeWorkItemId
+            activeWorkItemId,
+            isActiveWorkItemRevealed
         } = this.props;
 
         const selectedWorkItem = activeWorkItemId !== null
@@ -213,9 +214,7 @@ class EstimationSession extends Component {
                             <EstimatorPersona
                                 key={user.id}
                                 user={user}
-                                votesRevealed={(selectedWorkItem != null
-                                    ? selectedWorkItem.votesRevealed
-                                    : false)}
+                                votesRevealed={isActiveWorkItemRevealed}
                                 vote={_.some(votesForSelectedWorkItem, x => x.userId === user.id)
                                     ? _.find(votesForSelectedWorkItem, x => x.userId === user.id)
                                         .value
@@ -233,7 +232,7 @@ class EstimationSession extends Component {
                                 style={{ marginRight: "10px" }}
                             />
                         )}
-                        {selectedWorkItem !== null && selectedWorkItem.votesRevealed && (
+                        {isActiveWorkItemRevealed && (
                             <PrimaryButton
                                 onClick={() => this.saveEstimate(storyPoints)}
                                 text={`Save ${storyPoints} story points`}
@@ -256,15 +255,16 @@ class EstimationSession extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-    userId: state.devOps.context.user.id,
-    teamId: state.devOps.context.team.id,
-    projectId: state.devOps.context.project.id,
-    users: state.devOps.teams[state.devOps.context.team.id],
-    workItems: state.devOps.workItems[ownProps.match.params.iterationPath],
+    userId: state.applicationContext.userId,
+    teamId: state.applicationContext.teamId,
+    projectId: state.applicationContext.projectId,
+    users: state.user.filter(x => x.teamId === state.applicationContext.teamId),
+    workItems: state.workItem.filter(x => x.iterationPath === ownProps.match.params.iterationPath),
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,
-    votes: state.devOps.votes,
-    activeWorkItemId: state.devOps.activeWorkItemId
+    votes: state.vote,
+    activeWorkItemId: state.applicationContext.activeWorkItemId,
+    isActiveWorkItemRevealed: state.applicationContext.isActiveWorkItemRevealed
 });
 
 EstimationSession.defaultProps = {
@@ -283,7 +283,8 @@ EstimationSession.propTypes = {
     users: PropTypes.arrayOf(PropTypes.object),
     cardValues: PropTypes.arrayOf(PropTypes.string).isRequired,
     votes: PropTypes.arrayOf(PropTypes.object).isRequired,
-    activeWorkItemId: PropTypes.number
+    activeWorkItemId: PropTypes.number,
+    isActiveWorkItemRevealed: PropTypes.bool.isRequired
 };
 
 export default connect(mapStateToProps)(EstimationSession);

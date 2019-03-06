@@ -16,6 +16,19 @@
         "name": "Launch Firefox",
         "url": "https://jankratochvil.visualstudio.com/Todoist%20for%20Windows%2010/_apps/hub/Doist.doist-estimate-dev.my-hub/",
         "webRoot": "${workspaceFolder}"
-    }
+    },
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "Jest All",
+        "program": "${workspaceFolder}/node_modules/.bin/jest",
+        "args": ["--runInBand"],
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen",
+        "disableOptimisticBPs": true,
+        "windows": {
+          "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+        }
+      }
     ]
 }

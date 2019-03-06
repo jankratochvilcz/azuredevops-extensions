@@ -127,9 +127,9 @@ EstimationConfiguration.defaultProps = {
 };
 
 const mapStateToProps = state => ({
-    teamId: state.devOps.context.team.id,
-    projectId: state.devOps.context.project.id,
-    iterations: state.devOps.iterations,
+    teamId: state.applicationContext.teamId,
+    projectId: state.applicationContext.projectId,
+    iterations: state.iteration,
     availableCardDecks: state.enums.cardDecks
 });
 

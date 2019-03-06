@@ -28,7 +28,7 @@ UserStoryDetail.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    urlRoot: `${state.devOps.context.collection.uri}${state.devOps.context.project.name}/_workitems/edit/`
+    urlRoot: `${state.applicationContext.collectionUri}${state.applicationContext.projectName}/_workitems/edit/`
 });
 
 export default connect(mapStateToProps)(UserStoryDetail);

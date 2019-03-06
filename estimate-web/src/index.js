@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Provider } from 'react-redux'
-import thunk from 'redux-thunk'
-import { initializeIcons } from '@uifabric/icons';
+import { Provider } from "react-redux";
+import thunk from "redux-thunk";
+import { initializeIcons } from "@uifabric/icons";
 import { createStore, applyMiddleware } from "redux";
 
-import App from "./App.js";
+import App from "./App";
 import reducer from "./reducers";
 
 VSS.init({
@@ -15,7 +15,7 @@ VSS.init({
     usePlatformStyles: true,
     moduleLoaderConfig: {
         paths: {
-            Scripts: 'scripts'
+            Scripts: "scripts"
         }
     }
 });
