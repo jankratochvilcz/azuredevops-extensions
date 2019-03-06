@@ -1,5 +1,5 @@
 import applicationContext from "./applicationContext";
-import { RECEIVE_VOTES_REVEALED } from "../actions/estimation";
+import { RECEIVE_VOTES_REVEALED, RECEIVE_ACTIVEWORKITEM_CHANGED } from "../actions/estimation";
 
 describe("Application Context reducer", () => {
     test("Should return initial state", () => {
@@ -35,6 +35,30 @@ describe("Application Context reducer", () => {
         )).toMatchObject({
             activeWorkItemId: 1,
             isActiveWorkItemRevealed: false
+        });
+    });
+
+    test("Resets revealed status when a selected work item changes", () => {
+        expect(applicationContext({
+            activeWorkItemId: 1,
+            isActiveWorkItemRevealed: true
+        }, {
+            type: RECEIVE_ACTIVEWORKITEM_CHANGED,
+            workItemId: 2
+        })).toMatchObject({
+            isActiveWorkItemRevealed: false
+        });
+    });
+
+    test("Doesnt reset reveal status if active work item stays the same", () => {
+        expect(applicationContext({
+            activeWorkItemId: 1,
+            isActiveWorkItemRevealed: true
+        }, {
+            type: RECEIVE_ACTIVEWORKITEM_CHANGED,
+            workItemId: 1
+        })).toMatchObject({
+            isActiveWorkItemRevealed: true
         });
     });
 });

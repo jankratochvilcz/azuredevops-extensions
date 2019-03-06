@@ -12,10 +12,17 @@ const onInitializeContext = (state, action) => ({
     ...action.context
 });
 
-const onReceiveActiveWorkItemChanged = (state, action) => ({
-    ...state,
-    activeWorkItemId: action.workItemId
-});
+const onReceiveActiveWorkItemChanged = (state, action) => {
+    if (action.workItemId === state.activeWorkItemId) {
+        return state;
+    }
+
+    return {
+        ...state,
+        activeWorkItemId: action.workItemId,
+        isActiveWorkItemRevealed: false
+    };
+};
 
 const onReceiveVotesRevealed = (state, action) => {
     if (action.workItemId !== state.activeWorkItemId) {
