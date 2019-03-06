@@ -4,7 +4,8 @@ import { connect } from "react-redux";
 import _ from "underscore";
 import {
     PrimaryButton,
-    DefaultButton
+    DefaultButton,
+    IconButton
 } from "office-ui-fabric-react";
 
 import "./EstimationSession.less";
@@ -143,7 +144,9 @@ class EstimationSession extends Component {
             votes,
             userId,
             activeWorkItemId,
-            isActiveWorkItemRevealed
+            isActiveWorkItemRevealed,
+            iterationPath,
+            dispatch
         } = this.props;
 
         const selectedWorkItem = activeWorkItemId !== null
@@ -169,6 +172,15 @@ class EstimationSession extends Component {
                             <h4>Work Items</h4>
                             <div>{`${workItemsOrdered.length} work items left`}</div>
                             <div>{`${storyPointsTotal} total story points`}</div>
+                            <div className="refresh-button">
+                                <IconButton
+                                    className="refreshButton"
+                                    iconProps={{ iconName: "Refresh" }}
+                                    title="Reload User Stories"
+                                    ariaLabel="ReloadUserStories"
+                                    onClick={() => dispatch(getWorkItems(iterationPath))}
+                                />
+                            </div>
                         </div>
                         <UserStoryList
                             title="Work Items"
