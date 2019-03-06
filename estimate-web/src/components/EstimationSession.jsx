@@ -194,72 +194,75 @@ class EstimationSession extends Component {
                     </div>
                 </div>
                 <div className="center-pane">
-                    <div className="vote-title-container">
-                        <h4 className="vote-title-text">Voting</h4>
-                        <ConnectionStatus />
-                    </div>
-                    <div className="cards-alignment-container">
-                        <div className="poker-cards-container">
-                            {cardValues.map(cardValue => (
-                                <PokerCard
-                                    value={cardValue}
-                                    key={cardValue}
-                                    selected={_.some(
-                                        votes,
-                                        x => x.userId === userId
+                    {/* https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content */}
+                    <div className="scrollable-flex">
+                        <div className="vote-title-container">
+                            <h4 className="vote-title-text">Voting</h4>
+                            <ConnectionStatus />
+                        </div>
+                        <div className="cards-alignment-container">
+                            <div className="poker-cards-container">
+                                {cardValues.map(cardValue => (
+                                    <PokerCard
+                                        value={cardValue}
+                                        key={cardValue}
+                                        selected={_.some(
+                                            votes,
+                                            x => x.userId === userId
                                             && x.workItemId === activeWorkItemId
                                             && x.value === cardValue
-                                    )}
-                                    onClick={() => this.cardClicked(cardValue)}
+                                        )}
+                                        onClick={() => this.cardClicked(cardValue)}
+                                    />
+                                ))}
+                            </div>
+                            {selectedWorkItem === null && (
+                                <div className="cards-overlay">
+                                    <span className="cards-overlay-info">Pick a work item to start scoring</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="users-container">
+                            {_.sortBy(users, x => !x.connected).map(user => (
+                                <EstimatorPersona
+                                    key={user.id}
+                                    user={user}
+                                    votesRevealed={isActiveWorkItemRevealed}
+                                    vote={_.some(votesForSelectedWorkItem, x => x.userId === user.id)
+                                        ? _.find(votesForSelectedWorkItem, x => x.userId === user.id)
+                                            .value
+                                        : null}
                                 />
                             ))}
                         </div>
-                        {selectedWorkItem === null && (
-                            <div className="cards-overlay">
-                                <span className="cards-overlay-info">Pick a work item to start scoring</span>
-                            </div>
-                        )}
-                    </div>
 
-                    <div className="users-container">
-                        {_.sortBy(users, x => !x.connected).map(user => (
-                            <EstimatorPersona
-                                key={user.id}
-                                user={user}
-                                votesRevealed={isActiveWorkItemRevealed}
-                                vote={_.some(votesForSelectedWorkItem, x => x.userId === user.id)
-                                    ? _.find(votesForSelectedWorkItem, x => x.userId === user.id)
-                                        .value
-                                    : null}
-                            />
-                        ))}
-                    </div>
+                        <div className="voting-control-container">
+                            {selectedWorkItem !== null && !selectedWorkItem.votesRevealed && (
+                                <PrimaryButton
+                                    onClick={() => this.revealVotes()}
+                                    text="Reveal votes"
+                                    disabled={!_.some(votesForSelectedWorkItem)}
+                                    style={{ marginRight: "10px" }}
+                                />
+                            )}
+                            {isActiveWorkItemRevealed && (
+                                <PrimaryButton
+                                    onClick={() => this.saveEstimate(storyPoints)}
+                                    text={`Save ${storyPoints} story points`}
+                                    style={{ marginRight: "10px" }}
+                                />
+                            )}
+                            {selectedWorkItem !== null && selectedWorkItem.storyPoints !== undefined && (
+                                <DefaultButton
+                                    text="Reset &amp; revote"
+                                    onClick={() => this.resetEstimate()}
+                                />
+                            )}
+                        </div>
 
-                    <div className="voting-control-container">
-                        {selectedWorkItem !== null && !selectedWorkItem.votesRevealed && (
-                            <PrimaryButton
-                                onClick={() => this.revealVotes()}
-                                text="Reveal votes"
-                                disabled={!_.some(votesForSelectedWorkItem)}
-                                style={{ marginRight: "10px" }}
-                            />
-                        )}
-                        {isActiveWorkItemRevealed && (
-                            <PrimaryButton
-                                onClick={() => this.saveEstimate(storyPoints)}
-                                text={`Save ${storyPoints} story points`}
-                                style={{ marginRight: "10px" }}
-                            />
-                        )}
-                        {selectedWorkItem !== null && selectedWorkItem.storyPoints !== undefined && (
-                            <DefaultButton
-                                text="Reset &amp; revote"
-                                onClick={() => this.resetEstimate()}
-                            />
-                        )}
+                        {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
                     </div>
-
-                    {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
                 </div>
             </div>
         );
