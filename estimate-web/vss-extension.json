@@ -24,7 +24,7 @@
                 "ms.vss-work-web.work-hub-group"
             ],
             "properties": {
-                "name": "Estimate (Experimental)",
+                "name": "Estimate",
                 "uri": "estimate-hub.html"
             }
         }
