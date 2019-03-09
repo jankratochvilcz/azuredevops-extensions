@@ -9,9 +9,9 @@ import vote from "./vote";
 import enums from "./enums";
 
 const rootReducer = combineReducers({
-    applicationContext,
     team,
     user,
+    applicationContext,
     iteration,
     workItem,
     vote,

@@ -1,5 +1,5 @@
 import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
-import { connectionStarting, disconnected, connected } from "./connection";
+import { connectionStarting, disconnected } from "./connection";
 
 export const RECEIVE_GROUP_UPDATED = "ESTIMATION/RECEIVE_GROUP_UPDATED";
 export const REQUEST_VOTE = "ESTIMATION/REQUST_VOTE";
@@ -15,7 +15,8 @@ const revealedEventName = "revealed";
 const switchedActiveWorkItemEventName = "switched";
 
 const clientBuilder = new HubConnectionBuilder();
-const url = "https://localhost:44378/estimate";
+// const url = "https://localhost:3000/estimate";
+const url = "https://doist-estimate-api.azurewebsites.net/estimate";
 const logLevel = LogLevel.Information;
 
 const connection = clientBuilder
@@ -84,8 +85,6 @@ export const connect = (iterationPath, userId) => dispatch => {
     connection
         .start()
         .then(() => {
-            dispatch(connected());
-
             connection
                 .invoke("join", {
                     groupName: iterationPath,
@@ -93,11 +92,22 @@ export const connect = (iterationPath, userId) => dispatch => {
                 })
                 .catch(() => dispatch(disconnected()));
         })
-        .catch(x => console.log(x));
+        .catch(x => {
+            console.log(x);
+            setTimeout(() => dispatch(connect(iterationPath, userId)), 2000);
+        });
 };
 
-const registerConnectionHandlers = () => dispatch => {
-    connection.onclose(() => dispatch(disconnected()));
+const registerConnectionHandlers = (iterationPath, userId) => dispatch => {
+    connection.off(groupUpdatedEventName);
+    connection.off(votedEventName);
+    connection.off(revealedEventName);
+    connection.off(switchedActiveWorkItemEventName);
+
+    connection.onclose(() => {
+        dispatch(disconnected());
+        setTimeout(() => dispatch(connect(iterationPath, userId)), 2000);
+    });
 
     connection.on(
         groupUpdatedEventName,
@@ -124,5 +134,5 @@ export const connectToGroup = (iterationPath, userId) => dispatch => {
     dispatch(connectionStarting());
 
     connect(iterationPath, userId)(dispatch);
-    registerConnectionHandlers()(dispatch);
+    registerConnectionHandlers(iterationPath, userId)(dispatch);
 };

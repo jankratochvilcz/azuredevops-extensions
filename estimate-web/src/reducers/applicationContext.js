@@ -1,10 +1,11 @@
 import { STATUS_CHANGED } from "../actions/connection";
 import { INITIALIZE_CONTEXT } from "../actions";
-import { RECEIVE_ACTIVEWORKITEM_CHANGED, RECEIVE_VOTES_REVEALED } from "../actions/estimation";
+import { RECEIVE_ACTIVEWORKITEM_CHANGED, RECEIVE_VOTES_REVEALED, RECEIVE_GROUP_UPDATED } from "../actions/estimation";
 
 const onStatusChanged = (state, action) => ({
     ...state,
-    isConnecting: action.isConnecting
+    isConnecting: "isConnecting" in action ? action.isConnecting : state.isConnecting,
+    isDisconnected: "isDisconnected" in action ? action.isDisconnected : state.isDisconnected
 });
 
 const onInitializeContext = (state, action) => ({
@@ -35,6 +36,12 @@ const onReceiveVotesRevealed = (state, action) => {
     };
 };
 
+const onReceiveGroupUpdated = state => ({
+    ...state,
+    isConnecting: false,
+    isDisconnected: false
+});
+
 const applicationContext = (state = {
     isConnecting: false,
     userId: null,
@@ -48,6 +55,8 @@ const applicationContext = (state = {
     switch (action.type) {
         case STATUS_CHANGED:
             return onStatusChanged(state, action);
+        case RECEIVE_GROUP_UPDATED:
+            return onReceiveGroupUpdated(state, action);
         case INITIALIZE_CONTEXT:
             return onInitializeContext(state, action);
         case RECEIVE_ACTIVEWORKITEM_CHANGED:

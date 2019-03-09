@@ -1,5 +1,5 @@
 import applicationContext from "./applicationContext";
-import { RECEIVE_VOTES_REVEALED, RECEIVE_ACTIVEWORKITEM_CHANGED } from "../actions/estimation";
+import { RECEIVE_VOTES_REVEALED, RECEIVE_ACTIVEWORKITEM_CHANGED, RECEIVE_GROUP_UPDATED } from "../actions/estimation";
 
 describe("Application Context reducer", () => {
     test("Should return initial state", () => {
@@ -59,6 +59,16 @@ describe("Application Context reducer", () => {
             workItemId: 1
         })).toMatchObject({
             isActiveWorkItemRevealed: true
+        });
+    });
+
+    test("Marks IsConnecting as false if a group update is received", () => {
+        expect(applicationContext({
+            isConnecting: true
+        }, {
+            type: RECEIVE_GROUP_UPDATED
+        })).toMatchObject({
+            isConnecting: false
         });
     });
 });
