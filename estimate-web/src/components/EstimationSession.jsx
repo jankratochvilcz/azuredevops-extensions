@@ -32,11 +32,17 @@ class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
-        this.onactiveWorkItemIdChanged = this.onactiveWorkItemIdChanged.bind(this);
+        this.onactiveWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
         this.cardClicked = this.cardClicked.bind(this);
         this.saveEstimate = this.saveEstimate.bind(this);
         this.resetEstimate = this.resetEstimate.bind(this);
         this.revealVotes = this.revealVotes.bind(this);
+        this.markSelectedWorkItemIdAsActive = this.markSelectedWorkItemIdAsActive.bind(this);
+
+        this.state = {
+            selectedWorkItemId: null,
+            previousActiveWorkItemId: null
+        };
     }
 
     componentDidMount() {
@@ -63,9 +69,41 @@ class EstimationSession extends Component {
             .map(x => Number.parseInt(x.value, 10)));
     }
 
-    onactiveWorkItemIdChanged(workItemId) {
+    static getDerivedStateFromProps(props, state) {
+        const { previousActiveWorkItemId } = state;
+        const { activeWorkItemId } = props;
+
+        if (previousActiveWorkItemId === activeWorkItemId) {
+            return state;
+        }
+
+        return {
+            ...state,
+            previousActiveWorkItemId: activeWorkItemId,
+            selectedWorkItemId: activeWorkItemId
+        };
+    }
+
+    onSelectedWorkItemIdChanged(workItemId) {
+        this.setState({
+            selectedWorkItemId: workItemId
+        });
+    }
+
+    markSelectedWorkItemIdAsActive() {
+        const { selectedWorkItemId } = this.state;
+
+        if (selectedWorkItemId == null) {
+            return;
+        }
+
         const { userId, iterationPath, dispatch } = this.props;
-        dispatch(switchActiveWorkItem(userId, iterationPath, workItemId));
+
+        dispatch(switchActiveWorkItem(
+            userId,
+            iterationPath,
+            selectedWorkItemId
+        ));
     }
 
     saveEstimate(storyPoints) {
@@ -149,15 +187,26 @@ class EstimationSession extends Component {
             dispatch
         } = this.props;
 
-        const selectedWorkItem = activeWorkItemId !== null
+        const {
+            selectedWorkItemId
+        } = this.state;
+
+        const selectedWorkItem = selectedWorkItemId !== null
+            ? _.find(workItems, x => x.id === selectedWorkItemId)
+            : null;
+
+        const activeWorkItem = activeWorkItemId !== null
             ? _.find(workItems, x => x.id === activeWorkItemId)
             : null;
 
-        const votesForSelectedWorkItem = activeWorkItemId !== null
-            ? votes.filter(x => x.workItemId === activeWorkItemId)
+        const isSelectedWorkItemInEstimation = activeWorkItemId != null
+            && selectedWorkItemId === activeWorkItemId;
+
+        const votesForActiveWorkItem = selectedWorkItemId !== null
+            ? votes.filter(x => x.workItemId === selectedWorkItemId)
             : [];
 
-        const storyPoints = EstimationSession.getStoryPoints(votesForSelectedWorkItem);
+        const storyPoints = EstimationSession.getStoryPoints(votesForActiveWorkItem);
 
         const workItemsOrdered = _.sortBy(workItems, x => x.stackRank);
         const storyPointsTotal = Math.round(sum(workItems
@@ -188,7 +237,7 @@ class EstimationSession extends Component {
                             selectedUserStoryId={(selectedWorkItem != null
                                 ? selectedWorkItem.id
                                 : null)}
-                            onSelectedUserStoryIdChanged={this.onactiveWorkItemIdChanged}
+                            onSelectedUserStoryIdChanged={id => this.onSelectedWorkItemIdChanged(id)}
                             items={workItemsOrdered}
                         />
                     </div>
@@ -216,9 +265,15 @@ class EstimationSession extends Component {
                                     />
                                 ))}
                             </div>
-                            {selectedWorkItem === null && (
-                                <div className="cards-overlay">
-                                    <span className="cards-overlay-info">Pick a work item to start scoring</span>
+                            {!isSelectedWorkItemInEstimation && (
+                                <div
+                                    className="cards-overlay"
+                                    onKeyPress={() => this.markSelectedWorkItemIdAsActive()}
+                                    role="button"
+                                    tabIndex="0"
+                                    onClick={() => this.markSelectedWorkItemIdAsActive()}
+                                >
+                                    <span className="cards-overlay-info">🃏➡ Click to move your team to this work item and start scoring. ⬅🃏</span>
                                 </div>
                             )}
                         </div>
@@ -229,8 +284,8 @@ class EstimationSession extends Component {
                                     key={user.id}
                                     user={user}
                                     votesRevealed={isActiveWorkItemRevealed}
-                                    vote={_.some(votesForSelectedWorkItem, x => x.userId === user.id)
-                                        ? _.find(votesForSelectedWorkItem, x => x.userId === user.id)
+                                    vote={_.some(votesForActiveWorkItem, x => x.userId === user.id)
+                                        ? _.find(votesForActiveWorkItem, x => x.userId === user.id)
                                             .value
                                         : null}
                                 />
@@ -238,22 +293,22 @@ class EstimationSession extends Component {
                         </div>
 
                         <div className="voting-control-container">
-                            {selectedWorkItem !== null && !selectedWorkItem.votesRevealed && (
+                            {isSelectedWorkItemInEstimation && !activeWorkItem.votesRevealed && (
                                 <PrimaryButton
                                     onClick={() => this.revealVotes()}
                                     text="Reveal votes"
-                                    disabled={!_.some(votesForSelectedWorkItem)}
+                                    disabled={!_.some(votesForActiveWorkItem)}
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {isActiveWorkItemRevealed && (
+                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && (
                                 <PrimaryButton
                                     onClick={() => this.saveEstimate(storyPoints)}
                                     text={`Save ${storyPoints} story points`}
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {selectedWorkItem !== null && selectedWorkItem.storyPoints !== undefined && (
+                            {isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints !== undefined && (
                                 <DefaultButton
                                     text="Reset &amp; revote"
                                     onClick={() => this.resetEstimate()}
