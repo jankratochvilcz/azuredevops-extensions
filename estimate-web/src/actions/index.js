@@ -15,6 +15,9 @@ export const REQUEST_WORKITEMS = "DEVOPS/REQUEST_WORKITEMS";
 export const RECEIVE_WORKITEMS = "DEVOPS/RECEIVE_WORKITEMS";
 export const RECEIVE_WORKITEM_UPDATE = "DEVOPS/RECEIVE_WORKITEM_UPDATE";
 
+const ESTIMATABLE_WORKITEMTYPES = ["Bug", "User Story"];
+const NOT_ESTIMATABLE_WORKITEMSTATES = ["Removed"];
+
 const executeOnVssWorkClient = action => {
     VSS.require(["VSS/Service", "TFS/Work/RestClient"], (vssService, tfsWebApi) => {
         const client = vssService.getCollectionClient(tfsWebApi.WorkHttpClient);
@@ -46,7 +49,8 @@ const parseWorkItem = apiWorkItem => ({
     assignedTo: apiWorkItem.fields["System.AssignedTo"],
     description: apiWorkItem.fields["System.Description"] || apiWorkItem.fields["Microsoft.VSTS.TCM.ReproSteps"],
     workItemType: apiWorkItem.fields["System.WorkItemType"],
-    iterationPath: apiWorkItem.fields["System.IterationPath"]
+    iterationPath: apiWorkItem.fields["System.IterationPath"],
+    state: apiWorkItem.fields["System.State"]
 });
 
 export const initializeContext = () => {
@@ -95,7 +99,10 @@ const requestWorkItems = () => ({
 const receiveWorkItems = (iterationPath, result) => ({
     type: RECEIVE_WORKITEMS,
     iterationPath: iterationPath,
-    workItems: result.map(x => parseWorkItem(x))
+    workItems: result
+        .map(x => parseWorkItem(x))
+        .filter(x => _.some(ESTIMATABLE_WORKITEMTYPES, y => x.workItemType === y))
+        .filter(x => !_.some(NOT_ESTIMATABLE_WORKITEMSTATES, y => x.state === y))
 });
 
 const receiveWorkitemUpdate = (workItem, iterationPath) => ({
@@ -149,7 +156,7 @@ export const getWorkItems = iterationPath => dispatch => {
     dispatch(requestWorkItems());
 
     const wiql = {
-        query: `SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title],[System.IterationPath] FROM WorkItems WHERE [System.IterationPath] UNDER '${iterationPath}'`
+        query: `SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title],[System.IterationPath],[System.State] FROM WorkItems WHERE [System.IterationPath] UNDER '${iterationPath}'`
     };
 
     executeOnVssWorkItemTrackingClient(client => {
