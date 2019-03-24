@@ -141,11 +141,22 @@ class EstimationSession extends Component {
     }
 
     resetEstimate() {
-        const { dispatch, iterationPath, activeWorkItemId } = this.props;
+        const {
+            dispatch,
+            iterationPath,
+            activeWorkItemId,
+            userId
+        } = this.props;
 
         dispatch(removeStoryPoints(
             activeWorkItemId,
             iterationPath
+        ));
+
+        dispatch(switchActiveWorkItem(
+            userId,
+            iterationPath,
+            activeWorkItemId
         ));
     }
 
@@ -307,7 +318,7 @@ class EstimationSession extends Component {
                         </div>
 
                         <div className="voting-control-container">
-                            {isSelectedWorkItemInEstimation && !activeWorkItem.votesRevealed && (
+                            {isSelectedWorkItemInEstimation && !isActiveWorkItemRevealed && (
                                 <PrimaryButton
                                     onClick={() => this.revealVotes()}
                                     text="Reveal votes"
@@ -315,14 +326,14 @@ class EstimationSession extends Component {
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && (
+                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
                                 <PrimaryButton
                                     onClick={() => this.saveEstimate(storyPoints)}
                                     text={`Save ${storyPoints} story points`}
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints !== undefined && (
+                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && (
                                 <DefaultButton
                                     text="Reset &amp; revote"
                                     onClick={() => this.resetEstimate()}
