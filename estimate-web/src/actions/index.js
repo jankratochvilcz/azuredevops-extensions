@@ -46,13 +46,23 @@ const parseWorkItem = apiWorkItem => ({
     assignedTo: apiWorkItem.fields["System.AssignedTo"],
     description: apiWorkItem.fields["System.Description"] || apiWorkItem.fields["Microsoft.VSTS.TCM.ReproSteps"],
     workItemType: apiWorkItem.fields["System.WorkItemType"],
-    votesRevealed: false
+    iterationPath: apiWorkItem.fields["System.IterationPath"]
 });
 
-export const initializeContext = () => ({
-    type: INITIALIZE_CONTEXT,
-    context: VSS.getWebContext()
-});
+export const initializeContext = () => {
+    const context = VSS.getWebContext();
+
+    return {
+        type: INITIALIZE_CONTEXT,
+        context: {
+            teamId: context.team.id,
+            projectId: context.project.id,
+            projectName: context.project.name,
+            userId: context.user.id,
+            collectionUri: context.collection.uri
+        }
+    };
+};
 
 const requestIterations = () => ({
     type: REQUEST_ITERATIONS
@@ -71,7 +81,8 @@ const receiveTeam = (teamId, response) => ({
     type: RECEIVE_TEAM,
     team: response.map(x => ({
         ...x.identity,
-        connected: false,
+        isConnected: false,
+        teamId: teamId,
         votes: {}
     })),
     teamId: teamId
@@ -138,7 +149,7 @@ export const getWorkItems = iterationPath => dispatch => {
     dispatch(requestWorkItems());
 
     const wiql = {
-        query: `SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title] FROM WorkItems WHERE [System.IterationPath] UNDER '${iterationPath}'`
+        query: `SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title],[System.IterationPath] FROM WorkItems WHERE [System.IterationPath] UNDER '${iterationPath}'`
     };
 
     executeOnVssWorkItemTrackingClient(client => {

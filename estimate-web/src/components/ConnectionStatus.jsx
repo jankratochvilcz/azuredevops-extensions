@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import _ from "underscore";
 
 import "./ConnectionStatus.less";
 
@@ -15,13 +16,17 @@ const ConnectionStatus = props => {
         return <div className="connection-status-connecting">Connecting</div>;
     }
 
-    return <div className="connection-status-disconnected">Disconnected</div>;
+    return <div className="connection-status-disconnected">Disconnected (reconnecting in two seconds)</div>;
 };
 
-const mapStateToProps = state => ({
-    isConnected: state.connection.isConnected,
-    isConnecting: state.connection.isConnecting
-});
+const mapStateToProps = state => {
+    const user = _.find(state.user, x => x.id === state.applicationContext.userId);
+
+    return {
+        isConnecting: state.applicationContext.isConnecting,
+        isConnected: user != null && user.isConnected
+    };
+};
 
 ConnectionStatus.propTypes = {
     isConnected: PropTypes.bool.isRequired,

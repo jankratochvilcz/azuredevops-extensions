@@ -4,7 +4,8 @@ import { connect } from "react-redux";
 import _ from "underscore";
 import {
     PrimaryButton,
-    DefaultButton
+    DefaultButton,
+    IconButton
 } from "office-ui-fabric-react";
 
 import "./EstimatePage.less";
@@ -31,11 +32,17 @@ class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
-        this.onactiveWorkItemIdChanged = this.onactiveWorkItemIdChanged.bind(this);
+        this.onactiveWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
         this.cardClicked = this.cardClicked.bind(this);
         this.saveEstimate = this.saveEstimate.bind(this);
         this.resetEstimate = this.resetEstimate.bind(this);
         this.revealVotes = this.revealVotes.bind(this);
+        this.markSelectedWorkItemIdAsActive = this.markSelectedWorkItemIdAsActive.bind(this);
+
+        this.state = {
+            selectedWorkItemId: null,
+            previousActiveWorkItemId: null
+        };
     }
 
     componentDidMount() {
@@ -62,9 +69,41 @@ class EstimationSession extends Component {
             .map(x => Number.parseInt(x.value, 10)));
     }
 
-    onactiveWorkItemIdChanged(workItemId) {
+    static getDerivedStateFromProps(props, state) {
+        const { previousActiveWorkItemId } = state;
+        const { activeWorkItemId } = props;
+
+        if (previousActiveWorkItemId === activeWorkItemId) {
+            return state;
+        }
+
+        return {
+            ...state,
+            previousActiveWorkItemId: activeWorkItemId,
+            selectedWorkItemId: activeWorkItemId
+        };
+    }
+
+    onSelectedWorkItemIdChanged(workItemId) {
+        this.setState({
+            selectedWorkItemId: workItemId
+        });
+    }
+
+    markSelectedWorkItemIdAsActive() {
+        const { selectedWorkItemId } = this.state;
+
+        if (selectedWorkItemId == null) {
+            return;
+        }
+
         const { userId, iterationPath, dispatch } = this.props;
-        dispatch(switchActiveWorkItem(userId, iterationPath, workItemId));
+
+        dispatch(switchActiveWorkItem(
+            userId,
+            iterationPath,
+            selectedWorkItemId
+        ));
     }
 
     saveEstimate(storyPoints) {
@@ -142,18 +181,32 @@ class EstimationSession extends Component {
             users,
             votes,
             userId,
-            activeWorkItemId
+            activeWorkItemId,
+            isActiveWorkItemRevealed,
+            iterationPath,
+            dispatch
         } = this.props;
 
-        const selectedWorkItem = activeWorkItemId !== null
+        const {
+            selectedWorkItemId
+        } = this.state;
+
+        const selectedWorkItem = selectedWorkItemId !== null
+            ? _.find(workItems, x => x.id === selectedWorkItemId)
+            : null;
+
+        const activeWorkItem = activeWorkItemId !== null
             ? _.find(workItems, x => x.id === activeWorkItemId)
             : null;
 
-        const votesForSelectedWorkItem = activeWorkItemId !== null
-            ? votes.filter(x => x.workItemId === activeWorkItemId)
+        const isSelectedWorkItemInEstimation = activeWorkItemId != null
+            && selectedWorkItemId === activeWorkItemId;
+
+        const votesForActiveWorkItem = selectedWorkItemId !== null
+            ? votes.filter(x => x.workItemId === selectedWorkItemId)
             : [];
 
-        const storyPoints = EstimationSession.getStoryPoints(votesForSelectedWorkItem);
+        const storyPoints = EstimationSession.getStoryPoints(votesForActiveWorkItem);
 
         const workItemsOrdered = _.sortBy(workItems, x => x.stackRank);
         const storyPointsTotal = Math.round(sum(workItems
@@ -168,6 +221,15 @@ class EstimationSession extends Component {
                             <h4>Work Items</h4>
                             <div>{`${workItemsOrdered.length} work items left`}</div>
                             <div>{`${storyPointsTotal} total story points`}</div>
+                            <div className="refresh-button">
+                                <IconButton
+                                    className="refreshButton"
+                                    iconProps={{ iconName: "Refresh" }}
+                                    title="Reload User Stories"
+                                    ariaLabel="ReloadUserStories"
+                                    onClick={() => dispatch(getWorkItems(iterationPath))}
+                                />
+                            </div>
                         </div>
                         <UserStoryList
                             title="Work Items"
@@ -175,80 +237,87 @@ class EstimationSession extends Component {
                             selectedUserStoryId={(selectedWorkItem != null
                                 ? selectedWorkItem.id
                                 : null)}
-                            onSelectedUserStoryIdChanged={this.onactiveWorkItemIdChanged}
+                            onSelectedUserStoryIdChanged={id => this.onSelectedWorkItemIdChanged(id)}
                             items={workItemsOrdered}
                         />
                     </div>
                 </div>
                 <div className="center-pane">
-                    <div className="vote-title-container">
-                        <h4 className="vote-title-text">Voting</h4>
-                        <ConnectionStatus />
-                    </div>
-                    <div className="cards-alignment-container">
-                        <div className="poker-cards-container">
-                            {cardValues.map(cardValue => (
-                                <PokerCard
-                                    value={cardValue}
-                                    key={cardValue}
-                                    selected={_.some(
-                                        votes,
-                                        x => x.userId === userId
+                    {/* https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content */}
+                    <div className="scrollable-flex">
+                        <div className="vote-title-container">
+                            <h4 className="vote-title-text">Voting</h4>
+                            <ConnectionStatus />
+                        </div>
+                        <div className="cards-alignment-container">
+                            <div className="poker-cards-container">
+                                {cardValues.map(cardValue => (
+                                    <PokerCard
+                                        value={cardValue}
+                                        key={cardValue}
+                                        selected={_.some(
+                                            votes,
+                                            x => x.userId === userId
                                             && x.workItemId === activeWorkItemId
                                             && x.value === cardValue
-                                    )}
-                                    onClick={() => this.cardClicked(cardValue)}
+                                        )}
+                                        onClick={() => this.cardClicked(cardValue)}
+                                    />
+                                ))}
+                            </div>
+                            {!isSelectedWorkItemInEstimation && (
+                                <div
+                                    className="cards-overlay"
+                                    onKeyPress={() => this.markSelectedWorkItemIdAsActive()}
+                                    role="button"
+                                    tabIndex="0"
+                                    onClick={() => this.markSelectedWorkItemIdAsActive()}
+                                >
+                                    <span className="cards-overlay-info">🃏➡ Click to move your team to this work item and start scoring. ⬅🃏</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="users-container">
+                            {_.sortBy(users, x => !x.isConnected).map(user => (
+                                <EstimatorPersona
+                                    key={user.id}
+                                    user={user}
+                                    votesRevealed={isActiveWorkItemRevealed}
+                                    vote={_.some(votesForActiveWorkItem, x => x.userId === user.id)
+                                        ? _.find(votesForActiveWorkItem, x => x.userId === user.id)
+                                            .value
+                                        : null}
                                 />
                             ))}
                         </div>
-                        {selectedWorkItem === null && (
-                            <div className="cards-overlay">
-                                <span className="cards-overlay-info">Pick a work item to start scoring</span>
-                            </div>
-                        )}
-                    </div>
 
-                    <div className="users-container">
-                        {_.sortBy(users, x => !x.connected).map(user => (
-                            <EstimatorPersona
-                                key={user.id}
-                                user={user}
-                                votesRevealed={(selectedWorkItem != null
-                                    ? selectedWorkItem.votesRevealed
-                                    : false)}
-                                vote={_.some(votesForSelectedWorkItem, x => x.userId === user.id)
-                                    ? _.find(votesForSelectedWorkItem, x => x.userId === user.id)
-                                        .value
-                                    : null}
-                            />
-                        ))}
-                    </div>
+                        <div className="voting-control-container">
+                            {isSelectedWorkItemInEstimation && !activeWorkItem.votesRevealed && (
+                                <PrimaryButton
+                                    onClick={() => this.revealVotes()}
+                                    text="Reveal votes"
+                                    disabled={!_.some(votesForActiveWorkItem)}
+                                    style={{ marginRight: "10px" }}
+                                />
+                            )}
+                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && (
+                                <PrimaryButton
+                                    onClick={() => this.saveEstimate(storyPoints)}
+                                    text={`Save ${storyPoints} story points`}
+                                    style={{ marginRight: "10px" }}
+                                />
+                            )}
+                            {isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints !== undefined && (
+                                <DefaultButton
+                                    text="Reset &amp; revote"
+                                    onClick={() => this.resetEstimate()}
+                                />
+                            )}
+                        </div>
 
-                    <div className="voting-control-container">
-                        {selectedWorkItem !== null && !selectedWorkItem.votesRevealed && (
-                            <PrimaryButton
-                                onClick={() => this.revealVotes()}
-                                text="Reveal votes"
-                                disabled={!_.some(votesForSelectedWorkItem)}
-                                style={{ marginRight: "10px" }}
-                            />
-                        )}
-                        {selectedWorkItem !== null && selectedWorkItem.votesRevealed && (
-                            <PrimaryButton
-                                onClick={() => this.saveEstimate(storyPoints)}
-                                text={`Save ${storyPoints} story points`}
-                                style={{ marginRight: "10px" }}
-                            />
-                        )}
-                        {selectedWorkItem !== null && selectedWorkItem.storyPoints !== undefined && (
-                            <DefaultButton
-                                text="Reset &amp; revote"
-                                onClick={() => this.resetEstimate()}
-                            />
-                        )}
+                        {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
                     </div>
-
-                    {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
                 </div>
             </div>
         );
@@ -256,15 +325,16 @@ class EstimationSession extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-    userId: state.devOps.context.user.id,
-    teamId: state.devOps.context.team.id,
-    projectId: state.devOps.context.project.id,
-    users: state.devOps.teams[state.devOps.context.team.id],
-    workItems: state.devOps.workItems[ownProps.match.params.iterationPath],
+    userId: state.applicationContext.userId,
+    teamId: state.applicationContext.teamId,
+    projectId: state.applicationContext.projectId,
+    users: state.user.filter(x => x.teamId === state.applicationContext.teamId),
+    workItems: state.workItem.filter(x => x.iterationPath === ownProps.match.params.iterationPath),
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,
-    votes: state.devOps.votes,
-    activeWorkItemId: state.devOps.activeWorkItemId
+    votes: state.vote,
+    activeWorkItemId: state.applicationContext.activeWorkItemId,
+    isActiveWorkItemRevealed: state.applicationContext.isActiveWorkItemRevealed
 });
 
 EstimationSession.defaultProps = {
@@ -283,7 +353,8 @@ EstimationSession.propTypes = {
     users: PropTypes.arrayOf(PropTypes.object),
     cardValues: PropTypes.arrayOf(PropTypes.string).isRequired,
     votes: PropTypes.arrayOf(PropTypes.object).isRequired,
-    activeWorkItemId: PropTypes.number
+    activeWorkItemId: PropTypes.number,
+    isActiveWorkItemRevealed: PropTypes.bool.isRequired
 };
 
 export default connect(mapStateToProps)(EstimationSession);

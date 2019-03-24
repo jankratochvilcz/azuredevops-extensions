@@ -19,6 +19,14 @@
 
 .center-pane {
     display: flex;
+    flex: 1;
+    overflow: auto;
+    flex-direction: column;
+}
+
+.scrollable-flex {
+    min-height: min-content;
+    display: flex;
     flex-direction: column;
 }
 
@@ -86,6 +94,7 @@
     display: flex;
     justify-content: center;
     align-content: center;
+    cursor: pointer;
 }
 
 .cards-alignment-container {
@@ -115,4 +124,10 @@
     align-items: center;
     margin-top: @margin-large;
     margin-bottom: @margin-large;
+}
+
+.refresh-button {
+    display: inline-flex;
+    position: relative;
+    top: 4px;
 }

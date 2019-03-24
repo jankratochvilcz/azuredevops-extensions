@@ -15,6 +15,7 @@
         "VSS": "readable"
     },
     "env": {
-        "browser": true
+        "browser": true,
+        "jest": true
     }
 }
