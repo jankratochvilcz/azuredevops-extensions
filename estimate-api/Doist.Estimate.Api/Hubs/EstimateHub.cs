@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,18 +15,18 @@ namespace Doist.Estimate.Api.Hubs
         private const string RevealedMessageName = "revealed";
         private const string SwitchToWorkItemMessageName = "switched";
 
-        private static Dictionary<string, IEnumerable<EstimationUser>> groups = new Dictionary<string, IEnumerable<EstimationUser>>();
+        private static Dictionary<string, EstimationSession> groups = new Dictionary<string, EstimationSession>();
 
         public async Task Join(JoinRequest request)
         {
             if (!groups.ContainsKey(request.GroupName))
-                groups.Add(request.GroupName, Enumerable.Empty<EstimationUser>());
+                groups.Add(request.GroupName, new EstimationSession());
 
-            groups[request.GroupName] = groups[request.GroupName].Where(x => x.UserId != request.UserId);
+            groups[request.GroupName].Users = groups[request.GroupName].Users.Where(x => x.UserId != request.UserId);
 
             await this.Groups.AddToGroupAsync(this.Context.ConnectionId, request.GroupName);
 
-            groups[request.GroupName] = groups[request.GroupName].Union(new[] { new EstimationUser
+            groups[request.GroupName].Users = groups[request.GroupName].Users.Union(new[] { new EstimationUser
             {
                 UserId = request.UserId,
                 ConnectionId = this.Context.ConnectionId
@@ -36,8 +35,10 @@ namespace Doist.Estimate.Api.Hubs
             var response = new JoinResponse
             {
                 GroupName = request.GroupName,
-                PresentUserIds = groups[request.GroupName].Select(x => x.UserId)
+                PresentUserIds = groups[request.GroupName].Users.Select(x => x.UserId),
+                ActiveWorkItemId = groups[request.GroupName].ActiveWorkItemId
             };
+
             await SendToGroup(GroupUpdatedMessageName, request, response);
         }
 
@@ -77,6 +78,8 @@ namespace Doist.Estimate.Api.Hubs
             if (IsInvalidRequest(request))
                 return;
 
+            groups[request.GroupName].ActiveWorkItemId = request.WorkItemId;
+
             var response = new SwitchSelectedWorkItemResponse
             {
                 GroupName = request.GroupName,
@@ -88,7 +91,7 @@ namespace Doist.Estimate.Api.Hubs
         }
 
         private bool IsInvalidRequest(RequestBase request)
-            => !groups.TryGetValue(request.GroupName, out var users) || !users.Any(x => x.UserId == request.UserId);
+            => !groups.TryGetValue(request.GroupName, out var session) || !session.Users.Any(x => x.UserId == request.UserId);
 
         private Task SendToGroup<TResponse>(string messageName, RequestBase request, TResponse response) where TResponse : class
             => Clients.Group(request.GroupName).SendCoreAsync(messageName, new[] { response });

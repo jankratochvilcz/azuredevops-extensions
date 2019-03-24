@@ -10,5 +10,8 @@ namespace Doist.Estimate.Api.Hubs.Responses
 
         [JsonProperty("presentUserIds")]
         public IEnumerable<string> PresentUserIds { get; set; }
+
+        [JsonProperty("activeWorkItemId")]
+        public int? ActiveWorkItemId { get; set; }
     }
 }

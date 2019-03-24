@@ -255,7 +255,10 @@ class EstimationSession extends Component {
                                 : null)}
                             onSelectedUserStoryIdChanged={(
                                 id => this.onSelectedWorkItemIdChanged(id))}
-                            items={workItemsOrdered}
+                            items={(workItemsOrdered.map(x => ({
+                                ...x,
+                                isBeingScored: x.id === activeWorkItemId
+                            })))}
                         />
                     </div>
                 </div>

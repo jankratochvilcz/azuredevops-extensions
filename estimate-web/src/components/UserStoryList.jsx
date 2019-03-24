@@ -47,7 +47,10 @@ class UserStoryList extends Component {
                 maxWidth: 25,
                 data: "string",
                 isPadded: true,
-                onRender: item => <span>{item.storyPoints}</span>
+                onRender: item => (item.isBeingScored
+                    ? <span className="item-is-being-scored" role="img" aria-label="Scoring">⏳</span>
+                    : <span>{item.storyPoints}</span>
+                )
             }
         ];
 

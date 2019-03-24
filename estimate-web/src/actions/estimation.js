@@ -15,7 +15,7 @@ const revealedEventName = "revealed";
 const switchedActiveWorkItemEventName = "switched";
 
 const clientBuilder = new HubConnectionBuilder();
-// const url = "https://localhost:3000/estimate";
+// const url = "https://localhost:44378/estimate";
 const url = "https://doist-estimate-api.azurewebsites.net/estimate";
 const logLevel = LogLevel.Information;
 
@@ -24,9 +24,10 @@ const connection = clientBuilder
     .configureLogging(logLevel)
     .build();
 
-const receiveGroupUpdated = connectedUserIds => ({
+const receiveGroupUpdated = (connectedUserIds, activeWorkItemId) => ({
     type: RECEIVE_GROUP_UPDATED,
-    connectedUserIds: connectedUserIds
+    connectedUserIds: connectedUserIds,
+    activeWorkItemId: activeWorkItemId
 });
 
 const receiveVote = args => ({
@@ -111,7 +112,7 @@ const registerConnectionHandlers = (iterationPath, userId) => dispatch => {
 
     connection.on(
         groupUpdatedEventName,
-        args => dispatch(receiveGroupUpdated(args.presentUserIds))
+        args => dispatch(receiveGroupUpdated(args.presentUserIds, args.activeWorkItemId))
     );
 
     connection.on(

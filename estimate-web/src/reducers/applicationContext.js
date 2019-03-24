@@ -32,10 +32,11 @@ const onReceiveVotesRevealed = (state, action) => {
     };
 };
 
-const onReceiveGroupUpdated = state => ({
+const onReceiveGroupUpdated = (state, action) => ({
     ...state,
     isConnecting: false,
-    isDisconnected: false
+    isDisconnected: false,
+    activeWorkItemId: action.activeWorkItemId
 });
 
 const applicationContext = (state = {
