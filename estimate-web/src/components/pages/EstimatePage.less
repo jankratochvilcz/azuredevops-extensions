@@ -83,17 +83,15 @@
 }    
 
 .cards-overlay {
-    background: @background-light;
+    background: @background-lighter;
     height: 100%;
     width: 100%;
     position: absolute;
     left: 0;
     top: 0;
-    opacity: 0.9;
-    font-size: large;
     display: flex;
-    justify-content: center;
-    align-content: center;
+    padding-left: @margin-large;
+    padding-right: @margin-large;
     cursor: pointer;
 }
 
@@ -104,6 +102,15 @@
 .cards-overlay-info {
     margin-top: auto;
     margin-bottom: auto;
+}
+
+.cards-overlay-title {
+    font-weight: bold;
+    margin-bottom: @margin-small;
+}
+
+.cards-overlay-info-work-item-title {
+    font-style: italic;
 }
 
 .voting-control-container {

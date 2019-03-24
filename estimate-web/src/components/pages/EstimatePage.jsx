@@ -273,7 +273,21 @@ class EstimationSession extends Component {
                                     tabIndex="0"
                                     onClick={() => this.markSelectedWorkItemIdAsActive()}
                                 >
-                                    <span className="cards-overlay-info">🃏➡ Click to move your team to this work item and start scoring. ⬅🃏</span>
+                                    {selectedWorkItem != null && (
+                                        <div className="cards-overlay-info">
+                                            <div className="cards-overlay-title">
+                                                <span>Start scoring &nbsp;</span>
+                                                <span className="cards-overlay-info-work-item-title">{selectedWorkItem.title}</span>
+                                            </div>
+                                            <div>Click here to move the whole team to this work item and start scoring it.</div>
+                                        </div>
+                                    )}
+                                    {selectedWorkItem == null && (
+                                        <div className="cards-overlay-info">
+                                            <div className="cards-overlay-title">Pick a work item</div>
+                                            <div>Pick a work item from the &quot;Work Items&quot; list.</div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
