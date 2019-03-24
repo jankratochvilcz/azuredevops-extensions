@@ -38,6 +38,7 @@ class EstimationSession extends Component {
         this.resetEstimate = this.resetEstimate.bind(this);
         this.revealVotes = this.revealVotes.bind(this);
         this.markSelectedWorkItemIdAsActive = this.markSelectedWorkItemIdAsActive.bind(this);
+        this.getStoryPoints = this.getStoryPoints.bind(this);
 
         this.state = {
             selectedWorkItemId: null,
@@ -63,12 +64,6 @@ class EstimationSession extends Component {
         dispatch(getWorkItems(iterationPath));
     }
 
-    static getStoryPoints(votes) {
-        return average(votes
-            .filter(x => !Number.isNaN(x.value))
-            .map(x => Number.parseInt(x.value, 10)));
-    }
-
     static getDerivedStateFromProps(props, state) {
         const { previousActiveWorkItemId } = state;
         const { activeWorkItemId } = props;
@@ -88,6 +83,20 @@ class EstimationSession extends Component {
         this.setState({
             selectedWorkItemId: workItemId
         });
+    }
+
+    getStoryPoints(votes) {
+        const { cardValues } = this.props;
+
+        const voteValues = votes
+            .map(x => _.find(cardValues, y => y.title === x.value).value)
+            .filter(x => !Number.isNaN(x));
+
+        if (voteValues.length < 1) {
+            return NaN;
+        }
+
+        return average(voteValues);
     }
 
     markSelectedWorkItemIdAsActive() {
@@ -206,10 +215,6 @@ class EstimationSession extends Component {
             ? _.find(workItems, x => x.id === selectedWorkItemId)
             : null;
 
-        const activeWorkItem = activeWorkItemId !== null
-            ? _.find(workItems, x => x.id === activeWorkItemId)
-            : null;
-
         const isSelectedWorkItemInEstimation = activeWorkItemId != null
             && selectedWorkItemId === activeWorkItemId;
 
@@ -217,7 +222,7 @@ class EstimationSession extends Component {
             ? votes.filter(x => x.workItemId === selectedWorkItemId)
             : [];
 
-        const storyPoints = EstimationSession.getStoryPoints(votesForActiveWorkItem);
+        const storyPoints = this.getStoryPoints(votesForActiveWorkItem);
 
         const workItemsOrdered = _.sortBy(workItems, x => x.stackRank);
         const storyPointsTotal = Math.round(sum(workItems
@@ -248,7 +253,8 @@ class EstimationSession extends Component {
                             selectedUserStoryId={(selectedWorkItem != null
                                 ? selectedWorkItem.id
                                 : null)}
-                            onSelectedUserStoryIdChanged={id => this.onSelectedWorkItemIdChanged(id)}
+                            onSelectedUserStoryIdChanged={(
+                                id => this.onSelectedWorkItemIdChanged(id))}
                             items={workItemsOrdered}
                         />
                     </div>
@@ -264,15 +270,15 @@ class EstimationSession extends Component {
                             <div className="poker-cards-container">
                                 {cardValues.map(cardValue => (
                                     <PokerCard
-                                        value={cardValue}
-                                        key={cardValue}
+                                        value={cardValue.title}
+                                        key={cardValue.title}
                                         selected={_.some(
                                             votes,
                                             x => x.userId === userId
                                             && x.workItemId === activeWorkItemId
-                                            && x.value === cardValue
+                                            && x.value === cardValue.title
                                         )}
-                                        onClick={() => this.cardClicked(cardValue)}
+                                        onClick={() => this.cardClicked(cardValue.title)}
                                     />
                                 ))}
                             </div>
