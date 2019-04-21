@@ -3,12 +3,13 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import _ from "underscore";
 
-import { Dropdown } from "office-ui-fabric-react/lib/Dropdown";
 import { PrimaryButton } from "office-ui-fabric-react";
+import { Dropdown } from "office-ui-fabric-react/lib/Dropdown";
 import { Redirect } from "react-router";
 
 import { getIterations } from "../../actions";
 import "./WelcomePage.less";
+import IterationPicker from "../IterationPicker";
 
 class WelcomePage extends Component {
     constructor(props) {
@@ -82,16 +83,10 @@ class WelcomePage extends Component {
             <div className="main-content">
                 <h2 className="main-content-child">Configure Estimation Session</h2>
 
-                <Dropdown
-                    placeholder="Loading interations ..."
-                    className="main-content-child"
-                    label="Iteration"
-                    onChange={this.onSelectedIterationChanged}
-                    selectedKey={selectedIteration != null ? selectedIteration.id : null}
-                    options={_.first(iterations, 5).map(x => ({
-                        key: x.id,
-                        text: x.name
-                    }))}
+                <IterationPicker
+                    iterations={iterations}
+                    onSelectedIterationChanged={this.onSelectedIterationChanged}
+                    selectedIteration={selectedIteration}
                 />
 
                 <Dropdown
