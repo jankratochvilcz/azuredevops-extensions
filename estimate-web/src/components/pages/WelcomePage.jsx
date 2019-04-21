@@ -31,6 +31,23 @@ class WelcomePage extends Component {
     componentDidMount() {
         const { teamId, projectId, dispatch } = this.props;
 
+        // In cases where the user has gotten a link from a colleague,
+        // goes directly to the right session.
+        VSS.getService(VSS.ServiceIds.Navigation).then(navigationService => {
+            navigationService.getHash().then(hash => {
+                if (hash.length < 1) {
+                    return;
+                }
+
+                this.setState({
+                    selectedIteration: {
+                        path: hash
+                    },
+                    redirectToSession: true
+                });
+            });
+        });
+
         dispatch(getIterations(teamId, projectId));
     }
 

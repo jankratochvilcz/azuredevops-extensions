@@ -132,6 +132,10 @@ const registerConnectionHandlers = (iterationPath, userId) => dispatch => {
 };
 
 export const connectToGroup = (iterationPath, userId) => dispatch => {
+    VSS.getService(VSS.ServiceIds.Navigation).then(navigationService => {
+        navigationService.setHash(iterationPath);
+    });
+
     dispatch(connectionStarting());
 
     connect(iterationPath, userId)(dispatch);
