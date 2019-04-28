@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Dropdown, DropdownMenuItemType } from "office-ui-fabric-react/lib/Dropdown";
 import _ from "underscore";
+import iterationShape from "../reducers/models/iterationShape";
 
 const insertIterationOptionsGroupHeader = (
     iterationOptions,
@@ -68,15 +69,8 @@ const IterationPicker = props => {
 
 IterationPicker.propTypes = {
     onSelectedIterationChanged: PropTypes.func.isRequired,
-    selectedIteration: PropTypes.shape({
-        id: PropTypes.string
-    }),
-    iterations: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string,
-        name: PropTypes.string,
-        startDate: PropTypes.string,
-        finishDate: PropTypes.string
-    }))
+    selectedIteration: iterationShape,
+    iterations: PropTypes.arrayOf(iterationShape)
 };
 
 IterationPicker.defaultProps = {

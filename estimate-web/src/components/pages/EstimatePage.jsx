@@ -15,7 +15,8 @@ import {
     getTeam,
     getWorkItems,
     updateStoryPoints,
-    removeStoryPoints
+    removeStoryPoints,
+    getIterations
 } from "../../actions";
 import {
     connectToGroup,
@@ -27,6 +28,12 @@ import EstimatorPersona from "../EstimatorPersona";
 import { average, sum } from "../../utils/math";
 import UserStoryDetail from "../UserStoryDetail";
 import ConnectionStatus from "../ConnectionStatus";
+import { selectIterationUrl } from "../../selectors/devOpsUrlSelectors";
+import iterationShape from "../../reducers/models/iterationShape";
+import { cardValueShape } from "../../reducers/models/cardDeckShape";
+import userShape from "../../reducers/models/userShape";
+import voteShape from "../../reducers/models/voteShape";
+import workItemShape from "../../reducers/models/workItemShape";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -52,7 +59,8 @@ class EstimationSession extends Component {
             teamId,
             userId,
             projectId,
-            dispatch
+            dispatch,
+            iterations
         } = this.props;
 
         dispatch(getTeam(
@@ -62,6 +70,10 @@ class EstimationSession extends Component {
         ));
 
         dispatch(getWorkItems(iterationPath));
+
+        if (iterations.length < 1) {
+            dispatch(getIterations(teamId, projectId));
+        }
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -204,7 +216,9 @@ class EstimationSession extends Component {
             activeWorkItemId,
             isActiveWorkItemRevealed,
             iterationPath,
-            dispatch
+            dispatch,
+            iterations,
+            currentIterationUrl
         } = this.props;
 
         const {
@@ -229,12 +243,16 @@ class EstimationSession extends Component {
             .filter(x => x.storyPoints !== null && x.storyPoints !== undefined)
             .map(x => x.storyPoints)));
 
+        const iteration = _.find(iterations, x => x.path === iterationPath);
+
         return (
             <div className="component-root">
                 <div className="left-pane">
                     <div className="to-vote-row">
                         <div className="work-items-title-row">
-                            <h4>Work Items</h4>
+                            <h4>
+                                { iteration && <a href={currentIterationUrl} target="_blank" rel="noopener noreferrer">{iteration.name}</a> }
+                            </h4>
                             <div>{`${workItemsOrdered.length} work items left`}</div>
                             <div>{`${storyPointsTotal} total story points`}</div>
                             <div className="refresh-button">
@@ -368,7 +386,9 @@ const mapStateToProps = (state, ownProps) => ({
     iterationPath: ownProps.match.params.iterationPath,
     votes: state.vote,
     activeWorkItemId: state.applicationContext.activeWorkItemId,
-    isActiveWorkItemRevealed: state.applicationContext.isActiveWorkItemRevealed
+    isActiveWorkItemRevealed: state.applicationContext.isActiveWorkItemRevealed,
+    currentIterationUrl: selectIterationUrl(state, ownProps.match.params.iterationPath),
+    iterations: state.iteration
 });
 
 EstimationSession.defaultProps = {
@@ -383,12 +403,14 @@ EstimationSession.propTypes = {
     teamId: PropTypes.string.isRequired,
     projectId: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
-    workItems: PropTypes.arrayOf(PropTypes.object),
-    users: PropTypes.arrayOf(PropTypes.object),
-    cardValues: PropTypes.arrayOf(PropTypes.string).isRequired,
-    votes: PropTypes.arrayOf(PropTypes.object).isRequired,
+    workItems: PropTypes.arrayOf(workItemShape),
+    users: PropTypes.arrayOf(userShape),
+    votes: PropTypes.arrayOf(voteShape).isRequired,
     activeWorkItemId: PropTypes.number,
-    isActiveWorkItemRevealed: PropTypes.bool.isRequired
+    isActiveWorkItemRevealed: PropTypes.bool.isRequired,
+    cardValues: PropTypes.arrayOf(cardValueShape).isRequired,
+    iterations: PropTypes.arrayOf(iterationShape).isRequired,
+    currentIterationUrl: PropTypes.string.isRequired
 };
 
 export default connect(mapStateToProps)(EstimationSession);

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { PersonaSize, Persona, PersonaPresence } from "office-ui-fabric-react";
 
 import "./EstimatorPersona.less";
+import userShape from "../reducers/models/userShape";
 
 
 class EstimatorPersona extends Component {
@@ -51,7 +52,7 @@ EstimatorPersona.defaultProps = {
 };
 
 EstimatorPersona.propTypes = {
-    user: PropTypes.object.isRequired,
+    user: userShape.isRequired,
     vote: PropTypes.string,
     votesRevealed: PropTypes.bool
 };

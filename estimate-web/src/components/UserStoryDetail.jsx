@@ -4,6 +4,8 @@ import { connect } from "react-redux";
 import sanitizeHtml from "sanitize-html";
 
 import "./UserStoryDetail.less";
+import { selectWorkItemRootUrl } from "../selectors/devOpsUrlSelectors";
+import workItemShape from "../reducers/models/workItemShape";
 
 const mixInTargetBlankAttributes = (tagName, attribs) => ({
     tagName: tagName,
@@ -42,12 +44,12 @@ const UserStoryDetail = props => {
 };
 
 UserStoryDetail.propTypes = {
-    workItem: PropTypes.object.isRequired,
+    workItem: workItemShape.isRequired,
     urlRoot: PropTypes.string.isRequired
 };
 
 const mapStateToProps = state => ({
-    urlRoot: `${state.applicationContext.collectionUri}${state.applicationContext.projectName}/_workitems/edit/`
+    urlRoot: selectWorkItemRootUrl(state)
 });
 
 export default connect(mapStateToProps)(UserStoryDetail);

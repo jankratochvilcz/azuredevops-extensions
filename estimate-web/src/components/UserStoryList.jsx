@@ -138,7 +138,7 @@ UserStoryList.propTypes = {
     columns: PropTypes.arrayOf(PropTypes.string).isRequired,
     onSelectedUserStoryIdChanged: PropTypes.func,
     items: PropTypes.arrayOf(PropTypes.object).isRequired,
-    selectedUserStoryId: PropTypes.string
+    selectedUserStoryId: PropTypes.number
 };
 
 export default UserStoryList;

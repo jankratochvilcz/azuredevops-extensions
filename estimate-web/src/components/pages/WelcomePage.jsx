@@ -10,6 +10,8 @@ import { Redirect } from "react-router";
 import { getIterations } from "../../actions";
 import "./WelcomePage.less";
 import IterationPicker from "../IterationPicker";
+import { cardDeckShape } from "../../reducers/models/cardDeckShape";
+import iterationShape from "../../reducers/models/iterationShape";
 
 class WelcomePage extends Component {
     constructor(props) {
@@ -127,15 +129,16 @@ class WelcomePage extends Component {
 }
 
 WelcomePage.propTypes = {
-    availableCardDecks: PropTypes.arrayOf(PropTypes.object).isRequired,
+    availableCardDecks: PropTypes.arrayOf(cardDeckShape),
     teamId: PropTypes.string.isRequired,
     projectId: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
-    iterations: PropTypes.arrayOf(PropTypes.object)
+    iterations: PropTypes.arrayOf(iterationShape)
 };
 
 WelcomePage.defaultProps = {
-    iterations: []
+    iterations: [],
+    availableCardDecks: []
 };
 
 const mapStateToProps = state => ({
