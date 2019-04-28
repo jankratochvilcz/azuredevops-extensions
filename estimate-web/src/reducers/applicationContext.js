@@ -14,6 +14,10 @@ const onInitializeContext = (state, action) => ({
 });
 
 const onReceiveActiveWorkItemChanged = (state, action) => {
+    if (action.workItemId === state.activeWorkItemId) {
+        return state;
+    }
+
     return {
         ...state,
         activeWorkItemId: action.workItemId,
