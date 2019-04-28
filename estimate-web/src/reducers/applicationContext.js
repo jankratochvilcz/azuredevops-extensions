@@ -47,6 +47,7 @@ const applicationContext = (state = {
     isConnecting: false,
     userId: null,
     teamId: null,
+    teamName: null,
     projectId: null,
     projectName: null,
     collectionUri: null,

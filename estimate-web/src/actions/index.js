@@ -60,6 +60,7 @@ export const initializeContext = () => {
         type: INITIALIZE_CONTEXT,
         context: {
             teamId: context.team.id,
+            teamName: context.team.name,
             projectId: context.project.id,
             projectName: context.project.name,
             userId: context.user.id,
