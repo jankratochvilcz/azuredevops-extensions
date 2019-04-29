@@ -34,6 +34,7 @@ import { cardValueShape } from "../../reducers/models/cardDeckShape";
 import userShape from "../../reducers/models/userShape";
 import voteShape from "../../reducers/models/voteShape";
 import workItemShape from "../../reducers/models/workItemShape";
+import UserStoryDiscussion from "../UserStoryDiscussion";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -351,7 +352,8 @@ class EstimationSession extends Component {
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
+                            {isSelectedWorkItemInEstimation
+                                && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
                                 <PrimaryButton
                                     onClick={() => this.saveEstimate(storyPoints)}
                                     text={`Save ${storyPoints} story points`}
@@ -366,7 +368,13 @@ class EstimationSession extends Component {
                             )}
                         </div>
 
-                        {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
+                        {selectedWorkItem && (
+                            <React.Fragment>
+                                <UserStoryDetail workItem={selectedWorkItem} />
+                                <UserStoryDiscussion user={users.find(x => x.id === userId)} />
+                            </React.Fragment>
+                        )
+                        }
                     </div>
                 </div>
             </div>
