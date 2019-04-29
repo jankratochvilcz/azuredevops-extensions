@@ -371,7 +371,7 @@ class EstimationSession extends Component {
                         {selectedWorkItem && (
                             <React.Fragment>
                                 <UserStoryDetail workItem={selectedWorkItem} />
-                                <UserStoryDiscussion user={users.find(x => x.id === userId)} />
+                                <UserStoryDiscussion workItem={selectedWorkItem} user={users.find(x => x.id === userId)} />
                             </React.Fragment>
                         )
                         }

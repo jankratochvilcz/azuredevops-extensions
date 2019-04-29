@@ -1,4 +1,5 @@
 export const INITIALIZE_CONTEXT = "DEVOPS/INITIALIZE_CONTEXT";
+
 export const initializeContext = () => {
     const context = VSS.getWebContext();
 
@@ -63,6 +64,14 @@ export const REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE = "DEVOPS/REQUEST_WORKIT
 export const requestWorkItemUpdateStoryPointsRemove = workItemId => ({
     type: REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
     workItemId
+});
+
+
+export const REQUEST_WORKITEM_ADD_COMMENT = "DEVOPS/REQUEST_WORKITEM_ADD_COMMENT";
+export const requestWorkItemAddComment = (workItemId, comment) => ({
+    type: REQUEST_WORKITEM_ADD_COMMENT,
+    workItemId,
+    comment
 });
 
 export const RECEIVE_WORKITEM_UPDATE = "DEVOPS/RECEIVE_WORKITEM_UPDATE";
