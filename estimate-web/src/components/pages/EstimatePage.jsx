@@ -13,9 +13,9 @@ import UserStoryList from "../UserStoryList";
 import PokerCard from "../PokerCard";
 import {
     requestTeam,
-    getWorkItems,
-    updateStoryPoints,
-    removeStoryPoints,
+    requestWorkItems,
+    requestWorkItemUpdateStoryPointsUpdate,
+    requestWorkItemUpdateStoryPointsRemove,
     requestIterations
 } from "../../actions";
 import {
@@ -65,7 +65,7 @@ class EstimationSession extends Component {
             () => dispatch(connectToGroup(iterationPath, userId))
         ));
 
-        dispatch(getWorkItems(iterationPath));
+        dispatch(requestWorkItems(iterationPath));
 
         if (iterations.length < 1) {
             dispatch(requestIterations());
@@ -132,7 +132,7 @@ class EstimationSession extends Component {
             userId
         } = this.props;
 
-        dispatch(updateStoryPoints(
+        dispatch(requestWorkItemUpdateStoryPointsUpdate(
             activeWorkItemId,
             storyPoints,
             iterationPath
@@ -154,7 +154,9 @@ class EstimationSession extends Component {
 
         const nextWorkItem = _.first(_.rest(sortedWorkItemsLeft, currentWorkItemIndex + 1));
 
-        dispatch(switchActiveWorkItem(userId, iterationPath, nextWorkItem.id));
+        if (nextWorkItem) {
+            dispatch(switchActiveWorkItem(userId, iterationPath, nextWorkItem.id));
+        }
     }
 
     resetEstimate() {
@@ -165,7 +167,7 @@ class EstimationSession extends Component {
             userId
         } = this.props;
 
-        dispatch(removeStoryPoints(
+        dispatch(requestWorkItemUpdateStoryPointsRemove(
             activeWorkItemId,
             iterationPath
         ));
@@ -257,7 +259,7 @@ class EstimationSession extends Component {
                                     iconProps={{ iconName: "Refresh" }}
                                     title="Reload User Stories"
                                     ariaLabel="ReloadUserStories"
-                                    onClick={() => dispatch(getWorkItems(iterationPath))}
+                                    onClick={() => dispatch(requestWorkItemUpdateStoryPointsUpdate(iterationPath))}
                                 />
                             </div>
                         </div>

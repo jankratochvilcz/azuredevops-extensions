@@ -1,44 +1,4 @@
-import _ from "underscore";
-
-// Synchronous actions
 export const INITIALIZE_CONTEXT = "DEVOPS/INITIALIZE_CONTEXT";
-
-
-// Asynchronous actions
-export const REQUEST_ITERATIONS = "DEVOPS/REQUEST_ITERATIONS";
-export const RECEIVE_ITERATIONS = "DEVOPS/RECEIVE_ITERATIONS";
-
-export const REQUEST_TEAM = "DEVOPS/REQUEST_TEAM";
-export const RECEIVE_TEAM = "DEVOPS/RECEIVE_TEAM";
-
-export const REQUEST_WORKITEMS = "DEVOPS/REQUEST_WORKITEMS";
-export const RECEIVE_WORKITEMS = "DEVOPS/RECEIVE_WORKITEMS";
-export const RECEIVE_WORKITEM_UPDATE = "DEVOPS/RECEIVE_WORKITEM_UPDATE";
-
-const ESTIMATABLE_WORKITEMTYPES = ["Bug", "User Story"];
-const NOT_ESTIMATABLE_WORKITEMSTATES = ["Removed"];
-
-const executeOnVssWorkItemTrackingClient = action => {
-    VSS.require(["VSS/Service", "TFS/WorkItemTracking/RestClient"], (vssService, tfsWebApi) => {
-        const client = vssService.getCollectionClient(tfsWebApi.WorkItemTrackingHttpClient);
-        action(client);
-    });
-};
-
-const parseWorkItem = apiWorkItem => ({
-    id: apiWorkItem.id,
-    url: apiWorkItem.url,
-    title: apiWorkItem.fields["System.Title"],
-    storyPoints: apiWorkItem.fields["Microsoft.VSTS.Scheduling.StoryPoints"],
-    stackRank: apiWorkItem.fields["Microsoft.VSTS.Common.StackRank"],
-    createdBy: apiWorkItem.fields["System.CreatedBy"],
-    assignedTo: apiWorkItem.fields["System.AssignedTo"],
-    description: apiWorkItem.fields["System.Description"] || apiWorkItem.fields["Microsoft.VSTS.TCM.ReproSteps"],
-    workItemType: apiWorkItem.fields["System.WorkItemType"],
-    iterationPath: apiWorkItem.fields["System.IterationPath"],
-    state: apiWorkItem.fields["System.State"]
-});
-
 export const initializeContext = () => {
     const context = VSS.getWebContext();
 
@@ -55,87 +15,58 @@ export const initializeContext = () => {
     };
 };
 
+export const REQUEST_ITERATIONS = "DEVOPS/REQUEST_ITERATIONS";
 export const requestIterations = () => ({
     type: REQUEST_ITERATIONS
 });
 
+export const RECEIVE_ITERATIONS = "DEVOPS/RECEIVE_ITERATIONS";
 export const receiveIterations = iterations => ({
     type: RECEIVE_ITERATIONS,
     iterations: iterations
 });
 
-export const requestTeam = () => ({
-    type: REQUEST_TEAM
+export const REQUEST_TEAM = "DEVOPS/REQUEST_TEAM";
+export const requestTeam = postAction => ({
+    type: REQUEST_TEAM,
+    postAction
 });
 
+export const RECEIVE_TEAM = "DEVOPS/RECEIVE_TEAM";
 export const receiveTeam = (teamId, team) => ({
     type: RECEIVE_TEAM,
     team,
     teamId
 });
 
-const requestWorkItems = () => ({
-    type: REQUEST_WORKITEMS
+export const REQUEST_WORKITEMS = "DEVOPS/REQUEST_WORKITEMS";
+export const requestWorkItems = iterationPath => ({
+    type: REQUEST_WORKITEMS,
+    iterationPath
 });
 
-const receiveWorkItems = (iterationPath, result) => ({
+export const RECEIVE_WORKITEMS = "DEVOPS/RECEIVE_WORKITEMS";
+export const receiveWorkItems = (iterationPath, workItems) => ({
     type: RECEIVE_WORKITEMS,
-    iterationPath: iterationPath,
-    workItems: result
-        .map(x => parseWorkItem(x))
-        .filter(x => _.some(ESTIMATABLE_WORKITEMTYPES, y => x.workItemType === y))
-        .filter(x => !_.some(NOT_ESTIMATABLE_WORKITEMSTATES, y => x.state === y))
+    iterationPath,
+    workItems
 });
 
-const receiveWorkitemUpdate = (workItem, iterationPath) => ({
+export const REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE = "DEVOPS/REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE";
+export const requestWorkItemUpdateStoryPointsUpdate = (workItemId, storyPoints) => ({
+    type: REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
+    storyPoints,
+    workItemId
+});
+
+export const REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE = "DEVOPS/REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE";
+export const requestWorkItemUpdateStoryPointsRemove = workItemId => ({
+    type: REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
+    workItemId
+});
+
+export const RECEIVE_WORKITEM_UPDATE = "DEVOPS/RECEIVE_WORKITEM_UPDATE";
+export const receiveWorkItemUpdate = workItem => ({
     type: RECEIVE_WORKITEM_UPDATE,
-    workItem: workItem,
-    iterationPath: iterationPath
+    workItem: workItem
 });
-
-const updateWorkItem = (payload, iterationPath, workItemId) => dispatch => {
-    executeOnVssWorkItemTrackingClient(client => {
-        client
-            .updateWorkItem(payload, workItemId)
-            .then(workItem => dispatch(receiveWorkitemUpdate(
-                parseWorkItem(workItem),
-                iterationPath
-            )));
-    });
-};
-
-export const getWorkItems = iterationPath => dispatch => {
-    dispatch(requestWorkItems());
-
-    const wiql = {
-        query: `SELECT [System.Id],[Microsoft.VSTS.Common.StackRank],[Microsoft.VSTS.Scheduling.StoryPoints],[System.Title],[System.IterationPath],[System.State] FROM WorkItems WHERE [System.IterationPath] UNDER '${iterationPath}'`
-    };
-
-    executeOnVssWorkItemTrackingClient(client => {
-        client
-            .queryByWiql(wiql)
-            .then(wiqlResult => {
-                const workItemIds = wiqlResult.workItems.map(x => x.id);
-                client.getWorkItems(workItemIds)
-                    .then(workItemsResult => dispatch(receiveWorkItems(
-                        iterationPath,
-                        workItemsResult
-                    )));
-            });
-    });
-};
-
-export const updateStoryPoints = (workItemId, storyPoints, iterationPath) => (
-    dispatch => updateWorkItem([
-        {
-            op: "add",
-            path: "/fields/Microsoft.VSTS.Scheduling.StoryPoints",
-            value: storyPoints
-        }], iterationPath, workItemId)(dispatch));
-
-export const removeStoryPoints = (workItemId, iterationPath) => (
-    dispatch => updateWorkItem([
-        {
-            op: "remove",
-            path: "/fields/Microsoft.VSTS.Scheduling.StoryPoints"
-        }], iterationPath, workItemId)(dispatch));

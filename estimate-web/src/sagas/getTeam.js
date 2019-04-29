@@ -9,12 +9,7 @@ import {
 import { executeOnCoreClient } from "./infrastructure/vssClient";
 
 import { REQUEST_TEAM, receiveTeam } from "../actions";
-
-const normalizeTeamMember = (teamMember, teamId) => ({
-    ...teamMember.identity,
-    isConnected: false,
-    teamId: teamId
-});
+import { normalizeTeamMember } from "./infrastructure/vssEntityNormalization";
 
 function* getTeam(postAction) {
     const { teamId, projectId } = yield select(state => state.applicationContext);
