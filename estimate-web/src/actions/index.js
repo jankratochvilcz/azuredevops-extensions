@@ -25,13 +25,6 @@ const executeOnVssWorkItemTrackingClient = action => {
     });
 };
 
-const executeOnVssCoreClient = action => {
-    VSS.require(["VSS/Service", "TFS/Core/RestClient"], (vssService, tfsWebApi) => {
-        const client = vssService.getCollectionClient(tfsWebApi.CoreHttpClient);
-        action(client);
-    });
-};
-
 const parseWorkItem = apiWorkItem => ({
     id: apiWorkItem.id,
     url: apiWorkItem.url,
