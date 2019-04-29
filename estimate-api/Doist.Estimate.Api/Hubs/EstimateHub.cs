@@ -14,6 +14,7 @@ namespace Doist.Estimate.Api.Hubs
         private const string VotedMessageName = "voted";
         private const string RevealedMessageName = "revealed";
         private const string SwitchToWorkItemMessageName = "switched";
+        private const string RefreshDataMessageName = "refresh";
 
         private static Dictionary<string, EstimationSession> groups = new Dictionary<string, EstimationSession>();
 
@@ -88,6 +89,14 @@ namespace Doist.Estimate.Api.Hubs
             };
 
             await SendToGroup(SwitchToWorkItemMessageName, request, response);
+        }
+
+        public async Task RefreshData(RequestBase request)
+        {
+            if (IsInvalidRequest(request))
+                return;
+
+            await SendToGroup(RefreshDataMessageName, request, new { });
         }
 
         private bool IsInvalidRequest(RequestBase request)
