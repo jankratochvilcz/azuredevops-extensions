@@ -16,7 +16,7 @@ import {
     getWorkItems,
     updateStoryPoints,
     removeStoryPoints,
-    getIterations
+    requestIterations
 } from "../../actions";
 import {
     connectToGroup,
@@ -72,7 +72,7 @@ class EstimationSession extends Component {
         dispatch(getWorkItems(iterationPath));
 
         if (iterations.length < 1) {
-            dispatch(getIterations(teamId, projectId));
+            dispatch(requestIterations());
         }
     }
 

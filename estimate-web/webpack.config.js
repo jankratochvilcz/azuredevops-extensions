@@ -4,7 +4,9 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     target: "web",
-    entry: "./src/index.js",
+    entry: {
+        js: ["babel-polyfill", "./src/index.js"]
+    },
     mode: "development",
     module: {
         rules: [

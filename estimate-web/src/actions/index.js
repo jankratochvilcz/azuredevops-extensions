@@ -18,13 +18,6 @@ export const RECEIVE_WORKITEM_UPDATE = "DEVOPS/RECEIVE_WORKITEM_UPDATE";
 const ESTIMATABLE_WORKITEMTYPES = ["Bug", "User Story"];
 const NOT_ESTIMATABLE_WORKITEMSTATES = ["Removed"];
 
-const executeOnVssWorkClient = action => {
-    VSS.require(["VSS/Service", "TFS/Work/RestClient"], (vssService, tfsWebApi) => {
-        const client = vssService.getCollectionClient(tfsWebApi.WorkHttpClient);
-        action(client);
-    });
-};
-
 const executeOnVssWorkItemTrackingClient = action => {
     VSS.require(["VSS/Service", "TFS/WorkItemTracking/RestClient"], (vssService, tfsWebApi) => {
         const client = vssService.getCollectionClient(tfsWebApi.WorkItemTrackingHttpClient);
@@ -69,13 +62,13 @@ export const initializeContext = () => {
     };
 };
 
-const requestIterations = () => ({
+export const requestIterations = () => ({
     type: REQUEST_ITERATIONS
 });
 
-const receiveIterations = response => ({
+export const receiveIterations = iterations => ({
     type: RECEIVE_ITERATIONS,
-    iterations: _.sortBy(response, x => x.attributes.startDate).reverse()
+    iterations: iterations
 });
 
 const requestTeam = () => ({
@@ -120,21 +113,6 @@ const updateWorkItem = (payload, iterationPath, workItemId) => dispatch => {
                 parseWorkItem(workItem),
                 iterationPath
             )));
-    });
-};
-
-export const getIterations = (teamId, projectId) => dispatch => {
-    dispatch(requestIterations());
-
-    const getTeamIterationsArg = {
-        teamId,
-        projectId
-    };
-
-    executeOnVssWorkClient(client => {
-        client
-            .getTeamIterations(getTeamIterationsArg)
-            .then(result => dispatch(receiveIterations(result)));
     });
 };
 
