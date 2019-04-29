@@ -13,10 +13,7 @@ import { executeOnWorkClient } from "./infrastructure/vssClient";
 import { REQUEST_ITERATIONS, receiveIterations } from "../actions";
 
 function* getIterations() {
-    const { teamId, projectId } = yield select(state => ({
-        teamId: state.applicationContext.teamId,
-        projectId: state.applicationContext.projectId
-    }));
+    const { teamId, projectId } = yield select(state => state.applicationContext);
 
     const iterations = yield call(
         executeOnWorkClient,

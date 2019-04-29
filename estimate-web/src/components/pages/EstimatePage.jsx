@@ -12,7 +12,7 @@ import "./EstimatePage.less";
 import UserStoryList from "../UserStoryList";
 import PokerCard from "../PokerCard";
 import {
-    getTeam,
+    requestTeam,
     getWorkItems,
     updateStoryPoints,
     removeStoryPoints,
@@ -56,16 +56,12 @@ class EstimationSession extends Component {
     componentDidMount() {
         const {
             iterationPath,
-            teamId,
             userId,
-            projectId,
             dispatch,
             iterations
         } = this.props;
 
-        dispatch(getTeam(
-            teamId,
-            projectId,
+        dispatch(requestTeam(
             () => dispatch(connectToGroup(iterationPath, userId))
         ));
 
@@ -378,8 +374,6 @@ class EstimationSession extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
     userId: state.applicationContext.userId,
-    teamId: state.applicationContext.teamId,
-    projectId: state.applicationContext.projectId,
     users: state.user.filter(x => x.teamId === state.applicationContext.teamId),
     workItems: state.workItem.filter(x => x.iterationPath === ownProps.match.params.iterationPath),
     cardValues: state.enums.cardDecks[0].cardValues,
@@ -400,8 +394,6 @@ EstimationSession.defaultProps = {
 EstimationSession.propTypes = {
     iterationPath: PropTypes.string.isRequired,
     userId: PropTypes.string.isRequired,
-    teamId: PropTypes.string.isRequired,
-    projectId: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
     workItems: PropTypes.arrayOf(workItemShape),
     users: PropTypes.arrayOf(userShape),

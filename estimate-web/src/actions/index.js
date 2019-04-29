@@ -71,19 +71,14 @@ export const receiveIterations = iterations => ({
     iterations: iterations
 });
 
-const requestTeam = () => ({
+export const requestTeam = () => ({
     type: REQUEST_TEAM
 });
 
-const receiveTeam = (teamId, response) => ({
+export const receiveTeam = (teamId, team) => ({
     type: RECEIVE_TEAM,
-    team: response.map(x => ({
-        ...x.identity,
-        isConnected: false,
-        teamId: teamId,
-        votes: {}
-    })),
-    teamId: teamId
+    team,
+    teamId
 });
 
 const requestWorkItems = () => ({
@@ -113,21 +108,6 @@ const updateWorkItem = (payload, iterationPath, workItemId) => dispatch => {
                 parseWorkItem(workItem),
                 iterationPath
             )));
-    });
-};
-
-export const getTeam = (teamId, projectId, postAction) => dispatch => {
-    dispatch(requestTeam());
-
-    executeOnVssCoreClient(client => {
-        client
-            .getTeamMembersWithExtendedProperties(projectId, teamId)
-            .then(result => {
-                dispatch(receiveTeam(teamId, result));
-                if (postAction != null) {
-                    postAction();
-                }
-            });
     });
 };
 
