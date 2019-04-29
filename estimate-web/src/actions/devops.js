@@ -74,6 +74,20 @@ export const requestWorkItemAddComment = (workItemId, comment) => ({
     comment
 });
 
+export const REQUEST_WORKITEM_GET_COMMENTS = "DEVOPS/REQUEST_WORKITEM_GET_COMMENTS";
+export const requestWorkItemGetComments = workItemId => ({
+    type: REQUEST_WORKITEM_GET_COMMENTS,
+    workItemId
+});
+
+export const RECEIVE_WORKITEM_COMMENTS = "DEVOPS/RECEIVE_WORKITEM_COMMENTS";
+export const receiveWorkItemComments = (workItemId, comments) => ({
+    type: RECEIVE_WORKITEM_COMMENTS,
+    workItemId,
+    comments
+});
+
+
 export const RECEIVE_WORKITEM_UPDATE = "DEVOPS/RECEIVE_WORKITEM_UPDATE";
 export const receiveWorkItemUpdate = workItem => ({
     type: RECEIVE_WORKITEM_UPDATE,

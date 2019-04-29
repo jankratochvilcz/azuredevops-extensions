@@ -35,14 +35,12 @@ class UserStoryCommentEditor extends Component {
         return (
             <div className="user-story-comment-editor">
                 <Persona
-                    className="column-1"
                     key={user.id}
-                    size={user.isConnected ? PersonaSize.size40 : PersonaSize.size24}
+                    size={PersonaSize.size40}
                     imageUrl={user.imageUrl}
                     hidePersonaDetails
                 />
                 <TextField
-                    className="column-2"
                     placeholder="Share your thoughts..."
                     onChange={this.onChange}
                     value={comment}

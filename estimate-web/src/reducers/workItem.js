@@ -1,8 +1,12 @@
-import { RECEIVE_WORKITEMS, RECEIVE_WORKITEM_UPDATE } from "../actions/devops";
+import { RECEIVE_WORKITEMS, RECEIVE_WORKITEM_UPDATE, RECEIVE_WORKITEM_COMMENTS } from "../actions/devops";
 import { mergeArraysUsingId } from "./infrastructure/merging";
 
 const onReceiveWorkItems = (state, action) => (
     mergeArraysUsingId(state, action.workItems));
+
+const onReceiveComments = (state, action) => state.map(x => (x.id === action.workItemId
+    ? { ...x, comments: action.comments }
+    : x));
 
 const onReceiveWorkItemUpdate = (state, action) => (
     mergeArraysUsingId(state, [action.workItem]));
@@ -16,6 +20,8 @@ const workItem = (
             return onReceiveWorkItems(state, action);
         case RECEIVE_WORKITEM_UPDATE:
             return onReceiveWorkItemUpdate(state, action);
+        case RECEIVE_WORKITEM_COMMENTS:
+            return onReceiveComments(state, action);
         default:
             return state;
     }
