@@ -8,7 +8,7 @@ import {
 
 import { executeOnWorkItemTrackingClient } from "./infrastructure/vssClient";
 
-import { receiveWorkItemUpdate, REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE, REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE } from "../actions";
+import { receiveWorkItemUpdate, REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE, REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE } from "../actions/devops";
 import { normalizeWorkItem } from "./infrastructure/vssEntityNormalization";
 
 function* updateWorkItem(payload, workItemId) {

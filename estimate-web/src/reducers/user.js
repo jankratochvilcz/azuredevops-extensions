@@ -1,6 +1,6 @@
 import _ from "underscore";
 
-import { RECEIVE_TEAM } from "../actions";
+import { RECEIVE_TEAM } from "../actions/devops";
 import { mergeArraysUsingId } from "./infrastructure/merging";
 import { RECEIVE_GROUP_UPDATED } from "../actions/estimation";
 import { STATUS_CHANGED } from "../actions/connection";

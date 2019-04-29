@@ -8,7 +8,7 @@ import {
 
 import { executeOnCoreClient } from "./infrastructure/vssClient";
 
-import { REQUEST_TEAM, receiveTeam } from "../actions";
+import { REQUEST_TEAM, receiveTeam } from "../actions/devops";
 import { normalizeTeamMember } from "./infrastructure/vssEntityNormalization";
 
 function* getTeam(postAction) {

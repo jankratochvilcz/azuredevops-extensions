@@ -1,4 +1,4 @@
-import { RECEIVE_WORKITEMS, RECEIVE_WORKITEM_UPDATE } from "../actions";
+import { RECEIVE_WORKITEMS, RECEIVE_WORKITEM_UPDATE } from "../actions/devops";
 import { mergeArraysUsingId } from "./infrastructure/merging";
 
 const onReceiveWorkItems = (state, action) => (

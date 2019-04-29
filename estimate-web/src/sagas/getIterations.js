@@ -10,7 +10,7 @@ import {
 
 import { executeOnWorkClient } from "./infrastructure/vssClient";
 
-import { REQUEST_ITERATIONS, receiveIterations } from "../actions";
+import { REQUEST_ITERATIONS, receiveIterations } from "../actions/devops";
 
 function* getIterations() {
     const { teamId, projectId } = yield select(state => state.applicationContext);

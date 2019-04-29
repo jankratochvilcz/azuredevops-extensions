@@ -17,7 +17,7 @@ import {
     requestWorkItemUpdateStoryPointsUpdate,
     requestWorkItemUpdateStoryPointsRemove,
     requestIterations
-} from "../../actions";
+} from "../../actions/devops";
 import {
     connectToGroup,
     requestVote,

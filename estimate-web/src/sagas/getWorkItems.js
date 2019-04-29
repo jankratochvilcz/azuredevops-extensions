@@ -9,7 +9,7 @@ import {
 
 import { executeOnWorkItemTrackingClient } from "./infrastructure/vssClient";
 
-import { REQUEST_WORKITEMS, receiveWorkItems } from "../actions";
+import { REQUEST_WORKITEMS, receiveWorkItems } from "../actions/devops";
 import { normalizeWorkItem } from "./infrastructure/vssEntityNormalization";
 
 const ESTIMATABLE_WORKITEMTYPES = ["Bug", "User Story"];

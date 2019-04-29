@@ -1,4 +1,4 @@
-import { RECEIVE_TEAM } from "../actions";
+import { RECEIVE_TEAM } from "../actions/devops";
 
 const onReceiveTeam = (state, action) => {
     const { teamId } = action;

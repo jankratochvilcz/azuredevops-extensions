@@ -7,7 +7,7 @@ import { PrimaryButton } from "office-ui-fabric-react";
 import { Dropdown } from "office-ui-fabric-react/lib/Dropdown";
 import { Redirect } from "react-router";
 
-import { requestIterations } from "../../actions";
+import { requestIterations } from "../../actions/devops";
 import "./WelcomePage.less";
 import IterationPicker from "../IterationPicker";
 import { cardDeckShape } from "../../reducers/models/cardDeckShape";

@@ -1,4 +1,4 @@
-import { RECEIVE_ITERATIONS } from "../actions";
+import { RECEIVE_ITERATIONS } from "../actions/devops";
 import { mergeArraysUsingId } from "./infrastructure/merging";
 
 const onReceiveIterations = (state, action) => (
