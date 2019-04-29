@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import WelcomePage from "./components/pages/WelcomePage";
 import EstimatePage from "./components/pages/EstimatePage";
 
-import { initializeContext } from "./actions";
+import { initializeContext } from "./actions/devops";
 
 import "./App.less";
 

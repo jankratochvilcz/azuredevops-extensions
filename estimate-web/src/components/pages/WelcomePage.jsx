@@ -7,7 +7,7 @@ import { PrimaryButton } from "office-ui-fabric-react";
 import { Dropdown } from "office-ui-fabric-react/lib/Dropdown";
 import { Redirect } from "react-router";
 
-import { getIterations } from "../../actions";
+import { requestIterations } from "../../actions/devops";
 import "./WelcomePage.less";
 import IterationPicker from "../IterationPicker";
 import { cardDeckShape } from "../../reducers/models/cardDeckShape";
@@ -31,7 +31,7 @@ class WelcomePage extends Component {
     }
 
     componentDidMount() {
-        const { teamId, projectId, dispatch } = this.props;
+        const { dispatch } = this.props;
 
         // In cases where the user has gotten a link from a colleague,
         // goes directly to the right session.
@@ -50,7 +50,7 @@ class WelcomePage extends Component {
             });
         });
 
-        dispatch(getIterations(teamId, projectId));
+        dispatch(requestIterations());
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -130,8 +130,6 @@ class WelcomePage extends Component {
 
 WelcomePage.propTypes = {
     availableCardDecks: PropTypes.arrayOf(cardDeckShape),
-    teamId: PropTypes.string.isRequired,
-    projectId: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
     iterations: PropTypes.arrayOf(iterationShape)
 };
@@ -142,8 +140,6 @@ WelcomePage.defaultProps = {
 };
 
 const mapStateToProps = state => ({
-    teamId: state.applicationContext.teamId,
-    projectId: state.applicationContext.projectId,
     iterations: state.iteration,
     availableCardDecks: state.enums.cardDecks
 });

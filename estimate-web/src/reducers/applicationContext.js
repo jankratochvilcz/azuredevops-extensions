@@ -1,5 +1,5 @@
 import { STATUS_CHANGED } from "../actions/connection";
-import { INITIALIZE_CONTEXT } from "../actions";
+import { INITIALIZE_CONTEXT } from "../actions/devops";
 import { RECEIVE_ACTIVEWORKITEM_CHANGED, RECEIVE_VOTES_REVEALED, RECEIVE_GROUP_UPDATED } from "../actions/estimation";
 
 const onStatusChanged = (state, action) => ({

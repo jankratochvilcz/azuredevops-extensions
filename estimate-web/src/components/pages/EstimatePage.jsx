@@ -12,12 +12,12 @@ import "./EstimatePage.less";
 import UserStoryList from "../UserStoryList";
 import PokerCard from "../PokerCard";
 import {
-    getTeam,
-    getWorkItems,
-    updateStoryPoints,
-    removeStoryPoints,
-    getIterations
-} from "../../actions";
+    requestTeam,
+    requestWorkItems,
+    requestWorkItemUpdateStoryPointsUpdate,
+    requestWorkItemUpdateStoryPointsRemove,
+    requestIterations
+} from "../../actions/devops";
 import {
     connectToGroup,
     requestVote,
@@ -56,23 +56,19 @@ class EstimationSession extends Component {
     componentDidMount() {
         const {
             iterationPath,
-            teamId,
             userId,
-            projectId,
             dispatch,
             iterations
         } = this.props;
 
-        dispatch(getTeam(
-            teamId,
-            projectId,
+        dispatch(requestTeam(
             () => dispatch(connectToGroup(iterationPath, userId))
         ));
 
-        dispatch(getWorkItems(iterationPath));
+        dispatch(requestWorkItems(iterationPath));
 
         if (iterations.length < 1) {
-            dispatch(getIterations(teamId, projectId));
+            dispatch(requestIterations());
         }
     }
 
@@ -136,7 +132,7 @@ class EstimationSession extends Component {
             userId
         } = this.props;
 
-        dispatch(updateStoryPoints(
+        dispatch(requestWorkItemUpdateStoryPointsUpdate(
             activeWorkItemId,
             storyPoints,
             iterationPath
@@ -158,7 +154,9 @@ class EstimationSession extends Component {
 
         const nextWorkItem = _.first(_.rest(sortedWorkItemsLeft, currentWorkItemIndex + 1));
 
-        dispatch(switchActiveWorkItem(userId, iterationPath, nextWorkItem.id));
+        if (nextWorkItem) {
+            dispatch(switchActiveWorkItem(userId, iterationPath, nextWorkItem.id));
+        }
     }
 
     resetEstimate() {
@@ -169,7 +167,7 @@ class EstimationSession extends Component {
             userId
         } = this.props;
 
-        dispatch(removeStoryPoints(
+        dispatch(requestWorkItemUpdateStoryPointsRemove(
             activeWorkItemId,
             iterationPath
         ));
@@ -261,7 +259,7 @@ class EstimationSession extends Component {
                                     iconProps={{ iconName: "Refresh" }}
                                     title="Reload User Stories"
                                     ariaLabel="ReloadUserStories"
-                                    onClick={() => dispatch(getWorkItems(iterationPath))}
+                                    onClick={() => dispatch(requestWorkItemUpdateStoryPointsUpdate(iterationPath))}
                                 />
                             </div>
                         </div>
@@ -378,8 +376,6 @@ class EstimationSession extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
     userId: state.applicationContext.userId,
-    teamId: state.applicationContext.teamId,
-    projectId: state.applicationContext.projectId,
     users: state.user.filter(x => x.teamId === state.applicationContext.teamId),
     workItems: state.workItem.filter(x => x.iterationPath === ownProps.match.params.iterationPath),
     cardValues: state.enums.cardDecks[0].cardValues,
@@ -400,8 +396,6 @@ EstimationSession.defaultProps = {
 EstimationSession.propTypes = {
     iterationPath: PropTypes.string.isRequired,
     userId: PropTypes.string.isRequired,
-    teamId: PropTypes.string.isRequired,
-    projectId: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired,
     workItems: PropTypes.arrayOf(workItemShape),
     users: PropTypes.arrayOf(userShape),

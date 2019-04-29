@@ -1,5 +1,5 @@
 import team from "./team";
-import { RECEIVE_TEAM } from "../actions";
+import { RECEIVE_TEAM } from "../actions/devops";
 
 const sampleInitialState = [1, 2];
 
