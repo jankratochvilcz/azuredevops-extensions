@@ -8,6 +8,7 @@ import { requestWorkItemGetComments } from "../actions/devops";
 import workItemShape from "../reducers/models/workItemShape";
 
 import "./UserStoryCommentList.less";
+import timeAgo from "../utils/date";
 
 class UserStoryCommentList extends Component {
     componentDidMount() {
@@ -23,15 +24,22 @@ class UserStoryCommentList extends Component {
         return (
             <div className="user-story-comments">
                 {comments.map(comment => (
-                    <React.Fragment>
+                    <React.Fragment key={comment.id}>
                         <Persona
                             key={comment.createdBy.id}
                             size={PersonaSize.size40}
                             imageUrl={comment.createdBy.imageUrl}
                             hidePersonaDetails
                         />
-                        <div>
-                            <Label>{comment.createdBy.displayName}</Label>
+                        <div className="user-story-comment">
+                            <Label>
+                                <span className="user-display-name">{comment.createdBy.displayName}</span>
+                                <span> commented</span>
+                                <span>
+                                    {" "}
+                                    {timeAgo(comment.createdDate)}
+                                </span>
+                            </Label>
                             <div dangerouslySetInnerHTML={{
                                 __html: comment.text
                             }}
@@ -54,7 +62,8 @@ UserStoryCommentList.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    comments: state.workItem.find(x => x.id === state.applicationContext.activeWorkItemId).comments
+    comments: state.workItem
+        && state.workItem.find(x => x.id === state.applicationContext.activeWorkItemId).comments
 });
 
 const mapDispatchToProps = dispatch => ({
