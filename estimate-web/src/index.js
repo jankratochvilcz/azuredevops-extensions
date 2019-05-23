@@ -1,10 +1,13 @@
+/* eslint-disable prefer-arrow-callback */
+/* eslint-disable func-names */
+
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import thunk from "redux-thunk";
 import createSagaMiddleware from "redux-saga";
 import { initializeIcons } from "@uifabric/icons";
-import { createStore, applyMiddleware } from "redux";
+import { createStore, applyMiddleware, compose } from "redux";
 
 import App from "./App";
 import reducer from "./reducers";
@@ -32,9 +35,18 @@ VSS.ready(function () {
         thunk
     ];
 
+    /* eslint-disable no-underscore-dangle */
+    // Setup Redux dev tools.
+    // Instructions: https://github.com/zalmoxisus/redux-devtools-extension
+    // This allows to inspect the state, actions and other aspects of the app
+    // in the browser dev tools.The enhancer is needed so the extension can find and
+    // connect to our store.
+    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+    /* eslint-enable */
+
     const store = createStore(
         reducer,
-        applyMiddleware(...middleware)
+        composeEnhancers(applyMiddleware(...middleware))
     );
 
     sagaMiddleware.run(rootSaga);
