@@ -1,7 +1,7 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable func-names */
 
-// Heavily inspired by https://gist.github.com/ebakhtarov/4cc4c3f537c9cc4f6e87de4c492131b4
+// Inspired by https://gist.github.com/ebakhtarov/4cc4c3f537c9cc4f6e87de4c492131b4
 
 import {
     fork,
@@ -29,112 +29,78 @@ import {
     REQUEST_ACTIVEWORKITEM_CHANGED
 } from "../actions/estimation";
 
-const groupUpdatedEventName = "groupUpdated";
-const votedEventName = "voted";
-const revealedEventName = "revealed";
-const switchedActiveWorkItemEventName = "switched";
+const REQUEST_EVENT_JOIN = "join";
 
-const clientBuilder = new HubConnectionBuilder();
-// const url = "https://localhost:44378/estimate";
-const url = "https://doist-estimate-api.azurewebsites.net/estimate";
-const logLevel = LogLevel.Information;
+// const CONNECTION_URL = "https://localhost:44378/estimate";
+const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/estimate";
+const CONNECTION_LOG_LEVEL = LogLevel.Information;
 
+const receiveEventHandlers = [
+    { name: "groupUpdated", actionFactory: receiveGroupUpdated },
+    { name: "voted", actionFactory: receiveVote },
+    { name: "revealed", actionFactory: receiveVotesRevealed },
+    { name: "switched", actionFactory: receiveActiveWorkItemChanged }
+];
+
+const invokableActions = [
+    { action: REQUEST_VOTE, event: "vote" },
+    { action: REQUEST_ACTIVEWORKITEM_CHANGED, event: "switchSelectedWorkItem" },
+    { action: REQUEST_VOTES_REVEALED, event: "reveal" }
+];
+
+/**
+ *  Creates a channel that will generate actions based on incoming socket events.
+ */
 const createConnectionChannel = connection => eventChannel(emitter => {
-    connection.on(
-        groupUpdatedEventName,
-        args => emitter(receiveGroupUpdated(args.presentUserIds, args.activeWorkItemId))
-    );
-
-    connection.on(
-        votedEventName,
-        args => emitter(receiveVote(args))
-    );
-
-    connection.on(
-        revealedEventName,
-        args => emitter(receiveVotesRevealed(args))
-    );
-
-    connection.on(
-        switchedActiveWorkItemEventName,
-        args => emitter(receiveActiveWorkItemChanged(args))
-    );
+    receiveEventHandlers.forEach(({ name, actionFactory }) => connection.on(
+        name,
+        args => emitter(actionFactory(args))
+    ));
 
     return () => connection.close();
 });
 
-function* backgroundTask(connectionChannel) {
+/**
+ * Executes a Redux action on a WebSocket connection.
+ */
+const executeOnConnection = (actionName, eventName, connection) => function* () {
+    while (true) {
+        const args = yield take(actionName);
+        connection.invoke(eventName, args);
+    }
+};
+
+/**
+ * Consumes incoming socket actions and generates Redux actions from them.
+ */
+function* watchIncoming(connectionChannel) {
     while (true) {
         const payload = yield take(connectionChannel);
         yield put(payload);
     }
 }
 
-const executeRequestVote = connection => function* () {
-    while (true) {
-        const {
-            iterationPath,
-            userId,
-            workItemId,
-            value
-        } = yield take(REQUEST_VOTE);
+/**
+ * Comsumes applicable Redux actions and sends them to the socket.
+ */
+function* watchOutgoing(connection) {
+    const invokableActionForks = invokableActions
+        .map(({ action, event }) => executeOnConnection(action, event, connection))
+        .map(x => fork(x));
 
-        connection.invoke("vote", {
-            groupName: iterationPath,
-            userId: userId,
-            value: value,
-            workItemId: workItemId
-        });
-    }
-};
-
-const executeSwitchSelectedWorkItem = connection => function* () {
-    while (true) {
-        const {
-            iterationPath,
-            userId,
-            workItemId
-        } = yield take(REQUEST_ACTIVEWORKITEM_CHANGED);
-
-        connection.invoke("switchSelectedWorkItem", {
-            groupName: iterationPath,
-            userId,
-            workItemId
-        });
-    }
-};
-
-const executeRevealVotes = connection => function* () {
-    while (true) {
-        const {
-            iterationPath,
-            userId,
-            workItemId
-        } = yield take(REQUEST_VOTES_REVEALED);
-
-        connection.invoke("reveal", {
-            groupName: iterationPath,
-            userId,
-            workItemId
-        });
-    }
-};
-
-function* executeTask(connection) {
-    yield all([
-        fork(executeRequestVote(connection)),
-        fork(executeRevealVotes(connection)),
-        fork(executeSwitchSelectedWorkItem(connection))
-    ]);
+    yield all(invokableActionForks);
 }
 
+/**
+ * Connects to the socket after recieving the correct message.
+ */
 function* watchRequestGroupConnect() {
     while (true) {
         const { iterationPath, userId } = yield take(REQUEST_GROUP_CONNECT);
 
-        const connection = clientBuilder
-            .withUrl(url)
-            .configureLogging(logLevel)
+        const connection = new HubConnectionBuilder()
+            .withUrl(CONNECTION_URL)
+            .configureLogging(CONNECTION_LOG_LEVEL)
             .build();
 
         connection.onclose(() => {
@@ -146,7 +112,7 @@ function* watchRequestGroupConnect() {
             .start()
             .then(() => {
                 connection
-                    .invoke("join", {
+                    .invoke(REQUEST_EVENT_JOIN, {
                         groupName: iterationPath,
                         userId: userId
                     })
@@ -161,8 +127,8 @@ function* watchRequestGroupConnect() {
 
         const { cancel } = yield race({
             task: all([
-                call(backgroundTask, connectionChannel),
-                call(executeTask, connection)
+                call(watchIncoming, connectionChannel),
+                call(watchOutgoing, connection)
             ]),
             cancel: take(REQUEST_GROUP_DISCONNECT)
         });
