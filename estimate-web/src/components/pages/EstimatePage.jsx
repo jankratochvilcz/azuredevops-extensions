@@ -46,6 +46,7 @@ class EstimationSession extends Component {
         this.revealVotes = this.revealVotes.bind(this);
         this.markSelectedWorkItemIdAsActive = this.markSelectedWorkItemIdAsActive.bind(this);
         this.getStoryPoints = this.getStoryPoints.bind(this);
+        this.getWorkItems = this.getWorkItems.bind(this);
 
         this.state = {
             selectedWorkItemId: null,
@@ -65,7 +66,7 @@ class EstimationSession extends Component {
             () => dispatch(connectToGroup(iterationPath, userId))
         ));
 
-        dispatch(requestWorkItems(iterationPath));
+        this.getWorkItems()
 
         if (iterations.length < 1) {
             dispatch(requestIterations());
@@ -91,6 +92,12 @@ class EstimationSession extends Component {
         this.setState({
             selectedWorkItemId: workItemId
         });
+    }
+
+    getWorkItems() {
+        const { iterationPath, dispatch } = this.props;
+
+        dispatch(requestWorkItems(iterationPath));
     }
 
     getStoryPoints(votes) {
@@ -225,7 +232,6 @@ class EstimationSession extends Component {
             activeWorkItemId,
             isActiveWorkItemRevealed,
             iterationPath,
-            dispatch,
             iterations,
             currentIterationUrl
         } = this.props;
@@ -270,7 +276,7 @@ class EstimationSession extends Component {
                                     iconProps={{ iconName: "Refresh" }}
                                     title="Reload User Stories"
                                     ariaLabel="ReloadUserStories"
-                                    onClick={() => dispatch(requestWorkItemUpdateStoryPointsUpdate(iterationPath))}
+                                    onClick={this.getWorkItems}
                                 />
                             </div>
                         </div>
