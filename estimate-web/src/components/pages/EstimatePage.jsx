@@ -21,8 +21,8 @@ import {
 import {
     connectToGroup,
     requestVote,
-    revealVotes,
-    switchActiveWorkItem
+    requestSwitchActiveWorkItem,
+    requestVotesRevealed
 } from "../../actions/estimation";
 import EstimatorPersona from "../EstimatorPersona";
 import { average, sum } from "../../utils/math";
@@ -116,9 +116,9 @@ class EstimationSession extends Component {
 
         const { userId, iterationPath, dispatch } = this.props;
 
-        dispatch(switchActiveWorkItem(
-            userId,
+        dispatch(requestSwitchActiveWorkItem(
             iterationPath,
+            userId,
             selectedWorkItemId
         ));
     }
@@ -155,7 +155,7 @@ class EstimationSession extends Component {
         const nextWorkItem = _.first(_.rest(sortedWorkItemsLeft, currentWorkItemIndex + 1));
 
         if (nextWorkItem) {
-            dispatch(switchActiveWorkItem(userId, iterationPath, nextWorkItem.id));
+            dispatch(requestSwitchActiveWorkItem(iterationPath, userId, nextWorkItem.id));
         }
     }
 
@@ -172,36 +172,47 @@ class EstimationSession extends Component {
             iterationPath
         ));
 
-        dispatch(switchActiveWorkItem(
-            userId,
+        dispatch(requestSwitchActiveWorkItem(
             iterationPath,
+            userId,
             activeWorkItemId
         ));
     }
 
     revealVotes() {
-        const { iterationPath, userId, activeWorkItemId } = this.props;
-
-        revealVotes(
-            userId,
+        const {
             iterationPath,
-            activeWorkItemId
-        );
+            userId,
+            activeWorkItemId,
+            dispatch
+        } = this.props;
+
+        dispatch(requestVotesRevealed(
+            iterationPath,
+            userId,
+            activeWorkItemId,
+            dispatch
+        ));
     }
 
     cardClicked(value) {
-        const { userId, iterationPath, activeWorkItemId } = this.props;
+        const {
+            userId,
+            iterationPath,
+            activeWorkItemId,
+            dispatch
+        } = this.props;
 
         if (activeWorkItemId === null) {
             return;
         }
 
-        requestVote(
+        dispatch(requestVote(
             userId,
             iterationPath,
             activeWorkItemId,
             value
-        );
+        ));
     }
 
     render() {
