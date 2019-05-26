@@ -374,9 +374,9 @@ class EstimationSession extends Component {
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && (
+                            {(!Number.isNaN(storyPoints) || (isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints && !Number.isNaN(selectedWorkItem.storyPoints))) && (
                                 <DefaultButton
-                                    text="Reset &amp; revote"
+                                    text="Reset story points &amp; vote"
                                     onClick={() => this.resetEstimate()}
                                 />
                             )}
