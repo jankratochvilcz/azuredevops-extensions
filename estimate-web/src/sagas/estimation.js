@@ -26,26 +26,49 @@ import {
     REQUEST_VOTE,
     REQUEST_GROUP_DISCONNECT,
     REQUEST_VOTES_REVEALED,
-    REQUEST_ACTIVEWORKITEM_CHANGED
+    REQUEST_ACTIVEWORKITEM_CHANGED,
+    receiveWorkItemScored
 } from "../actions/estimation";
+import { REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE, REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE } from "../actions/devops";
 
 const REQUEST_EVENT_JOIN = "join";
 
-// const CONNECTION_URL = "https://localhost:44378/estimate";
-const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/estimate";
+const CONNECTION_URL = "https://localhost:44378/estimate";
+// const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/estimate";
 const CONNECTION_LOG_LEVEL = LogLevel.Information;
 
 const receiveEventHandlers = [
     { name: "groupUpdated", actionFactory: receiveGroupUpdated },
     { name: "voted", actionFactory: receiveVote },
     { name: "revealed", actionFactory: receiveVotesRevealed },
-    { name: "switched", actionFactory: receiveActiveWorkItemChanged }
+    { name: "switched", actionFactory: receiveActiveWorkItemChanged },
+    { name: "scored", actionFactory: receiveWorkItemScored }
 ];
 
 const invokableActions = [
     { action: REQUEST_VOTE, event: "vote" },
     { action: REQUEST_ACTIVEWORKITEM_CHANGED, event: "switchSelectedWorkItem" },
-    { action: REQUEST_VOTES_REVEALED, event: "reveal" }
+    { action: REQUEST_VOTES_REVEALED, event: "reveal" },
+    {
+        action: REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
+        event: "score",
+        argsTransform: args => ({
+            groupName: args.iterationPath,
+            value: args.storyPoints,
+            userId: args.userId,
+            workItemId: args.workItemId
+        })
+    },
+    {
+        action: REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
+        event: "score",
+        argsTransform: args => ({
+            groupName: args.iterationPath,
+            value: null,
+            userId: args.userId,
+            workItemId: args.workItemId
+        })
+    }
 ];
 
 /**
@@ -63,10 +86,13 @@ const createConnectionChannel = connection => eventChannel(emitter => {
 /**
  * Executes a Redux action on a WebSocket connection.
  */
-const executeOnConnection = (actionName, eventName, connection) => function* () {
+const executeOnConnection = (actionName, eventName, argsTransform, connection) => function* () {
     while (true) {
         const args = yield take(actionName);
-        connection.invoke(eventName, args);
+
+        const transformedArgs = argsTransform ? argsTransform(args) : args;
+
+        connection.invoke(eventName, transformedArgs);
     }
 };
 
@@ -85,7 +111,13 @@ function* watchIncoming(connectionChannel) {
  */
 function* watchOutgoing(connection) {
     const invokableActionForks = invokableActions
-        .map(({ action, event }) => executeOnConnection(action, event, connection))
+        .map((
+            {
+                action,
+                event,
+                argsTransform
+            }
+        ) => executeOnConnection(action, event, argsTransform, connection))
         .map(x => fork(x));
 
     yield all(invokableActionForks);
