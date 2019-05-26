@@ -53,16 +53,25 @@ export const receiveWorkItems = (iterationPath, workItems) => ({
 });
 
 export const REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE = "DEVOPS/REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE";
-export const requestWorkItemUpdateStoryPointsUpdate = (workItemId, storyPoints) => ({
+export const requestWorkItemUpdateStoryPointsUpdate = (
+    workItemId,
+    storyPoints,
+    iterationPath,
+    userId
+) => ({
     type: REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
     storyPoints,
-    workItemId
+    workItemId,
+    iterationPath,
+    userId
 });
 
 export const REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE = "DEVOPS/REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE";
-export const requestWorkItemUpdateStoryPointsRemove = workItemId => ({
+export const requestWorkItemUpdateStoryPointsRemove = (workItemId, iterationPath, userId) => ({
     type: REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
-    workItemId
+    workItemId,
+    iterationPath,
+    userId
 });
 
 export const RECEIVE_WORKITEM_UPDATE = "DEVOPS/RECEIVE_WORKITEM_UPDATE";

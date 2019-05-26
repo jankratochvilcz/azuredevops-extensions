@@ -135,24 +135,28 @@ class EstimationSession extends Component {
         dispatch(requestWorkItemUpdateStoryPointsUpdate(
             activeWorkItemId,
             storyPoints,
-            iterationPath
+            iterationPath,
+            userId
         ));
 
-        const sortedWorkItemsLeft = _.sortBy(
-            workItems.filter(x => x.storyPoints == null),
+        const sortedWorkItems = _.sortBy(
+            workItems,
             x => x.stackRank
         );
 
         const currentWorkItemIndex = _.findIndex(
-            sortedWorkItemsLeft,
+            sortedWorkItems,
             x => x.id === activeWorkItemId
         );
 
-        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItemsLeft.length - 1) {
+        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItems.length - 1) {
             return;
         }
 
-        const nextWorkItem = _.first(_.rest(sortedWorkItemsLeft, currentWorkItemIndex + 1));
+        const nextWorkItem = _.find(
+            _.rest(sortedWorkItems, currentWorkItemIndex + 1),
+            x => !x.storyPoints
+        );
 
         if (nextWorkItem) {
             dispatch(requestSwitchActiveWorkItem(iterationPath, userId, nextWorkItem.id));
@@ -169,7 +173,8 @@ class EstimationSession extends Component {
 
         dispatch(requestWorkItemUpdateStoryPointsRemove(
             activeWorkItemId,
-            iterationPath
+            iterationPath,
+            userId
         ));
 
         dispatch(requestSwitchActiveWorkItem(
