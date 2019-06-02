@@ -299,7 +299,10 @@ class EstimationSession extends Component {
                     <div className="scrollable-flex">
                         <div className="vote-title-container">
                             <h4 className="vote-title-text">Voting</h4>
-                            <ConnectionStatus />
+                            <ConnectionStatus
+                                iterationPath={iterationPath}
+                                userId={userId}
+                            />
                         </div>
                         <div className="cards-alignment-container">
                             <div className="poker-cards-container">
