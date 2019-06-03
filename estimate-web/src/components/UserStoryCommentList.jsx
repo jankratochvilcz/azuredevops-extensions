@@ -63,7 +63,7 @@ UserStoryCommentList.propTypes = {
 
 const mapStateToProps = state => ({
     comments: state.workItem
-        && state.workItem.find(x => x.id === state.applicationContext.activeWorkItemId).comments
+        && state.workItem.find(x => x.id === state.applicationContext.selectedWorkItemId).comments
 });
 
 const mapDispatchToProps = dispatch => ({
