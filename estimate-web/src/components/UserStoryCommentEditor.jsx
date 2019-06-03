@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { PropTypes } from "prop-types";
 
 import {
-    TextField, Persona, PersonaSize, PrimaryButton
+    TextField, Persona, PersonaSize, PrimaryButton, Spinner
 } from "office-ui-fabric-react";
 
 import "./UserStoryCommentEditor.less";
@@ -39,7 +39,7 @@ class UserStoryCommentEditor extends Component {
     };
 
     render() {
-        const { user } = this.props;
+        const { user, addingComment } = this.props;
         const { comment } = this.state;
         return (
             <div className="user-story-comment-editor">
@@ -56,7 +56,10 @@ class UserStoryCommentEditor extends Component {
                     multiline
                     autoAdjustHeight
                 />
-                <PrimaryButton onClick={this.onAddClicked}>Add Comment</PrimaryButton>
+                <PrimaryButton onClick={this.onAddClicked} className="add-button">
+                    <span>Add Comment</span>
+                    {addingComment && <Spinner className="adding-spinner" />}
+                </PrimaryButton>
             </div>
         );
     }
@@ -65,11 +68,21 @@ class UserStoryCommentEditor extends Component {
 UserStoryCommentEditor.propTypes = {
     user: userShape.isRequired,
     workItem: workItemShape.isRequired,
-    addComment: PropTypes.func.isRequired
+    addComment: PropTypes.func.isRequired,
+    addingComment: PropTypes.bool
 };
+
+UserStoryCommentEditor.defaultProps = {
+    addingComment: false
+};
+
+const mapStateToProps = state => ({
+    addingComment: state.workItem.find(x => x.id === state.applicationContext.selectedWorkItemId)
+        .addingComment
+});
 
 const mapDispatchToProps = dispatch => ({
     addComment: (workItemId, comment) => dispatch(requestWorkItemAddComment(workItemId, comment))
 });
 
-export default connect(undefined, mapDispatchToProps)(UserStoryCommentEditor);
+export default connect(mapStateToProps, mapDispatchToProps)(UserStoryCommentEditor);

@@ -1,6 +1,11 @@
 import _ from "underscore";
 
-import { RECEIVE_WORKITEMS, RECEIVE_WORKITEM_UPDATE, RECEIVE_WORKITEM_COMMENTS } from "../actions/devops";
+import {
+    RECEIVE_WORKITEMS,
+    RECEIVE_WORKITEM_UPDATE,
+    RECEIVE_WORKITEM_COMMENTS,
+    REQUEST_WORKITEM_ADD_COMMENT
+} from "../actions/devops";
 import { mergeArraysUsingId } from "./infrastructure/merging";
 import { RECEIVE_WORKITEM_SCORED } from "../actions/estimation";
 
@@ -8,7 +13,13 @@ const onReceiveWorkItems = (state, action) => (
     mergeArraysUsingId(state, action.workItems));
 
 const onReceiveComments = (state, action) => state.map(x => (x.id === action.workItemId
-    ? { ...x, comments: action.comments, commentsFetched: true }
+    ? {
+        ...x, comments: action.comments, commentsFetched: true, addingComment: false
+    }
+    : x));
+
+const onRequestWorkItemAddComment = (state, action) => state.map(x => (x.id === action.workItemId
+    ? { ...x, addingComment: true }
     : x));
 
 const onReceiveWorkItemUpdate = (state, action) => (
@@ -40,6 +51,8 @@ const workItem = (
             return onReceiveComments(state, action);
         case RECEIVE_WORKITEM_SCORED:
             return onReceiveWorkItemScored(state, action);
+        case REQUEST_WORKITEM_ADD_COMMENT:
+            return onRequestWorkItemAddComment(state, action);
         default:
             return state;
     }
