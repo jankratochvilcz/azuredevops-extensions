@@ -2,11 +2,16 @@ import { STATUS_CHANGED } from "../actions/connection";
 import { INITIALIZE_CONTEXT } from "../actions/devops";
 import { RECEIVE_ACTIVEWORKITEM_CHANGED, RECEIVE_VOTES_REVEALED, RECEIVE_GROUP_UPDATED } from "../actions/estimation";
 
-const onStatusChanged = (state, action) => ({
-    ...state,
-    isConnecting: "isConnecting" in action ? action.isConnecting : state.isConnecting,
-    isDisconnected: "isDisconnected" in action ? action.isDisconnected : state.isDisconnected
-});
+const onStatusChanged = (state, action) => {
+    const isConnecting = "isConnecting" in action ? action.isConnecting : state.isConnecting;
+    const isDisconnected = ("isDisconnected" in action ? action.isDisconnected : state.isDisconnected) || false;
+
+    return {
+        ...state,
+        isConnecting,
+        isDisconnected
+    };
+};
 
 const onInitializeContext = (state, action) => ({
     ...state,
@@ -45,6 +50,7 @@ const onReceiveGroupUpdated = (state, action) => ({
 
 const applicationContext = (state = {
     isConnecting: false,
+    isDisconnected: false,
     userId: null,
     teamId: null,
     teamName: null,

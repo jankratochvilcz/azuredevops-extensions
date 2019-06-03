@@ -21,8 +21,8 @@ import {
 import {
     connectToGroup,
     requestVote,
-    revealVotes,
-    switchActiveWorkItem
+    requestSwitchActiveWorkItem,
+    requestVotesRevealed
 } from "../../actions/estimation";
 import EstimatorPersona from "../EstimatorPersona";
 import { average, sum } from "../../utils/math";
@@ -117,9 +117,9 @@ class EstimationSession extends Component {
 
         const { userId, iterationPath, dispatch } = this.props;
 
-        dispatch(switchActiveWorkItem(
-            userId,
+        dispatch(requestSwitchActiveWorkItem(
             iterationPath,
+            userId,
             selectedWorkItemId
         ));
     }
@@ -136,27 +136,31 @@ class EstimationSession extends Component {
         dispatch(requestWorkItemUpdateStoryPointsUpdate(
             activeWorkItemId,
             storyPoints,
-            iterationPath
+            iterationPath,
+            userId
         ));
 
-        const sortedWorkItemsLeft = _.sortBy(
-            workItems.filter(x => x.storyPoints == null),
+        const sortedWorkItems = _.sortBy(
+            workItems,
             x => x.stackRank
         );
 
         const currentWorkItemIndex = _.findIndex(
-            sortedWorkItemsLeft,
+            sortedWorkItems,
             x => x.id === activeWorkItemId
         );
 
-        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItemsLeft.length - 1) {
+        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItems.length - 1) {
             return;
         }
 
-        const nextWorkItem = _.first(_.rest(sortedWorkItemsLeft, currentWorkItemIndex + 1));
+        const nextWorkItem = _.find(
+            _.rest(sortedWorkItems, currentWorkItemIndex + 1),
+            x => !x.storyPoints
+        );
 
         if (nextWorkItem) {
-            dispatch(switchActiveWorkItem(userId, iterationPath, nextWorkItem.id));
+            dispatch(requestSwitchActiveWorkItem(iterationPath, userId, nextWorkItem.id));
         }
     }
 
@@ -170,39 +174,51 @@ class EstimationSession extends Component {
 
         dispatch(requestWorkItemUpdateStoryPointsRemove(
             activeWorkItemId,
-            iterationPath
+            iterationPath,
+            userId
         ));
 
-        dispatch(switchActiveWorkItem(
-            userId,
+        dispatch(requestSwitchActiveWorkItem(
             iterationPath,
+            userId,
             activeWorkItemId
         ));
     }
 
     revealVotes() {
-        const { iterationPath, userId, activeWorkItemId } = this.props;
-
-        revealVotes(
-            userId,
+        const {
             iterationPath,
-            activeWorkItemId
-        );
+            userId,
+            activeWorkItemId,
+            dispatch
+        } = this.props;
+
+        dispatch(requestVotesRevealed(
+            iterationPath,
+            userId,
+            activeWorkItemId,
+            dispatch
+        ));
     }
 
     cardClicked(value) {
-        const { userId, iterationPath, activeWorkItemId } = this.props;
+        const {
+            userId,
+            iterationPath,
+            activeWorkItemId,
+            dispatch
+        } = this.props;
 
         if (activeWorkItemId === null) {
             return;
         }
 
-        requestVote(
+        dispatch(requestVote(
             userId,
             iterationPath,
             activeWorkItemId,
             value
-        );
+        ));
     }
 
     render() {
@@ -284,7 +300,10 @@ class EstimationSession extends Component {
                     <div className="scrollable-flex">
                         <div className="vote-title-container">
                             <h4 className="vote-title-text">Voting</h4>
-                            <ConnectionStatus />
+                            <ConnectionStatus
+                                iterationPath={iterationPath}
+                                userId={userId}
+                            />
                         </div>
                         <div className="cards-alignment-container">
                             <div className="poker-cards-container">
@@ -360,9 +379,9 @@ class EstimationSession extends Component {
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && (
+                            {(!Number.isNaN(storyPoints) || (isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints && !Number.isNaN(selectedWorkItem.storyPoints))) && (
                                 <DefaultButton
-                                    text="Reset &amp; revote"
+                                    text="Reset story points &amp; vote"
                                     onClick={() => this.resetEstimate()}
                                 />
                             )}

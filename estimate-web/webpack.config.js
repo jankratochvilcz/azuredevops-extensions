@@ -41,6 +41,7 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
+            { from: "./assets/*.png", to: "./" },
             { from: "./node_modules/vss-web-extension-sdk/lib/VSS.SDK.min.js", to: "lib/VSS.SDK.min.js" },
             { from: "./node_modules/office-ui-fabric-react/dist/css/fabric.min.css", to: "lib/fabric.min.css" },
             { from: "./src/*.html", to: "./" },

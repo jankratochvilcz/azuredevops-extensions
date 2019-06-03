@@ -8,6 +8,7 @@ import watchGetTeam from "./getTeam";
 import watchGetWorkItems from "./getWorkItems";
 import watchUpdateWorkItem from "./updateWorkItem";
 import watchGetComments from "./getComments";
+import watchEstimation from "./estimation";
 
 export default function* root() {
     yield all([
@@ -15,6 +16,7 @@ export default function* root() {
         fork(watchGetTeam),
         fork(watchGetWorkItems),
         fork(watchGetComments),
-        fork(watchUpdateWorkItem)
+        fork(watchUpdateWorkItem),
+        fork(watchEstimation)
     ]);
 }

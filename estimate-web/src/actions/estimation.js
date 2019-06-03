@@ -1,36 +1,35 @@
-import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
-import { connectionStarting, disconnected } from "./connection";
+import { connectionStarting } from "./connection";
 
-export const RECEIVE_GROUP_UPDATED = "ESTIMATION/RECEIVE_GROUP_UPDATED";
-export const REQUEST_VOTE = "ESTIMATION/REQUST_VOTE";
-export const RECEIVE_VOTE = "ESTIMATION/RECEIVE_VOTE";
-export const RECEIVE_VOTES_REVEALED = "ESTIMATION/RECEIVE_VOTES_REVEALED";
-
-export const REQUEST_ACTIVEWORKITEM_CHANGED = "REQUEST/ACTIVEWORKITEM_CHANGED";
-export const RECEIVE_ACTIVEWORKITEM_CHANGED = "RECEIVE/ACTIVEWORKITEM_CHANGED";
-
-const groupUpdatedEventName = "groupUpdated";
-const votedEventName = "voted";
-const revealedEventName = "revealed";
-const switchedActiveWorkItemEventName = "switched";
-
-const clientBuilder = new HubConnectionBuilder();
-// const url = "https://localhost:44378/estimate";
-const url = "https://doist-estimate-api.azurewebsites.net/estimate";
-const logLevel = LogLevel.Information;
-
-const connection = clientBuilder
-    .withUrl(url)
-    .configureLogging(logLevel)
-    .build();
-
-const receiveGroupUpdated = (connectedUserIds, activeWorkItemId) => ({
-    type: RECEIVE_GROUP_UPDATED,
-    connectedUserIds: connectedUserIds,
-    activeWorkItemId: activeWorkItemId
+export const REQUEST_GROUP_CONNECT = "ESTIMATION/REQUEST_GROUP_CONNECT";
+export const requestGroupConnect = (iterationPath, userId) => ({
+    type: REQUEST_GROUP_CONNECT,
+    iterationPath,
+    userId
 });
 
-const receiveVote = args => ({
+export const REQUEST_GROUP_DISCONNECT = "ESTIMATION/REQUEST_GROUP_DISCONNECT";
+export const requestGroupDisconnect = () => ({
+    type: REQUEST_GROUP_DISCONNECT
+});
+
+export const RECEIVE_GROUP_UPDATED = "ESTIMATION/RECEIVE_GROUP_UPDATED";
+export const receiveGroupUpdated = args => ({
+    type: RECEIVE_GROUP_UPDATED,
+    connectedUserIds: args.presentUserIds,
+    activeWorkItemId: args.activeWorkItemId
+});
+
+export const REQUEST_VOTE = "ESTIMATION/REQUEST_VOTE";
+export const requestVote = (userId, iterationPath, workItemId, value) => ({
+    type: REQUEST_VOTE,
+    groupName: iterationPath,
+    userId,
+    workItemId,
+    value
+});
+
+export const RECEIVE_VOTE = "ESTIMATION/RECEIVE_VOTE";
+export const receiveVote = args => ({
     type: RECEIVE_VOTE,
     iterationPath: args.groupName,
     userId: args.userId,
@@ -38,98 +37,43 @@ const receiveVote = args => ({
     workItemId: args.workItemId
 });
 
-const receiveVotesRevealed = args => ({
+export const REQUEST_VOTES_REVEALED = "ESTIMATION/REQUEST_VOTES_REVEALED";
+export const requestVotesRevealed = (iterationPath, userId, workItemId) => ({
+    type: REQUEST_VOTES_REVEALED,
+    groupName: iterationPath,
+    userId,
+    workItemId
+});
+
+export const RECEIVE_VOTES_REVEALED = "ESTIMATION/RECEIVE_VOTES_REVEALED";
+export const receiveVotesRevealed = args => ({
     type: RECEIVE_VOTES_REVEALED,
     workItemId: args.workItemId,
     iterationPath: args.groupName
 });
 
-const receiveActiveWorkItemChanged = args => ({
+export const REQUEST_ACTIVEWORKITEM_CHANGED = "ESTIMATION/REQUEST_ACTIVEWORKITEM_CHANGED";
+export const requestSwitchActiveWorkItem = (iterationPath, userId, workItemId) => ({
+    type: REQUEST_ACTIVEWORKITEM_CHANGED,
+    groupName: iterationPath,
+    userId,
+    workItemId
+});
+
+export const RECEIVE_ACTIVEWORKITEM_CHANGED = "ESTIMATION/RECEIVE_ACTIVEWORKITEM_CHANGED";
+export const receiveActiveWorkItemChanged = args => ({
     type: RECEIVE_ACTIVEWORKITEM_CHANGED,
     workItemId: args.workItemId,
     iterationPath: args.groupName
 });
 
-export const requestVote = (userId, iterationPath, workItemId, value) => {
-    connection.invoke("vote", {
-        groupName: iterationPath,
-        userId: userId,
-        value: value,
-        workItemId: workItemId
-    });
-};
-
-export const revealVotes = (userId, iterationPath, workItemId) => {
-    connection.invoke("reveal", {
-        groupName: iterationPath,
-        userId: userId,
-        workItemId: workItemId
-    });
-};
-
-export const switchActiveWorkItem = (userId, iterationPath, workItemId) => {
-    connection.invoke("switchSelectedWorkItem", {
-        groupName: iterationPath,
-        userId: userId,
-        workItemId: workItemId
-    });
-
-    return receiveActiveWorkItemChanged({
-        workItemId: workItemId,
-        iterationPath: iterationPath
-    });
-};
-
-export const connect = (iterationPath, userId) => dispatch => {
-    dispatch(connectionStarting());
-
-    connection
-        .start()
-        .then(() => {
-            connection
-                .invoke("join", {
-                    groupName: iterationPath,
-                    userId: userId
-                })
-                .catch(() => dispatch(disconnected()));
-        })
-        .catch(x => {
-            console.log(x);
-            setTimeout(() => dispatch(connect(iterationPath, userId)), 2000);
-        });
-};
-
-const registerConnectionHandlers = (iterationPath, userId) => dispatch => {
-    connection.off(groupUpdatedEventName);
-    connection.off(votedEventName);
-    connection.off(revealedEventName);
-    connection.off(switchedActiveWorkItemEventName);
-
-    connection.onclose(() => {
-        dispatch(disconnected());
-        setTimeout(() => dispatch(connect(iterationPath, userId)), 2000);
-    });
-
-    connection.on(
-        groupUpdatedEventName,
-        args => dispatch(receiveGroupUpdated(args.presentUserIds, args.activeWorkItemId))
-    );
-
-    connection.on(
-        votedEventName,
-        args => dispatch(receiveVote(args))
-    );
-
-    connection.on(
-        revealedEventName,
-        args => dispatch(receiveVotesRevealed(args))
-    );
-
-    connection.on(
-        switchedActiveWorkItemEventName,
-        args => dispatch(receiveActiveWorkItemChanged(args))
-    );
-};
+export const RECEIVE_WORKITEM_SCORED = "ESTIMATION/RECEIVE_WORKITEM_SCORED";
+export const receiveWorkItemScored = args => ({
+    type: RECEIVE_WORKITEM_SCORED,
+    workItemId: args.workItemId,
+    storyPoints: args.value,
+    iterationPath: args.groupName
+});
 
 export const connectToGroup = (iterationPath, userId) => dispatch => {
     VSS.getService(VSS.ServiceIds.Navigation).then(navigationService => {
@@ -137,7 +81,5 @@ export const connectToGroup = (iterationPath, userId) => dispatch => {
     });
 
     dispatch(connectionStarting());
-
-    connect(iterationPath, userId)(dispatch);
-    registerConnectionHandlers(iterationPath, userId)(dispatch);
+    dispatch(requestGroupConnect(iterationPath, userId));
 };
