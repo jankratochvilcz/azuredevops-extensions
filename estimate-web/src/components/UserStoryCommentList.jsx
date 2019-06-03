@@ -12,14 +12,26 @@ import timeAgo from "../utils/date";
 
 class UserStoryCommentList extends Component {
     componentDidMount() {
-        const { workItem, requestComments } = this.props;
-        requestComments(workItem.id);
+        const { workItem, requestComments, commentsFetched } = this.props;
+        if (!commentsFetched) {
+            requestComments(workItem.id);
+        }
+    }
+
+    componentDidUpdate(previousProps) {
+        const { workItem, requestComments, commentsFetched } = this.props;
+
+        if (commentsFetched) return;
+
+        if (workItem.id !== previousProps.workItem.id) {
+            requestComments(workItem.id);
+        }
     }
 
     render() {
-        const { comments } = this.props;
-        if (!comments) {
-            return <Spinner label="Loading..." />;
+        const { comments, commentsFetched } = this.props;
+        if (!commentsFetched) {
+            return <Spinner label="Loading comments..." />;
         }
         return (
             <div className="user-story-comments">
@@ -55,17 +67,23 @@ class UserStoryCommentList extends Component {
 }
 
 UserStoryCommentList.propTypes = {
-    comments: PropTypes.arrayOf(PropTypes.object).isRequired
-};
-
-UserStoryCommentList.propTypes = {
     workItem: workItemShape.isRequired,
-    requestComments: PropTypes.func.isRequired
+    requestComments: PropTypes.func.isRequired,
+    comments: PropTypes.arrayOf(PropTypes.object),
+    commentsFetched: PropTypes.bool
 };
 
+UserStoryCommentList.defaultProps = {
+    commentsFetched: false,
+    comments: []
+};
+
+// TODO (CK): rewrite using filters
 const mapStateToProps = state => ({
     comments: state.workItem
-        && state.workItem.find(x => x.id === state.applicationContext.selectedWorkItemId).comments
+        && state.workItem.find(x => x.id === state.applicationContext.selectedWorkItemId).comments,
+    commentsFetched: state.workItem.find(x => x.id === state.applicationContext.selectedWorkItemId)
+        .commentsFetched
 });
 
 const mapDispatchToProps = dispatch => ({

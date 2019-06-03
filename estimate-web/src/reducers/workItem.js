@@ -8,7 +8,7 @@ const onReceiveWorkItems = (state, action) => (
     mergeArraysUsingId(state, action.workItems));
 
 const onReceiveComments = (state, action) => state.map(x => (x.id === action.workItemId
-    ? { ...x, comments: action.comments }
+    ? { ...x, comments: action.comments, commentsFetched: true }
     : x));
 
 const onReceiveWorkItemUpdate = (state, action) => (
