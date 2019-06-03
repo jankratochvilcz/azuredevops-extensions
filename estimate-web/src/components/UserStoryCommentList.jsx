@@ -40,9 +40,11 @@ class UserStoryCommentList extends Component {
                                     {timeAgo(comment.createdDate)}
                                 </span>
                             </Label>
-                            <div dangerouslySetInnerHTML={{
-                                __html: comment.text
-                            }}
+                            <div
+                                className="body"
+                                dangerouslySetInnerHTML={{
+                                    __html: comment.text
+                                }}
                             />
                         </div>
                     </React.Fragment>
