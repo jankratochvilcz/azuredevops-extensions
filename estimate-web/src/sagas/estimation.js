@@ -26,8 +26,8 @@ import {
     REQUEST_GROUP_DISCONNECT,
     REQUEST_VOTES_REVEALED,
     REQUEST_ACTIVEWORKITEM_CHANGED,
-    REQUEST_WORKITEM_REFRESH_COMMENTS,
-    receiveWorkItemScored
+    receiveWorkItemScored,
+    REQUEST_WORKITEM_REFRESH_COMMENTS
 } from "../actions/estimation";
 
 import {

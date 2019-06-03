@@ -12,10 +12,9 @@ import {
     receiveWorkItemUpdate,
     REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
     REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
-    REQUEST_WORKITEM_ADD_COMMENT
+    REQUEST_WORKITEM_ADD_COMMENT,
+    requestWorkItemGetComments
 } from "../actions/devops";
-
-import { requestWorkItemRefreshComments } from "../actions/estimation";
 
 import { normalizeWorkItem } from "./infrastructure/vssEntityNormalization";
 
@@ -71,7 +70,7 @@ function* watchAddComment() {
             },
             workItemId
         );
-        yield put(requestWorkItemRefreshComments(workItemId));
+        yield put(requestWorkItemGetComments(workItemId));
     }
 }
 
