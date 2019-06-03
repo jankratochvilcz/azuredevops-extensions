@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import _ from "underscore";
 
 import { PrimaryButton } from "office-ui-fabric-react";
-import { Dropdown } from "office-ui-fabric-react/lib/Dropdown";
 import { Redirect } from "react-router";
 
 import { requestIterations } from "../../actions/devops";
@@ -12,6 +11,7 @@ import "./WelcomePage.less";
 import IterationPicker from "../IterationPicker";
 import { cardDeckShape } from "../../reducers/models/cardDeckShape";
 import iterationShape from "../../reducers/models/iterationShape";
+import EmptyState from "../EmptyState";
 
 class WelcomePage extends Component {
     constructor(props) {
@@ -85,12 +85,10 @@ class WelcomePage extends Component {
     render() {
         const {
             redirectToSession,
-            selectedIteration,
-            selectedDeck
+            selectedIteration
         } = this.state;
 
         const {
-            availableCardDecks,
             iterations
         } = this.props;
 
@@ -99,30 +97,30 @@ class WelcomePage extends Component {
         }
 
         return (
-            <div className="main-content">
-                <h2 className="main-content-child">Configure Estimation Session</h2>
-
-                <IterationPicker
-                    iterations={iterations}
-                    onSelectedIterationChanged={this.onSelectedIterationChanged}
-                    selectedIteration={selectedIteration}
-                />
-
-                <Dropdown
-                    label="Deck"
-                    className="main-content-child"
-                    selectedKey={selectedDeck != null ? selectedDeck.key : null}
-                    options={availableCardDecks.map(x => ({
-                        key: x.key,
-                        text: x.name
-                    }))}
-                />
-
-                <PrimaryButton
-                    className="main-content-child go-to-session-button"
-                    onClick={this.goToSession}
-                    text="Start Estimating"
-                />
+            <div className="centering-root">
+                <div className="welcome-root">
+                    <div className="welcome-illustration">
+                        <EmptyState
+                            image="/assets/setup_wizard.svg"
+                            title="Sprint Selection"
+                            body="Select a sprint you want to estimate from the list above.
+                            Once you click &quot;Estimate&quot;, grab the URL from the adress bar and share it with colleagues to allow them to join."
+                        />
+                    </div>
+                    <div className="iterations-picker">
+                        <IterationPicker
+                            iterations={iterations}
+                            onSelectedIterationChanged={this.onSelectedIterationChanged}
+                            selectedIteration={selectedIteration}
+                        />
+                    </div>
+                    <div className="go-to-session-button">
+                        <PrimaryButton
+                            onClick={this.goToSession}
+                            text="Estimate"
+                        />
+                    </div>
+                </div>
             </div>
         );
     }

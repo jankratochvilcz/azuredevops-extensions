@@ -5,10 +5,11 @@ import _ from "underscore";
 import {
     PrimaryButton,
     DefaultButton,
-    IconButton
+    IconButton,
+    Spinner,
+    SpinnerSize
 } from "office-ui-fabric-react";
 
-import "./EstimatePage.less";
 import UserStoryList from "../UserStoryList";
 import PokerCard from "../PokerCard";
 import {
@@ -34,6 +35,10 @@ import { cardValueShape } from "../../reducers/models/cardDeckShape";
 import userShape from "../../reducers/models/userShape";
 import voteShape from "../../reducers/models/voteShape";
 import workItemShape from "../../reducers/models/workItemShape";
+
+import "./EstimatePage.less";
+import "../../resources/Containers.less";
+import EmptyState from "../EmptyState";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -252,12 +257,13 @@ class EstimationSession extends Component {
 
         const storyPoints = this.getStoryPoints(votesForActiveWorkItem);
 
-        const workItemsOrdered = _.sortBy(workItems, x => x.stackRank);
-        const storyPointsTotal = Math.round(sum(workItems
+        const workItemsOrdered = _.sortBy(workItems || [], x => x.stackRank);
+        const storyPointsTotal = Math.round(sum((workItems || [])
             .filter(x => x.storyPoints !== null && x.storyPoints !== undefined)
             .map(x => x.storyPoints)));
 
         const iteration = _.find(iterations, x => x.path === iterationPath);
+        const hasNoWorkItems = iteration && !iteration.workItemsLoading && workItems.length < 1;
 
         return (
             <div className="component-root">
@@ -267,9 +273,9 @@ class EstimationSession extends Component {
                             <h4>
                                 { iteration && <a href={currentIterationUrl} target="_blank" rel="noopener noreferrer">{iteration.name}</a> }
                             </h4>
-                            <div>{`${workItemsOrdered.length} work items left`}</div>
-                            <div>{`${storyPointsTotal} total story points`}</div>
-                            <div className="refresh-button">
+                            <div className="work-items-title-row-member">{`${workItemsOrdered.length} work items left`}</div>
+                            <div className="work-items-title-row-member">{`${storyPointsTotal} total story points`}</div>
+                            <div className="refresh-button work-items-title-row-member">
                                 <IconButton
                                     className="refreshButton"
                                     iconProps={{ iconName: "Refresh" }}
@@ -278,32 +284,41 @@ class EstimationSession extends Component {
                                     onClick={() => dispatch(requestWorkItemUpdateStoryPointsUpdate(iterationPath))}
                                 />
                             </div>
-                        </div>
-                        <UserStoryList
-                            title="Work Items"
-                            columns={["title", "storyPoints"]}
-                            selectedUserStoryId={(selectedWorkItem != null
-                                ? selectedWorkItem.id
-                                : null)}
-                            onSelectedUserStoryIdChanged={(
-                                id => this.onSelectedWorkItemIdChanged(id))}
-                            items={(workItemsOrdered.map(x => ({
-                                ...x,
-                                isBeingScored: x.id === activeWorkItemId
-                            })))}
-                        />
-                    </div>
-                </div>
-                <div className="center-pane">
-                    {/* https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content */}
-                    <div className="scrollable-flex">
-                        <div className="vote-title-container">
-                            <h4 className="vote-title-text">Voting</h4>
                             <ConnectionStatus
                                 iterationPath={iterationPath}
                                 userId={userId}
                             />
                         </div>
+                        { iteration && !iteration.workItemsLoading && !hasNoWorkItems && (
+                            <UserStoryList
+                                title="Work Items"
+                                columns={["title", "storyPoints"]}
+                                selectedUserStoryId={(selectedWorkItem != null
+                                    ? selectedWorkItem.id
+                                    : null)}
+                                onSelectedUserStoryIdChanged={(
+                                    id => this.onSelectedWorkItemIdChanged(id))}
+                                items={(workItemsOrdered.map(x => ({
+                                    ...x,
+                                    isBeingScored: x.id === activeWorkItemId
+                                })))}
+                            />
+                        )}
+                        { hasNoWorkItems && iteration && !iteration.workItemsLoading && (
+                            <EmptyState
+                                image="/assets/blank_canvas.svg"
+                                title="No user stories to score"
+                                body="There are no user stories and bugs in iteration to score just yet."
+                            />
+                        )}
+                        { (!iteration || iteration.workItemsLoading) && (
+                            <Spinner size={SpinnerSize.large} />
+                        )}
+                    </div>
+                </div>
+                <div className="center-pane">
+                    {/* https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content */}
+                    <div className="scrollable-flex">
                         <div className="cards-alignment-container">
                             <div className="poker-cards-container">
                                 {cardValues.map(cardValue => (
@@ -377,7 +392,7 @@ class EstimationSession extends Component {
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {(!Number.isNaN(storyPoints) || (isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints && !Number.isNaN(selectedWorkItem.storyPoints))) && (
+                            {(!Number.isNaN(storyPoints) || (selectedWorkItem && isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints && !Number.isNaN(selectedWorkItem.storyPoints))) && (
                                 <DefaultButton
                                     text="Reset story points &amp; vote"
                                     onClick={() => this.resetEstimate()}

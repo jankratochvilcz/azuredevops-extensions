@@ -40,6 +40,11 @@ function* getWorkItems(iterationPath) {
 
     const workItemIds = wiqlQueryResult.workItems.map(x => x.id);
 
+    if (workItemIds.length < 1) {
+        yield put(receiveWorkItems(iterationPath, []));
+        return;
+    }
+
     const workItems = yield call(
         executeOnWorkItemTrackingClient,
         x => x.getWorkItems(workItemIds)

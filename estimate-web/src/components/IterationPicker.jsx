@@ -59,7 +59,6 @@ const IterationPicker = props => {
         <Dropdown
             placeholder="Loading interations ..."
             className="main-content-child"
-            label="Iteration"
             onChange={onSelectedIterationChanged}
             selectedKey={selectedIteration != null ? selectedIteration.id : null}
             options={iterationOptions}
