@@ -10,7 +10,6 @@ import {
 } from "office-ui-fabric-react";
 
 import UserStoryList from "../UserStoryList";
-import PokerCard from "../PokerCard";
 import {
     requestTeam,
     requestWorkItems,
@@ -20,7 +19,6 @@ import {
 } from "../../actions/devops";
 import {
     connectToGroup,
-    requestVote,
     requestSwitchActiveWorkItem,
     requestVotesRevealed
 } from "../../actions/estimation";
@@ -37,13 +35,13 @@ import "./EstimatePage.less";
 import "../../resources/Containers.less";
 import EmptyState from "../EmptyState";
 import EstimationSessionStatus from "../EstimationSessionStatus";
+import PokerCardList from "../PokerCardList";
 
 class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
         this.onactiveWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
-        this.cardClicked = this.cardClicked.bind(this);
         this.saveEstimate = this.saveEstimate.bind(this);
         this.resetEstimate = this.resetEstimate.bind(this);
         this.revealVotes = this.revealVotes.bind(this);
@@ -203,33 +201,11 @@ class EstimationSession extends Component {
         ));
     }
 
-    cardClicked(value) {
-        const {
-            userId,
-            iterationPath,
-            activeWorkItemId,
-            dispatch
-        } = this.props;
-
-        if (activeWorkItemId === null) {
-            return;
-        }
-
-        dispatch(requestVote(
-            userId,
-            iterationPath,
-            activeWorkItemId,
-            value
-        ));
-    }
-
     render() {
         const {
             workItems,
-            cardValues,
             users,
             votes,
-            userId,
             activeWorkItemId,
             isActiveWorkItemRevealed,
             iterationPath,
@@ -296,21 +272,7 @@ class EstimationSession extends Component {
                     {/* https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content */}
                     <div className="scrollable-flex">
                         <div className="cards-alignment-container">
-                            <div className="poker-cards-container">
-                                {cardValues.map(cardValue => (
-                                    <PokerCard
-                                        value={cardValue.title}
-                                        key={cardValue.title}
-                                        selected={_.some(
-                                            votes,
-                                            x => x.userId === userId
-                                            && x.workItemId === activeWorkItemId
-                                            && x.value === cardValue.title
-                                        )}
-                                        onClick={() => this.cardClicked(cardValue.title)}
-                                    />
-                                ))}
-                            </div>
+                            { iteration && <PokerCardList iteration={iteration} /> }
                             {!isSelectedWorkItemInEstimation && (
                                 <div
                                     className="cards-overlay"
