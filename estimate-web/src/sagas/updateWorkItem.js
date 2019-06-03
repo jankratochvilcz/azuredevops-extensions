@@ -14,6 +14,9 @@ import {
     REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
     REQUEST_WORKITEM_ADD_COMMENT
 } from "../actions/devops";
+
+import { requestWorkItemRefreshComments } from "../actions/estimation";
+
 import { normalizeWorkItem } from "./infrastructure/vssEntityNormalization";
 
 function* updateWorkItem(payload, workItemId) {
@@ -59,7 +62,7 @@ function* watchRemoveStoryPoints() {
 function* watchAddComment() {
     while (true) {
         const { workItemId, comment } = yield take(REQUEST_WORKITEM_ADD_COMMENT);
-        yield fork(
+        yield call(
             updateWorkItem,
             {
                 op: "add",
@@ -68,6 +71,7 @@ function* watchAddComment() {
             },
             workItemId
         );
+        yield put(requestWorkItemRefreshComments(workItemId));
     }
 }
 

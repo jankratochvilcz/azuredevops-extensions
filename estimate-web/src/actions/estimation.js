@@ -82,6 +82,19 @@ export const receiveWorkItemScored = args => ({
     iterationPath: args.groupName
 });
 
+
+export const REQUEST_WORKITEM_REFRESH_COMMENTS = "ESTIMATION/REQUEST_WORKITEM_REFRESH_COMMENTS";
+export const requestWorkItemRefreshComments = id => ({
+    type: REQUEST_WORKITEM_REFRESH_COMMENTS,
+    workItemId: id
+});
+
+export const RECEIVE_WORKITEM_REFRESH_COMMENTS = "ESTIMATION/RECEIVE_WORKITEM_REFRESH_COMMENTS";
+export const receiveWorkItemRefreshComments = id => ({
+    type: RECEIVE_WORKITEM_REFRESH_COMMENTS,
+    workItemId: id
+});
+
 export const connectToGroup = (iterationPath, userId) => dispatch => {
     VSS.getService(VSS.ServiceIds.Navigation).then(navigationService => {
         navigationService.setHash(iterationPath);
