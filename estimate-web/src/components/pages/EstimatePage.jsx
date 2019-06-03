@@ -5,7 +5,6 @@ import _ from "underscore";
 import {
     PrimaryButton,
     DefaultButton,
-    IconButton,
     Spinner,
     SpinnerSize
 } from "office-ui-fabric-react";
@@ -26,10 +25,8 @@ import {
     requestVotesRevealed
 } from "../../actions/estimation";
 import EstimatorPersona from "../EstimatorPersona";
-import { average, sum } from "../../utils/math";
+import { average } from "../../utils/math";
 import UserStoryDetail from "../UserStoryDetail";
-import ConnectionStatus from "../ConnectionStatus";
-import { selectIterationUrl } from "../../selectors/devOpsUrlSelectors";
 import iterationShape from "../../reducers/models/iterationShape";
 import { cardValueShape } from "../../reducers/models/cardDeckShape";
 import userShape from "../../reducers/models/userShape";
@@ -39,6 +36,7 @@ import workItemShape from "../../reducers/models/workItemShape";
 import "./EstimatePage.less";
 import "../../resources/Containers.less";
 import EmptyState from "../EmptyState";
+import EstimationSessionStatus from "../EstimationSessionStatus";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -235,9 +233,7 @@ class EstimationSession extends Component {
             activeWorkItemId,
             isActiveWorkItemRevealed,
             iterationPath,
-            dispatch,
-            iterations,
-            currentIterationUrl
+            iterations
         } = this.props;
 
         const {
@@ -258,9 +254,6 @@ class EstimationSession extends Component {
         const storyPoints = this.getStoryPoints(votesForActiveWorkItem);
 
         const workItemsOrdered = _.sortBy(workItems || [], x => x.stackRank);
-        const storyPointsTotal = Math.round(sum((workItems || [])
-            .filter(x => x.storyPoints !== null && x.storyPoints !== undefined)
-            .map(x => x.storyPoints)));
 
         const iteration = _.find(iterations, x => x.path === iterationPath);
         const hasNoWorkItems = iteration && !iteration.workItemsLoading && workItems.length < 1;
@@ -269,40 +262,23 @@ class EstimationSession extends Component {
             <div className="component-root">
                 <div className="left-pane">
                     <div className="to-vote-row">
-                        <div className="work-items-title-row">
-                            <h4>
-                                { iteration && <a href={currentIterationUrl} target="_blank" rel="noopener noreferrer">{iteration.name}</a> }
-                            </h4>
-                            <div className="work-items-title-row-member">{`${workItemsOrdered.length} work items left`}</div>
-                            <div className="work-items-title-row-member">{`${storyPointsTotal} total story points`}</div>
-                            <div className="refresh-button work-items-title-row-member">
-                                <IconButton
-                                    className="refreshButton"
-                                    iconProps={{ iconName: "Refresh" }}
-                                    title="Reload User Stories"
-                                    ariaLabel="ReloadUserStories"
-                                    onClick={() => dispatch(requestWorkItemUpdateStoryPointsUpdate(iterationPath))}
-                                />
-                            </div>
-                            <ConnectionStatus
-                                iterationPath={iterationPath}
-                                userId={userId}
-                            />
-                        </div>
                         { iteration && !iteration.workItemsLoading && !hasNoWorkItems && (
-                            <UserStoryList
-                                title="Work Items"
-                                columns={["title", "storyPoints"]}
-                                selectedUserStoryId={(selectedWorkItem != null
-                                    ? selectedWorkItem.id
-                                    : null)}
-                                onSelectedUserStoryIdChanged={(
-                                    id => this.onSelectedWorkItemIdChanged(id))}
-                                items={(workItemsOrdered.map(x => ({
-                                    ...x,
-                                    isBeingScored: x.id === activeWorkItemId
-                                })))}
-                            />
+                            <>
+                                <EstimationSessionStatus iteration={iteration} />
+                                <UserStoryList
+                                    title="Work Items"
+                                    columns={["title", "storyPoints"]}
+                                    selectedUserStoryId={(selectedWorkItem != null
+                                        ? selectedWorkItem.id
+                                        : null)}
+                                    onSelectedUserStoryIdChanged={(
+                                        id => this.onSelectedWorkItemIdChanged(id))}
+                                    items={(workItemsOrdered.map(x => ({
+                                        ...x,
+                                        isBeingScored: x.id === activeWorkItemId
+                                    })))}
+                                />
+                            </>
                         )}
                         { hasNoWorkItems && iteration && !iteration.workItemsLoading && (
                             <EmptyState
@@ -312,7 +288,7 @@ class EstimationSession extends Component {
                             />
                         )}
                         { (!iteration || iteration.workItemsLoading) && (
-                            <Spinner size={SpinnerSize.large} />
+                            <Spinner className="user-stories-spinner" size={SpinnerSize.large} />
                         )}
                     </div>
                 </div>
@@ -417,7 +393,6 @@ const mapStateToProps = (state, ownProps) => ({
     votes: state.vote,
     activeWorkItemId: state.applicationContext.activeWorkItemId,
     isActiveWorkItemRevealed: state.applicationContext.isActiveWorkItemRevealed,
-    currentIterationUrl: selectIterationUrl(state, ownProps.match.params.iterationPath),
     iterations: state.iteration
 });
 
@@ -437,8 +412,7 @@ EstimationSession.propTypes = {
     activeWorkItemId: PropTypes.number,
     isActiveWorkItemRevealed: PropTypes.bool.isRequired,
     cardValues: PropTypes.arrayOf(cardValueShape).isRequired,
-    iterations: PropTypes.arrayOf(iterationShape).isRequired,
-    currentIterationUrl: PropTypes.string.isRequired
+    iterations: PropTypes.arrayOf(iterationShape).isRequired
 };
 
 export default connect(mapStateToProps)(EstimationSession);
