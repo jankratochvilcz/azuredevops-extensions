@@ -29,8 +29,17 @@ class UserStoryCommentEditor extends Component {
         this.setState({ comment });
     };
 
+    onAddClicked = () => {
+        const { addComment, workItem } = this.props;
+        const { comment } = this.state;
+
+        addComment(workItem.id, comment);
+
+        this.setState({ comment: "" });
+    };
+
     render() {
-        const { user, addComment, workItem } = this.props;
+        const { user } = this.props;
         const { comment } = this.state;
         return (
             <div className="user-story-comment-editor">
@@ -47,7 +56,7 @@ class UserStoryCommentEditor extends Component {
                     multiline
                     autoAdjustHeight
                 />
-                <PrimaryButton onClick={() => addComment(workItem.id, comment)}>Add Comment</PrimaryButton>
+                <PrimaryButton onClick={this.onAddClicked}>Add Comment</PrimaryButton>
             </div>
         );
     }
