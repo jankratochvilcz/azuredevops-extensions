@@ -1,0 +1,21 @@
+@import "../resources/Measurements.less";
+
+.user-story-comment-editor {
+    display: grid;
+    grid-template-columns: 50px auto;
+    grid-template-rows: auto auto;
+
+    button {
+        grid-column: 2;
+        max-width: 150px;
+        margin-top: @margin-small;
+    }
+}
+
+.add-button {
+    padding: @base-margin;
+
+    .adding-spinner {
+        margin-left: @margin-small;
+    }
+}

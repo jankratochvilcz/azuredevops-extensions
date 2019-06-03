@@ -20,12 +20,14 @@ import {
     receiveVote,
     receiveVotesRevealed,
     receiveActiveWorkItemChanged,
+    receiveWorkItemRefreshComments,
     REQUEST_GROUP_CONNECT,
     REQUEST_VOTE,
     REQUEST_GROUP_DISCONNECT,
     REQUEST_VOTES_REVEALED,
     REQUEST_ACTIVEWORKITEM_CHANGED,
-    receiveWorkItemScored
+    receiveWorkItemScored,
+    REQUEST_WORKITEM_REFRESH_COMMENTS
 } from "../actions/estimation";
 
 import {
@@ -46,12 +48,14 @@ const receiveEventHandlers = [
     { name: "voted", actionFactory: receiveVote },
     { name: "revealed", actionFactory: receiveVotesRevealed },
     { name: "switched", actionFactory: receiveActiveWorkItemChanged },
-    { name: "scored", actionFactory: receiveWorkItemScored }
+    { name: "scored", actionFactory: receiveWorkItemScored },
+    { name: "refreshComments", actionFactory: receiveWorkItemRefreshComments }
 ];
 
-// Handlers of actions that should be sent to SingalR
+// Handlers of actions that should be sent to SignalR
 const invokableActions = [
     { action: REQUEST_VOTE, event: "vote" },
+    { action: REQUEST_WORKITEM_REFRESH_COMMENTS, event: "refreshComments" },
     { action: REQUEST_ACTIVEWORKITEM_CHANGED, event: "switchSelectedWorkItem" },
     { action: REQUEST_VOTES_REVEALED, event: "reveal" },
     {
@@ -170,7 +174,6 @@ function* watchConnection(connection) {
     const connectionChannel = yield call(createConnectionEventsChannel, connection);
 
     while (true) {
-
         // In practical terms, this makes sure the saga doesn't attempt
         // to send incoming actions to a closed connection.
         const { cancel } = yield race({

@@ -22,7 +22,8 @@ import {
     connectToGroup,
     requestVote,
     requestSwitchActiveWorkItem,
-    requestVotesRevealed
+    requestVotesRevealed,
+    selectedWorkItemChanged
 } from "../../actions/estimation";
 import EstimatorPersona from "../EstimatorPersona";
 import { average, sum } from "../../utils/math";
@@ -34,6 +35,7 @@ import { cardValueShape } from "../../reducers/models/cardDeckShape";
 import userShape from "../../reducers/models/userShape";
 import voteShape from "../../reducers/models/voteShape";
 import workItemShape from "../../reducers/models/workItemShape";
+import UserStoryDiscussion from "../UserStoryDiscussion";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -88,9 +90,8 @@ class EstimationSession extends Component {
     }
 
     onSelectedWorkItemIdChanged(workItemId) {
-        this.setState({
-            selectedWorkItemId: workItemId
-        });
+        const { dispatch } = this.props;
+        dispatch(selectedWorkItemChanged(workItemId));
     }
 
     getStoryPoints(votes) {
@@ -223,6 +224,7 @@ class EstimationSession extends Component {
     render() {
         const {
             workItems,
+            selectedWorkItemId,
             cardValues,
             users,
             votes,
@@ -234,10 +236,6 @@ class EstimationSession extends Component {
             iterations,
             currentIterationUrl
         } = this.props;
-
-        const {
-            selectedWorkItemId
-        } = this.state;
 
         const selectedWorkItem = selectedWorkItemId !== null
             ? _.find(workItems, x => x.id === selectedWorkItemId)
@@ -370,7 +368,8 @@ class EstimationSession extends Component {
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
+                            {isSelectedWorkItemInEstimation
+                                && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
                                 <PrimaryButton
                                     onClick={() => this.saveEstimate(storyPoints)}
                                     text={`Save ${storyPoints} story points`}
@@ -385,7 +384,13 @@ class EstimationSession extends Component {
                             )}
                         </div>
 
-                        {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
+                        {selectedWorkItem && (
+                            <React.Fragment>
+                                <UserStoryDetail workItem={selectedWorkItem} />
+                                <UserStoryDiscussion workItem={selectedWorkItem} user={users.find(x => x.id === userId)} />
+                            </React.Fragment>
+                        )
+                        }
                     </div>
                 </div>
             </div>
@@ -400,6 +405,7 @@ const mapStateToProps = (state, ownProps) => ({
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,
     votes: state.vote,
+    selectedWorkItemId: state.applicationContext.selectedWorkItemId,
     activeWorkItemId: state.applicationContext.activeWorkItemId,
     isActiveWorkItemRevealed: state.applicationContext.isActiveWorkItemRevealed,
     currentIterationUrl: selectIterationUrl(state, ownProps.match.params.iterationPath),
@@ -409,7 +415,8 @@ const mapStateToProps = (state, ownProps) => ({
 EstimationSession.defaultProps = {
     workItems: [],
     users: [],
-    activeWorkItemId: null
+    activeWorkItemId: null,
+    selectedWorkItemId: null
 };
 
 EstimationSession.propTypes = {
@@ -420,6 +427,7 @@ EstimationSession.propTypes = {
     users: PropTypes.arrayOf(userShape),
     votes: PropTypes.arrayOf(voteShape).isRequired,
     activeWorkItemId: PropTypes.number,
+    selectedWorkItemId: PropTypes.number,
     isActiveWorkItemRevealed: PropTypes.bool.isRequired,
     cardValues: PropTypes.arrayOf(cardValueShape).isRequired,
     iterations: PropTypes.arrayOf(iterationShape).isRequired,

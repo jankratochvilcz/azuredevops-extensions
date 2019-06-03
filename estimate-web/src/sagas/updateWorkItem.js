@@ -8,7 +8,14 @@ import {
 
 import { executeOnWorkItemTrackingClient } from "./infrastructure/vssClient";
 
-import { receiveWorkItemUpdate, REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE, REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE } from "../actions/devops";
+import {
+    receiveWorkItemUpdate,
+    REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
+    REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
+    REQUEST_WORKITEM_ADD_COMMENT,
+    requestWorkItemGetComments
+} from "../actions/devops";
+
 import { normalizeWorkItem } from "./infrastructure/vssEntityNormalization";
 
 function* updateWorkItem(payload, workItemId) {
@@ -51,9 +58,26 @@ function* watchRemoveStoryPoints() {
     }
 }
 
+function* watchAddComment() {
+    while (true) {
+        const { workItemId, comment } = yield take(REQUEST_WORKITEM_ADD_COMMENT);
+        yield call(
+            updateWorkItem,
+            {
+                op: "add",
+                path: "/fields/System.History",
+                value: comment
+            },
+            workItemId
+        );
+        yield put(requestWorkItemGetComments(workItemId));
+    }
+}
+
 export default function* watchUpdateWorkItem() {
     yield all([
         fork(watchUpdateStoryPoints),
-        fork(watchRemoveStoryPoints)
+        fork(watchRemoveStoryPoints),
+        fork(watchAddComment)
     ]);
 }

@@ -1,6 +1,11 @@
 import { STATUS_CHANGED } from "../actions/connection";
 import { INITIALIZE_CONTEXT } from "../actions/devops";
-import { RECEIVE_ACTIVEWORKITEM_CHANGED, RECEIVE_VOTES_REVEALED, RECEIVE_GROUP_UPDATED } from "../actions/estimation";
+import {
+    RECEIVE_ACTIVEWORKITEM_CHANGED,
+    RECEIVE_VOTES_REVEALED,
+    RECEIVE_GROUP_UPDATED,
+    SELECTED_WORK_ITEM_CHANGED
+} from "../actions/estimation";
 
 const onStatusChanged = (state, action) => {
     const isConnecting = "isConnecting" in action ? action.isConnecting : state.isConnecting;
@@ -48,6 +53,11 @@ const onReceiveGroupUpdated = (state, action) => ({
     activeWorkItemId: action.activeWorkItemId
 });
 
+const onSelectedWorkItemChanged = (state, action) => ({
+    ...state,
+    selectedWorkItemId: action.selectedWorkItemId
+});
+
 const applicationContext = (state = {
     isConnecting: false,
     isDisconnected: false,
@@ -58,6 +68,7 @@ const applicationContext = (state = {
     projectName: null,
     collectionUri: null,
     activeWorkItemId: null,
+    selectedWorkItemId: null,
     isActiveWorkItemRevealed: false
 }, action) => {
     switch (action.type) {
@@ -71,6 +82,8 @@ const applicationContext = (state = {
             return onReceiveActiveWorkItemChanged(state, action);
         case RECEIVE_VOTES_REVEALED:
             return onReceiveVotesRevealed(state, action);
+        case SELECTED_WORK_ITEM_CHANGED:
+            return onSelectedWorkItemChanged(state, action);
         default:
             return state;
     }

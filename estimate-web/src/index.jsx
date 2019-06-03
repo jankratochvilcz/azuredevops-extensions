@@ -27,7 +27,7 @@ VSS.init({
 
 initializeIcons();
 
-VSS.ready(function () {
+VSS.ready(() => {
     const sagaMiddleware = createSagaMiddleware();
 
     const middleware = [

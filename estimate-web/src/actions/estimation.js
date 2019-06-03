@@ -1,4 +1,5 @@
 import { connectionStarting } from "./connection";
+import { requestWorkItemGetComments } from "./devops";
 
 export const REQUEST_GROUP_CONNECT = "ESTIMATION/REQUEST_GROUP_CONNECT";
 export const requestGroupConnect = (iterationPath, userId) => ({
@@ -67,6 +68,13 @@ export const receiveActiveWorkItemChanged = args => ({
     iterationPath: args.groupName
 });
 
+export const SELECTED_WORK_ITEM_CHANGED = "ESTIMATION/SELECTED_WORK_ITEM_CHANGED";
+export const selectedWorkItemChanged = id => ({
+    type: SELECTED_WORK_ITEM_CHANGED,
+    selectedWorkItemId: id
+});
+
+
 export const RECEIVE_WORKITEM_SCORED = "ESTIMATION/RECEIVE_WORKITEM_SCORED";
 export const receiveWorkItemScored = args => ({
     type: RECEIVE_WORKITEM_SCORED,
@@ -74,6 +82,14 @@ export const receiveWorkItemScored = args => ({
     storyPoints: args.value,
     iterationPath: args.groupName
 });
+
+export const REQUEST_WORKITEM_REFRESH_COMMENTS = "ESTIMATION/REQUEST_WORKITEM_REFRESH_COMMENTS";
+export const requestWorkItemRefreshComments = args => ({
+    type: REQUEST_WORKITEM_REFRESH_COMMENTS,
+    workItemId: args.workItemId
+});
+
+export const receiveWorkItemRefreshComments = args => requestWorkItemGetComments(args.workItemId);
 
 export const connectToGroup = (iterationPath, userId) => dispatch => {
     VSS.getService(VSS.ServiceIds.Navigation).then(navigationService => {
