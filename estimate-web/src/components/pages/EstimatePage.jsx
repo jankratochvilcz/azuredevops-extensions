@@ -4,9 +4,9 @@ import { connect } from "react-redux";
 import _ from "underscore";
 import {
     PrimaryButton,
-    DefaultButton,
     Spinner,
-    SpinnerSize
+    SpinnerSize,
+    CompoundButton
 } from "office-ui-fabric-react";
 
 import UserStoryList from "../UserStoryList";
@@ -277,37 +277,16 @@ class EstimationSession extends Component {
                     </div>
                 </div>
                 <div className="center-pane">
-                    {/* https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content */}
-                    <div className="scrollable-flex">
+                    {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
+                </div>
+                <div className="right-pane">
+                    { iteration && isSelectedWorkItemInEstimation && (
                         <div className="cards-alignment-container">
-                            { iteration && <PokerCardList iteration={iteration} /> }
-                            {!isSelectedWorkItemInEstimation && (
-                                <div
-                                    className="cards-overlay"
-                                    onKeyPress={() => this.markSelectedWorkItemIdAsActive()}
-                                    role="button"
-                                    tabIndex="0"
-                                    onClick={() => this.markSelectedWorkItemIdAsActive()}
-                                >
-                                    {selectedWorkItem != null && (
-                                        <div className="cards-overlay-info">
-                                            <div className="cards-overlay-title">
-                                                <span>Start scoring &nbsp;</span>
-                                                <span className="cards-overlay-info-work-item-title">{selectedWorkItem.title}</span>
-                                            </div>
-                                            <div>Click here to move the whole team to this work item and start scoring it.</div>
-                                        </div>
-                                    )}
-                                    {selectedWorkItem == null && (
-                                        <div className="cards-overlay-info">
-                                            <div className="cards-overlay-title">Pick a work item</div>
-                                            <div>Pick a work item from the &quot;Work Items&quot; list.</div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            <PokerCardList iteration={iteration} />
                         </div>
+                    )}
 
+                    {isSelectedWorkItemInEstimation && (
                         <div className="users-container">
                             {users.map(user => (
                                 <EstimatorPersona
@@ -321,33 +300,102 @@ class EstimationSession extends Component {
                                 />
                             ))}
                         </div>
+                    )}
 
-                        <div className="voting-control-container">
-                            {isSelectedWorkItemInEstimation && !isActiveWorkItemRevealed && (
-                                <PrimaryButton
+                    
+                    {isSelectedWorkItemInEstimation && !isActiveWorkItemRevealed && (
+                        <>
+                            <div className="voting-control-container">
+                                <CompoundButton
                                     onClick={() => this.revealVotes()}
+                                    primary={votesForActiveWorkItem.length === users.length}
                                     text="Reveal votes"
+                                    split
+                                    style={{
+                                        width: "299px",
+                                        maxWidth: "299px"
+                                    }}
+                                    secondaryText="Take you time to carefully consider the work item, but stay aware of time."
                                     disabled={!_.some(votesForActiveWorkItem)}
-                                    style={{ marginRight: "10px" }}
+                                    iconProps={{
+                                        iconName: "view"
+                                    }}
+                                    menuProps={{
+                                        items: [{
+                                            key: "reset",
+                                            text: "Reset and revote",
+                                            onClick: () => this.saveEstimate(storyPoints),
+                                            iconProps: {
+                                                iconName: "redo"
+                                            }
+                                        }]
+                                    }}
                                 />
+                            </div>
+                            <div className="voting-illustration">
+                                <EmptyState
+                                    image="/assets/in_thought.svg"
+                                    body="&quot;Give me six hours to chop down a tree and I will spend the first four sharpening the axe.&quot;"
+                                />
+                            </div>
+                        </>
+                    )}
+                    {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
+                        <CompoundButton
+                            primary
+                            onClick={() => this.saveEstimate(storyPoints)}
+                            text={`Commit ${storyPoints} story points`}
+                            split
+                            secondaryText="If votes differ significantly, consider a short discussion and re-vote before comitting."
+                            disabled={!_.some(votesForActiveWorkItem)}
+                            iconProps={{
+                                iconName: "commitments"
+                            }}
+                            style={{
+                                width: "299px",
+                                maxWidth: "299px"
+                            }}
+                            menuProps={{
+                                items: [{
+                                    key: "reset",
+                                    text: "Reset and revote",
+                                    onClick: () => this.saveEstimate(storyPoints),
+                                    iconProps: {
+                                        iconName: "redo"
+                                    }
+                                }]
+                            }}
+                        />
+                    )}
+                    
+
+                    {!isSelectedWorkItemInEstimation && (
+                        <div
+                            className="cards-overlay"
+                        >
+                            {selectedWorkItem != null && (
+                                <EmptyState
+                                    image="/assets/playing_cards.svg"
+                                    title={selectedWorkItem.title}
+                                    body="Click here to move the whole team to this work item and start estimating it."
+                                >
+                                    <PrimaryButton
+                                        onClick={() => this.markSelectedWorkItemIdAsActive()}
+                                        text="Start estimating"
+                                    />
+                                </EmptyState>
                             )}
-                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
-                                <PrimaryButton
-                                    onClick={() => this.saveEstimate(storyPoints)}
-                                    text={`Save ${storyPoints} story points`}
-                                    style={{ marginRight: "10px" }}
-                                />
-                            )}
-                            {(!Number.isNaN(storyPoints) || (selectedWorkItem && isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints && !Number.isNaN(selectedWorkItem.storyPoints))) && (
-                                <DefaultButton
-                                    text="Reset story points &amp; vote"
-                                    onClick={() => this.resetEstimate()}
-                                />
+                            {selectedWorkItem == null && (
+                                <div className="cards-overlay-info">
+                                    <EmptyState
+                                        image="/assets/waiting_for_you.svg"
+                                        title="Pick a work item"
+                                        body="Start scoring by picking a work item from the list on the left."
+                                    />
+                                </div>
                             )}
                         </div>
-
-                        {selectedWorkItem && <UserStoryDetail workItem={selectedWorkItem} />}
-                    </div>
+                    )}
                 </div>
             </div>
         );

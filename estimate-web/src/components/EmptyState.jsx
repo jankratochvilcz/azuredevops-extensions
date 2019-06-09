@@ -6,7 +6,8 @@ import "./EmptyState.less";
 const EmptyState = ({
     image,
     title,
-    body
+    body,
+    children
 }) => (
     <div className="empty-state-container">
         <img
@@ -16,19 +17,23 @@ const EmptyState = ({
         />
         { title && <div className="empty-state-title">{title}</div> }
         { body && <div className="empty-state-body">{body}</div> }
+
+        { children && <div className="empty-state-children">{children}</div>}
     </div>
 );
 
 EmptyState.propTypes = {
     image: PropTypes.string,
     title: PropTypes.string,
-    body: PropTypes.string
+    body: PropTypes.string,
+    children: PropTypes.element
 };
 
 EmptyState.defaultProps = {
     image: null,
     title: null,
-    body: null
+    body: null,
+    children: null
 };
 
 export default EmptyState;

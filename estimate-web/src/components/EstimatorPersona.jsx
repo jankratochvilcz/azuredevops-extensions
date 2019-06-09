@@ -35,8 +35,7 @@ class EstimatorPersona extends Component {
         return (
             <Persona
                 key={user.id}
-                size={user.isConnected ? PersonaSize.size40 : PersonaSize.size24}
-                hidePersonaDetails={!user.isConnected}
+                size={PersonaSize.size32}
                 imageUrl={user.imageUrl}
                 text={user.displayName}
                 onRenderCoin={vote != null && votesRevealed ? this.renderVote : undefined}
