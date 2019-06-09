@@ -29,8 +29,8 @@ const EstimationSessionStatus = ({
             <h4>
                 { iteration && <a href={currentIterationUrl} target="_blank" rel="noopener noreferrer">{iteration.name}</a> }
             </h4>
-            <div className="work-items-title-row-member">{`${workItemsWithoutStoryPointsCount} work items left`}</div>
-            <div className="work-items-title-row-member">{`${storyPointsTotal} total story points`}</div>
+            <div className="work-items-title-row-member">{`${workItemsWithoutStoryPointsCount} items left`}</div>
+            <div className="work-items-title-row-member">{`${storyPointsTotal} story points`}</div>
             <div className="work-items-title-row-member">
                 <ConnectionStatus
                     iterationPath={iteration.path}
