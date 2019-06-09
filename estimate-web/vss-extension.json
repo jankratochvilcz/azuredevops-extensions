@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "doist-estimate",
     "publisher": "Doist",
-    "version": "1.0.40",
+    "version": "1.0.41",
     "name": "Estimate",
     "description": "Real-time backlog estimation using planning poker",
     "public": false,
