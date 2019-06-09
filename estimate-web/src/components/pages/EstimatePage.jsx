@@ -36,6 +36,7 @@ import "../../resources/Containers.less";
 import EmptyState from "../EmptyState";
 import EstimationSessionStatus from "../EstimationSessionStatus";
 import PokerCardList from "../PokerCardList";
+import { selectUsersInCurrentTeam } from "../../selectors/usersSelectors";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -67,7 +68,7 @@ class EstimationSession extends Component {
             () => dispatch(connectToGroup(iterationPath, userId))
         ));
 
-        this.getWorkItems()
+        this.getWorkItems();
 
         if (iterations.length < 1) {
             dispatch(requestIterations());
@@ -308,7 +309,7 @@ class EstimationSession extends Component {
                         </div>
 
                         <div className="users-container">
-                            {users.filter(x => x.isConnected).map(user => (
+                            {users.map(user => (
                                 <EstimatorPersona
                                     key={user.id}
                                     user={user}
@@ -355,7 +356,7 @@ class EstimationSession extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
     userId: state.applicationContext.userId,
-    users: state.user.filter(x => x.teamId === state.applicationContext.teamId),
+    users: selectUsersInCurrentTeam(state),
     workItems: state.workItem.filter(x => x.iterationPath === ownProps.match.params.iterationPath),
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,

@@ -31,6 +31,12 @@ const EstimationSessionStatus = ({
             </h4>
             <div className="work-items-title-row-member">{`${workItemsWithoutStoryPointsCount} work items left`}</div>
             <div className="work-items-title-row-member">{`${storyPointsTotal} total story points`}</div>
+            <div className="work-items-title-row-member">
+                <ConnectionStatus
+                    iterationPath={iteration.path}
+                    userId={userId}
+                />
+            </div>
             <div className="refresh-button work-items-title-row-member">
                 <IconButton
                     className="refreshButton"
@@ -40,10 +46,6 @@ const EstimationSessionStatus = ({
                     onClick={() => refreshWorkItems(iteration.path)}
                 />
             </div>
-            <ConnectionStatus
-                iterationPath={iteration.path}
-                userId={userId}
-            />
         </div>
     );
 };
