@@ -302,7 +302,7 @@ class EstimationSession extends Component {
                         </div>
                     )}
 
-                    
+
                     {isSelectedWorkItemInEstimation && !isActiveWorkItemRevealed && (
                         <>
                             <div className="voting-control-container">
@@ -341,33 +341,35 @@ class EstimationSession extends Component {
                         </>
                     )}
                     {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
-                        <CompoundButton
-                            primary
-                            onClick={() => this.saveEstimate(storyPoints)}
-                            text={`Commit ${storyPoints} story points`}
-                            split
-                            secondaryText="If votes differ significantly, consider a short discussion and re-vote before comitting."
-                            disabled={!_.some(votesForActiveWorkItem)}
-                            iconProps={{
-                                iconName: "commitments"
-                            }}
-                            style={{
-                                width: "299px",
-                                maxWidth: "299px"
-                            }}
-                            menuProps={{
-                                items: [{
-                                    key: "reset",
-                                    text: "Reset and revote",
-                                    onClick: () => this.saveEstimate(storyPoints),
-                                    iconProps: {
-                                        iconName: "redo"
-                                    }
-                                }]
-                            }}
-                        />
+                        <div className="voting-control-container">
+                            <CompoundButton
+                                primary
+                                onClick={() => this.saveEstimate(storyPoints)}
+                                text={`Commit ${storyPoints} story points`}
+                                split
+                                secondaryText="If votes differ significantly, consider a short discussion and re-vote before comitting."
+                                disabled={!_.some(votesForActiveWorkItem)}
+                                iconProps={{
+                                    iconName: "commitments"
+                                }}
+                                style={{
+                                    width: "299px",
+                                    maxWidth: "299px"
+                                }}
+                                menuProps={{
+                                    items: [{
+                                        key: "reset",
+                                        text: "Reset and revote",
+                                        onClick: () => this.saveEstimate(storyPoints),
+                                        iconProps: {
+                                            iconName: "redo"
+                                        }
+                                    }]
+                                }}
+                            />
+                        </div>
                     )}
-                    
+
 
                     {!isSelectedWorkItemInEstimation && (
                         <div
