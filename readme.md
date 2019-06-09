@@ -10,3 +10,5 @@ A DevOps extension to allow for comfortable scoring sessions.
 * Presence indicators for individual team members
 
 Estimate is build with React, Redux and SignalR.
+
+https://undraw.co/ is used for illustrations

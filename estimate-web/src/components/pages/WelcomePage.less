@@ -1,17 +1,31 @@
 @import "../../resources/Measurements.less";
 
-.main-content {
-    grid-column: main-content;
+.centering-root {
     display: flex;
-    flex-direction: column;
-    margin: auto;
-    width: 400px;
+    height: 100%;
 }
 
-.main-content-child {
-    margin-bottom: @base-margin;
+.welcome-root {
+    margin: auto;
+    display: grid;
+    grid-template-rows: auto auto;
+    grid-template-columns: auto auto;
+}
+
+.welcome-illustration {
+    grid-row: 2;
+    grid-column: 1 / span 2;
+    margin-bottom: @margin-extra-large;
+}
+
+.iterations-picker {
+    grid-row: 1;
+    grid-column: 1;
+    width: 300px;
 }
 
 .go-to-session-button {
-    margin-left: auto;
+    margin-left: @base-margin;
+    grid-row: 1;
+    grid-column: 2;
 }

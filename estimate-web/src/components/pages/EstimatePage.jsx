@@ -5,12 +5,11 @@ import _ from "underscore";
 import {
     PrimaryButton,
     DefaultButton,
-    IconButton
+    Spinner,
+    SpinnerSize
 } from "office-ui-fabric-react";
 
-import "./EstimatePage.less";
 import UserStoryList from "../UserStoryList";
-import PokerCard from "../PokerCard";
 import {
     requestTeam,
     requestWorkItems,
@@ -20,27 +19,29 @@ import {
 } from "../../actions/devops";
 import {
     connectToGroup,
-    requestVote,
     requestSwitchActiveWorkItem,
     requestVotesRevealed
 } from "../../actions/estimation";
 import EstimatorPersona from "../EstimatorPersona";
-import { average, sum } from "../../utils/math";
+import { average } from "../../utils/math";
 import UserStoryDetail from "../UserStoryDetail";
-import ConnectionStatus from "../ConnectionStatus";
-import { selectIterationUrl } from "../../selectors/devOpsUrlSelectors";
 import iterationShape from "../../reducers/models/iterationShape";
 import { cardValueShape } from "../../reducers/models/cardDeckShape";
 import userShape from "../../reducers/models/userShape";
 import voteShape from "../../reducers/models/voteShape";
 import workItemShape from "../../reducers/models/workItemShape";
 
+import "./EstimatePage.less";
+import "../../resources/Containers.less";
+import EmptyState from "../EmptyState";
+import EstimationSessionStatus from "../EstimationSessionStatus";
+import PokerCardList from "../PokerCardList";
+
 class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
         this.onactiveWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
-        this.cardClicked = this.cardClicked.bind(this);
         this.saveEstimate = this.saveEstimate.bind(this);
         this.resetEstimate = this.resetEstimate.bind(this);
         this.revealVotes = this.revealVotes.bind(this);
@@ -142,24 +143,28 @@ class EstimationSession extends Component {
         dispatch(requestWorkItemUpdateStoryPointsUpdate(
             activeWorkItemId,
             storyPoints,
-            iterationPath
+            iterationPath,
+            userId
         ));
 
-        const sortedWorkItemsLeft = _.sortBy(
-            workItems.filter(x => x.storyPoints == null),
+        const sortedWorkItems = _.sortBy(
+            workItems,
             x => x.stackRank
         );
 
         const currentWorkItemIndex = _.findIndex(
-            sortedWorkItemsLeft,
+            sortedWorkItems,
             x => x.id === activeWorkItemId
         );
 
-        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItemsLeft.length - 1) {
+        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItems.length - 1) {
             return;
         }
 
-        const nextWorkItem = _.first(_.rest(sortedWorkItemsLeft, currentWorkItemIndex + 1));
+        const nextWorkItem = _.find(
+            _.rest(sortedWorkItems, currentWorkItemIndex + 1),
+            x => !x.storyPoints
+        );
 
         if (nextWorkItem) {
             dispatch(requestSwitchActiveWorkItem(iterationPath, userId, nextWorkItem.id));
@@ -176,7 +181,8 @@ class EstimationSession extends Component {
 
         dispatch(requestWorkItemUpdateStoryPointsRemove(
             activeWorkItemId,
-            iterationPath
+            iterationPath,
+            userId
         ));
 
         dispatch(requestSwitchActiveWorkItem(
@@ -202,38 +208,15 @@ class EstimationSession extends Component {
         ));
     }
 
-    cardClicked(value) {
-        const {
-            userId,
-            iterationPath,
-            activeWorkItemId,
-            dispatch
-        } = this.props;
-
-        if (activeWorkItemId === null) {
-            return;
-        }
-
-        dispatch(requestVote(
-            userId,
-            iterationPath,
-            activeWorkItemId,
-            value
-        ));
-    }
-
     render() {
         const {
             workItems,
-            cardValues,
             users,
             votes,
-            userId,
             activeWorkItemId,
             isActiveWorkItemRevealed,
             iterationPath,
-            iterations,
-            currentIterationUrl
+            iterations
         } = this.props;
 
         const {
@@ -253,71 +236,50 @@ class EstimationSession extends Component {
 
         const storyPoints = this.getStoryPoints(votesForActiveWorkItem);
 
-        const workItemsOrdered = _.sortBy(workItems, x => x.stackRank);
-        const storyPointsTotal = Math.round(sum(workItems
-            .filter(x => x.storyPoints !== null && x.storyPoints !== undefined)
-            .map(x => x.storyPoints)));
+        const workItemsOrdered = _.sortBy(workItems || [], x => x.stackRank);
 
         const iteration = _.find(iterations, x => x.path === iterationPath);
+        const hasNoWorkItems = iteration && !iteration.workItemsLoading && workItems.length < 1;
 
         return (
             <div className="component-root">
                 <div className="left-pane">
                     <div className="to-vote-row">
-                        <div className="work-items-title-row">
-                            <h4>
-                                { iteration && <a href={currentIterationUrl} target="_blank" rel="noopener noreferrer">{iteration.name}</a> }
-                            </h4>
-                            <div>{`${workItemsOrdered.length} work items left`}</div>
-                            <div>{`${storyPointsTotal} total story points`}</div>
-                            <div className="refresh-button">
-                                <IconButton
-                                    className="refreshButton"
-                                    iconProps={{ iconName: "Refresh" }}
-                                    title="Reload User Stories"
-                                    ariaLabel="ReloadUserStories"
-                                    onClick={this.getWorkItems}
+                        { iteration && !iteration.workItemsLoading && !hasNoWorkItems && (
+                            <>
+                                <EstimationSessionStatus iteration={iteration} />
+                                <UserStoryList
+                                    title="Work Items"
+                                    columns={["title", "storyPoints"]}
+                                    selectedUserStoryId={(selectedWorkItem != null
+                                        ? selectedWorkItem.id
+                                        : null)}
+                                    onSelectedUserStoryIdChanged={(
+                                        id => this.onSelectedWorkItemIdChanged(id))}
+                                    items={(workItemsOrdered.map(x => ({
+                                        ...x,
+                                        isBeingScored: x.id === activeWorkItemId
+                                    })))}
                                 />
-                            </div>
-                        </div>
-                        <UserStoryList
-                            title="Work Items"
-                            columns={["title", "storyPoints"]}
-                            selectedUserStoryId={(selectedWorkItem != null
-                                ? selectedWorkItem.id
-                                : null)}
-                            onSelectedUserStoryIdChanged={(
-                                id => this.onSelectedWorkItemIdChanged(id))}
-                            items={(workItemsOrdered.map(x => ({
-                                ...x,
-                                isBeingScored: x.id === activeWorkItemId
-                            })))}
-                        />
+                            </>
+                        )}
+                        { hasNoWorkItems && iteration && !iteration.workItemsLoading && (
+                            <EmptyState
+                                image="/assets/blank_canvas.svg"
+                                title="No user stories to score"
+                                body="There are no user stories and bugs in iteration to score just yet."
+                            />
+                        )}
+                        { (!iteration || iteration.workItemsLoading) && (
+                            <Spinner className="user-stories-spinner" size={SpinnerSize.large} />
+                        )}
                     </div>
                 </div>
                 <div className="center-pane">
                     {/* https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content */}
                     <div className="scrollable-flex">
-                        <div className="vote-title-container">
-                            <h4 className="vote-title-text">Voting</h4>
-                            <ConnectionStatus />
-                        </div>
                         <div className="cards-alignment-container">
-                            <div className="poker-cards-container">
-                                {cardValues.map(cardValue => (
-                                    <PokerCard
-                                        value={cardValue.title}
-                                        key={cardValue.title}
-                                        selected={_.some(
-                                            votes,
-                                            x => x.userId === userId
-                                            && x.workItemId === activeWorkItemId
-                                            && x.value === cardValue.title
-                                        )}
-                                        onClick={() => this.cardClicked(cardValue.title)}
-                                    />
-                                ))}
-                            </div>
+                            { iteration && <PokerCardList iteration={iteration} /> }
                             {!isSelectedWorkItemInEstimation && (
                                 <div
                                     className="cards-overlay"
@@ -346,7 +308,7 @@ class EstimationSession extends Component {
                         </div>
 
                         <div className="users-container">
-                            {_.sortBy(users, x => !x.isConnected).map(user => (
+                            {users.filter(x => x.isConnected).map(user => (
                                 <EstimatorPersona
                                     key={user.id}
                                     user={user}
@@ -375,9 +337,9 @@ class EstimationSession extends Component {
                                     style={{ marginRight: "10px" }}
                                 />
                             )}
-                            {isSelectedWorkItemInEstimation && isActiveWorkItemRevealed && (
+                            {(!Number.isNaN(storyPoints) || (selectedWorkItem && isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints && !Number.isNaN(selectedWorkItem.storyPoints))) && (
                                 <DefaultButton
-                                    text="Reset &amp; revote"
+                                    text="Reset story points &amp; vote"
                                     onClick={() => this.resetEstimate()}
                                 />
                             )}
@@ -400,7 +362,6 @@ const mapStateToProps = (state, ownProps) => ({
     votes: state.vote,
     activeWorkItemId: state.applicationContext.activeWorkItemId,
     isActiveWorkItemRevealed: state.applicationContext.isActiveWorkItemRevealed,
-    currentIterationUrl: selectIterationUrl(state, ownProps.match.params.iterationPath),
     iterations: state.iteration
 });
 
@@ -420,8 +381,7 @@ EstimationSession.propTypes = {
     activeWorkItemId: PropTypes.number,
     isActiveWorkItemRevealed: PropTypes.bool.isRequired,
     cardValues: PropTypes.arrayOf(cardValueShape).isRequired,
-    iterations: PropTypes.arrayOf(iterationShape).isRequired,
-    currentIterationUrl: PropTypes.string.isRequired
+    iterations: PropTypes.arrayOf(iterationShape).isRequired
 };
 
 export default connect(mapStateToProps)(EstimationSession);

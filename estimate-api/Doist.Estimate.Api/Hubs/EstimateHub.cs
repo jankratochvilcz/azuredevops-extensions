@@ -14,7 +14,7 @@ namespace Doist.Estimate.Api.Hubs
         private const string VotedMessageName = "voted";
         private const string RevealedMessageName = "revealed";
         private const string SwitchToWorkItemMessageName = "switched";
-        private const string RefreshDataMessageName = "refresh";
+        private const string ScoreDataMessageName = "scored";
 
         private static Dictionary<string, EstimationSession> groups = new Dictionary<string, EstimationSession>();
 
@@ -91,12 +91,23 @@ namespace Doist.Estimate.Api.Hubs
             await SendToGroup(SwitchToWorkItemMessageName, request, response);
         }
 
-        public async Task RefreshData(RequestBase request)
+        public async Task Score(ScoreRequest request)
         {
             if (IsInvalidRequest(request))
                 return;
 
-            await SendToGroup(RefreshDataMessageName, request, new { });
+            var valueResult = decimal.TryParse(request.Value, out var valueParsed)
+                ? valueParsed
+                : (decimal?)null;
+
+            var response = new ScoreResponse
+            {
+                GroupName = request.GroupName,
+                WorkItemId = request.WorkItemId,
+                Value = valueResult
+            };
+
+            await SendToGroup(ScoreDataMessageName, request, response);
         }
 
         private bool IsInvalidRequest(RequestBase request)

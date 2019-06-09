@@ -15,58 +15,123 @@ import {
 import { eventChannel } from "@redux-saga/core";
 import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
 
-import { disconnected } from "../actions/connection";
 import {
     receiveGroupUpdated,
     receiveVote,
     receiveVotesRevealed,
     receiveActiveWorkItemChanged,
     REQUEST_GROUP_CONNECT,
-    requestGroupConnect,
     REQUEST_VOTE,
     REQUEST_GROUP_DISCONNECT,
     REQUEST_VOTES_REVEALED,
-    REQUEST_ACTIVEWORKITEM_CHANGED
+    REQUEST_ACTIVEWORKITEM_CHANGED,
+    receiveWorkItemScored
 } from "../actions/estimation";
 
-const REQUEST_EVENT_JOIN = "join";
+import {
+    REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
+    REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE
+} from "../actions/devops";
 
-// const CONNECTION_URL = "https://localhost:44378/estimate";
-const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/estimate";
+import { disconnected, STATUS_CHANGED } from "../actions/connection";
+
+const REQUEST_EVENT_JOIN = "join";
+const CONNECTION_URL = "https://localhost:44378/estimate";
+// const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/estimate";
 const CONNECTION_LOG_LEVEL = LogLevel.Information;
 
+// Handlers of messages incoming from SignalR
 const receiveEventHandlers = [
     { name: "groupUpdated", actionFactory: receiveGroupUpdated },
     { name: "voted", actionFactory: receiveVote },
     { name: "revealed", actionFactory: receiveVotesRevealed },
-    { name: "switched", actionFactory: receiveActiveWorkItemChanged }
+    { name: "switched", actionFactory: receiveActiveWorkItemChanged },
+    { name: "scored", actionFactory: receiveWorkItemScored }
 ];
 
+// Handlers of actions that should be sent to SingalR
 const invokableActions = [
     { action: REQUEST_VOTE, event: "vote" },
     { action: REQUEST_ACTIVEWORKITEM_CHANGED, event: "switchSelectedWorkItem" },
-    { action: REQUEST_VOTES_REVEALED, event: "reveal" }
+    { action: REQUEST_VOTES_REVEALED, event: "reveal" },
+    {
+        action: REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
+        event: "score",
+        argsTransform: args => ({
+            groupName: args.iterationPath,
+            value: args.storyPoints,
+            userId: args.userId,
+            workItemId: args.workItemId
+        })
+    },
+    {
+        action: REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
+        event: "score",
+        argsTransform: args => ({
+            groupName: args.iterationPath,
+            value: null,
+            userId: args.userId,
+            workItemId: args.workItemId
+        })
+    }
 ];
 
 /**
  *  Creates a channel that will generate actions based on incoming socket events.
  */
-const createConnectionChannel = connection => eventChannel(emitter => {
+const createConnectionEventsChannel = connection => eventChannel(emitter => {
     receiveEventHandlers.forEach(({ name, actionFactory }) => connection.on(
         name,
         args => emitter(actionFactory(args))
     ));
 
-    return () => connection.close();
+    connection.onclose(() => emitter(disconnected()));
+
+    return () => connection.stop();
 });
+
+/**
+ * Connects to a given connection and joins the user group.
+ * Returns a promise of { connectionError } in case of error or { } in case of success.
+ */
+const connect = (connection, iterationPath, userId) => new Promise(resolve => {
+    connection
+        .start()
+        .then(() => {
+            connection
+                .invoke(REQUEST_EVENT_JOIN, {
+                    groupName: iterationPath,
+                    userId: userId
+                })
+                .then(() => resolve({ }))
+                .catch(ex => resolve({ connectionError: ex }));
+        })
+        .catch(ex => {
+            resolve({ connectionError: ex });
+        });
+});
+
+/**
+ * Wraps the connect function into a sequence for easier consumption within the saga.
+ */
+function* establishConnection(connection, iterationPath, userId) {
+    const { connectionError } = yield call(connect, connection, iterationPath, userId);
+
+    if (connectionError != null) {
+        yield put(disconnected());
+    }
+}
 
 /**
  * Executes a Redux action on a WebSocket connection.
  */
-const executeOnConnection = (actionName, eventName, connection) => function* () {
+const executeOnConnection = (actionName, eventName, argsTransform, connection) => function* () {
     while (true) {
         const args = yield take(actionName);
-        connection.invoke(eventName, args);
+
+        const transformedArgs = argsTransform ? argsTransform(args) : args;
+
+        connection.invoke(eventName, transformedArgs);
     }
 };
 
@@ -85,10 +150,43 @@ function* watchIncoming(connectionChannel) {
  */
 function* watchOutgoing(connection) {
     const invokableActionForks = invokableActions
-        .map(({ action, event }) => executeOnConnection(action, event, connection))
+        .map((
+            {
+                action,
+                event,
+                argsTransform
+            }
+        ) => executeOnConnection(action, event, argsTransform, connection))
         .map(x => fork(x));
 
     yield all(invokableActionForks);
+}
+
+/**
+ * Composes sagas that operate on an active connection,
+ * including ones that take action in case of the connection closing.
+ */
+function* watchConnection(connection) {
+    const connectionChannel = yield call(createConnectionEventsChannel, connection);
+
+    while (true) {
+
+        // In practical terms, this makes sure the saga doesn't attempt
+        // to send incoming actions to a closed connection.
+        const { cancel } = yield race({
+            task: all([
+                call(watchIncoming, connectionChannel),
+                call(watchOutgoing, connection)
+            ]),
+            cancel: take(REQUEST_GROUP_DISCONNECT),
+            disconnected: take(action => action.type === STATUS_CHANGED && action.isDisconnected)
+        });
+
+        if (cancel || disconnected) {
+            connectionChannel.close();
+            return;
+        }
+    }
 }
 
 /**
@@ -103,39 +201,10 @@ function* watchRequestGroupConnect() {
             .configureLogging(CONNECTION_LOG_LEVEL)
             .build();
 
-        connection.onclose(() => {
-            setTimeout(() => put(requestGroupConnect(iterationPath, userId)), 2000);
-            put(disconnected());
-        });
-
-        connection
-            .start()
-            .then(() => {
-                connection
-                    .invoke(REQUEST_EVENT_JOIN, {
-                        groupName: iterationPath,
-                        userId: userId
-                    })
-                    .catch(() => put(disconnected()));
-            })
-            .catch(x => {
-                console.log(x);
-                setTimeout(() => put(requestGroupConnect(iterationPath, userId)), 2000);
-            });
-
-        const connectionChannel = yield call(createConnectionChannel, connection);
-
-        const { cancel } = yield race({
-            task: all([
-                call(watchIncoming, connectionChannel),
-                call(watchOutgoing, connection)
-            ]),
-            cancel: take(REQUEST_GROUP_DISCONNECT)
-        });
-
-        if (cancel) {
-            connectionChannel.close();
-        }
+        yield all([
+            fork(watchConnection, connection, iterationPath, userId),
+            fork(establishConnection, connection, iterationPath, userId)
+        ]);
     }
 }
 

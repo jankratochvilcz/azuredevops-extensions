@@ -9,6 +9,10 @@ import {
 import _ from "underscore";
 import "./UserStoryList.less";
 
+const getColumnClassName = item => {
+    return item.storyPoints == null ? "" : "item-scored";
+};
+
 class UserStoryList extends Component {
     constructor(props) {
         super(props);
@@ -26,7 +30,7 @@ class UserStoryList extends Component {
                 isRowHeader: true,
                 data: "string",
                 isPadded: false,
-                onRender: item => <span>{item.id}</span>
+                onRender: item => <span className={getColumnClassName(item)}>{item.id}</span>
             },
             {
                 key: "title",
@@ -37,7 +41,7 @@ class UserStoryList extends Component {
                 isRowHeader: true,
                 data: "string",
                 isPadded: true,
-                onRender: item => <span>{item.title}</span>
+                onRender: item => <span className={getColumnClassName(item)}>{item.title}</span>
             },
             {
                 key: "storyPoints",
@@ -49,7 +53,7 @@ class UserStoryList extends Component {
                 isPadded: true,
                 onRender: item => (item.isBeingScored
                     ? <span className="item-is-being-scored" role="img" aria-label="Scoring">⏳</span>
-                    : <span>{item.storyPoints}</span>
+                    : <span className={getColumnClassName(item)}>{item.storyPoints}</span>
                 )
             }
         ];

@@ -52,7 +52,7 @@ export const receiveVotesRevealed = args => ({
     iterationPath: args.groupName
 });
 
-export const REQUEST_ACTIVEWORKITEM_CHANGED = "REQUEST/ACTIVEWORKITEM_CHANGED";
+export const REQUEST_ACTIVEWORKITEM_CHANGED = "ESTIMATION/REQUEST_ACTIVEWORKITEM_CHANGED";
 export const requestSwitchActiveWorkItem = (iterationPath, userId, workItemId) => ({
     type: REQUEST_ACTIVEWORKITEM_CHANGED,
     groupName: iterationPath,
@@ -60,10 +60,18 @@ export const requestSwitchActiveWorkItem = (iterationPath, userId, workItemId) =
     workItemId
 });
 
-export const RECEIVE_ACTIVEWORKITEM_CHANGED = "RECEIVE/ACTIVEWORKITEM_CHANGED";
+export const RECEIVE_ACTIVEWORKITEM_CHANGED = "ESTIMATION/RECEIVE_ACTIVEWORKITEM_CHANGED";
 export const receiveActiveWorkItemChanged = args => ({
     type: RECEIVE_ACTIVEWORKITEM_CHANGED,
     workItemId: args.workItemId,
+    iterationPath: args.groupName
+});
+
+export const RECEIVE_WORKITEM_SCORED = "ESTIMATION/RECEIVE_WORKITEM_SCORED";
+export const receiveWorkItemScored = args => ({
+    type: RECEIVE_WORKITEM_SCORED,
+    workItemId: args.workItemId,
+    storyPoints: args.value,
     iterationPath: args.groupName
 });
 

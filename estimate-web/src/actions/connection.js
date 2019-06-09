@@ -7,5 +7,6 @@ export const connectionStarting = () => ({
 
 export const disconnected = () => ({
     type: STATUS_CHANGED,
-    isDisconnected: true
+    isDisconnected: true,
+    isConnecting: false
 });
