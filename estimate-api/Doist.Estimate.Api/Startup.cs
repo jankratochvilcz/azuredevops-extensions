@@ -29,6 +29,7 @@ namespace Doist.Estimate.Api
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseCors(DefaultCorsPolicy);
+            app.UseStaticFiles();
 
             if (env.IsDevelopment())
             {

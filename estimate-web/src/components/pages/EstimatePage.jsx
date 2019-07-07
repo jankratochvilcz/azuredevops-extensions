@@ -266,7 +266,7 @@ class EstimationSession extends Component {
                         )}
                         { hasNoWorkItems && iteration && !iteration.workItemsLoading && (
                             <EmptyState
-                                image="/assets/blank_canvas.svg"
+                                image="https://doist-estimate-api.azurewebsites.net/assets/blank_canvas.svg"
                                 title="No user stories to score"
                                 body="There are no user stories and bugs in iteration to score just yet."
                             />
@@ -334,7 +334,7 @@ class EstimationSession extends Component {
                             </div>
                             <div className="voting-illustration">
                                 <EmptyState
-                                    image="/assets/in_thought.svg"
+                                    image="https://doist-estimate-api.azurewebsites.net/assets/in_thought.svg"
                                     body="&quot;Give me six hours to chop down a tree and I will spend the first four sharpening the axe.&quot;"
                                 />
                             </div>
@@ -377,7 +377,7 @@ class EstimationSession extends Component {
                         >
                             {selectedWorkItem != null && (
                                 <EmptyState
-                                    image="/assets/playing_cards.svg"
+                                    image="https://doist-estimate-api.azurewebsites.net/assets/playing_cards.svg"
                                     title={selectedWorkItem.title}
                                     body="Click here to move the whole team to this work item and start estimating it."
                                 >
@@ -390,7 +390,7 @@ class EstimationSession extends Component {
                             {selectedWorkItem == null && (
                                 <div className="cards-overlay-info">
                                     <EmptyState
-                                        image="/assets/waiting_for_you.svg"
+                                        image="https://doist-estimate-api.azurewebsites.net/assets/waiting_for_you.svg"
                                         title="Pick a work item"
                                         body="Start scoring by picking a work item from the list on the left."
                                     />

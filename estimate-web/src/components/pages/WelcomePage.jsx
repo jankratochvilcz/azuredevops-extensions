@@ -101,7 +101,7 @@ class WelcomePage extends Component {
                 <div className="welcome-root">
                     <div className="welcome-illustration">
                         <EmptyState
-                            image="/assets/setup_wizard.svg"
+                            image="https://doist-estimate-api.azurewebsites.net/assets/setup_wizard.svg"
                             title="Sprint Selection"
                             body="Select a sprint you want to estimate from the list above.
                             Once you click &quot;Estimate&quot;, grab the URL from the adress bar and share it with colleagues to allow them to join."

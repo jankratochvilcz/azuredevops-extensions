@@ -36,8 +36,8 @@ import {
 import { disconnected, STATUS_CHANGED } from "../actions/connection";
 
 const REQUEST_EVENT_JOIN = "join";
-const CONNECTION_URL = "https://localhost:44378/estimate";
-// const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/estimate";
+// const CONNECTION_URL = "https://localhost:44378/estimate";
+const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/estimate";
 const CONNECTION_LOG_LEVEL = LogLevel.Information;
 
 // Handlers of messages incoming from SignalR
