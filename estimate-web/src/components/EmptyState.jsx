@@ -15,8 +15,8 @@ const EmptyState = ({
             className="illustration"
             alt="Empty state"
         />
-        { title && <div className="empty-state-title">{title}</div> }
-        { body && <div className="empty-state-body">{body}</div> }
+        { title && <div data-private className="empty-state-title">{title}</div> }
+        { body && <div data-private className="empty-state-body">{body}</div> }
 
         { children && <div className="empty-state-children">{children}</div>}
     </div>
