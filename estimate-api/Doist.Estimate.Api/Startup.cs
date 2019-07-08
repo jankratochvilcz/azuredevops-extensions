@@ -1,4 +1,5 @@
 ﻿using Doist.Estimate.Api.Hubs;
+using Doist.Estimate.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,8 @@ namespace Doist.Estimate.Api
             }));
 
             services.AddSignalR();
+
+            services.AddSingleton<ISprintEstimationService, SprintEstimationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
