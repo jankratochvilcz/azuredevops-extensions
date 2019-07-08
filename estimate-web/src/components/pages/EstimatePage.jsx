@@ -287,7 +287,7 @@ class EstimationSession extends Component {
                     )}
 
                     {isSelectedWorkItemInEstimation && (
-                        <div className="users-container">
+                        <div className="users-container" data-private>
                             {users.map(user => (
                                 <EstimatorPersona
                                     key={user.id}

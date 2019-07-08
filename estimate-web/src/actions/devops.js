@@ -10,6 +10,8 @@ export const initializeContext = () => {
             projectId: context.project.id,
             projectName: context.project.name,
             userId: context.user.id,
+            userEmail: context.user.email,
+            userName: context.user.name,
             collectionUri: context.collection.uri
         }
     };

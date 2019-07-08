@@ -41,7 +41,7 @@ class UserStoryList extends Component {
                 isRowHeader: true,
                 data: "string",
                 isPadded: true,
-                onRender: item => <span className={getColumnClassName(item)}>{item.title}</span>
+                onRender: item => <span className={getColumnClassName(item)} data-private>{item.title}</span>
             },
             {
                 key: "storyPoints",

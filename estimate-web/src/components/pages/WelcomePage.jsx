@@ -107,7 +107,7 @@ class WelcomePage extends Component {
                             Once you click &quot;Estimate&quot;, grab the URL from the adress bar and share it with colleagues to allow them to join."
                         />
                     </div>
-                    <div className="iterations-picker">
+                    <div className="iterations-picker" data-private>
                         <IterationPicker
                             iterations={iterations}
                             onSelectedIterationChanged={this.onSelectedIterationChanged}
