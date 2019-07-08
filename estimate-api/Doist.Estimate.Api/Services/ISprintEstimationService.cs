@@ -15,21 +15,21 @@ namespace Doist.Estimate.Api.Services
 
         Task<SprintEstimation> ChangeActiveWorkItem(
             string sprintId,
-            string workItemId);
+            int? workItemId);
 
         Task<SprintEstimation> RevealWorkItemScores(
             string sprintId,
-            string workItemId);
+            int workItemId);
 
         Task<SprintEstimation> ScoreWorkItem(
             string sprintId,
-            string workItemId,
+            int workItemId,
             string userId,
             string score);
 
         Task<SprintEstimation> CommitNumericalScore(
             string sprintId,
-            string workItemId,
+            int workItemId,
             decimal? score);
     }
 }

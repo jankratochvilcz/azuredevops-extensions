@@ -2,6 +2,6 @@
 {
     public class RevealWorkItemScoresRequest : RequestBase
     {
-        public string WorkItemId { get; set; }
+        public int WorkItemId { get; set; }
     }
 }

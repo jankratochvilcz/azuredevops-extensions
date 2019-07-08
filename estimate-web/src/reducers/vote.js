@@ -4,7 +4,7 @@ const onReceiveSprintEstimationUpdate = (state, { activeWorkItemId, activeWorkIt
     Object.keys(activeWorkItemScores).map(key => ({
         workItemId: activeWorkItemId,
         userId: key,
-        value: activeWorkItemId[key]
+        value: activeWorkItemScores[key]
     }))
 );
 

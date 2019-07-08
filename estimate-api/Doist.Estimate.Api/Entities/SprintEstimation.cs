@@ -12,7 +12,7 @@ namespace Doist.Estimate.Api.Entities
         public IEnumerable<string> UserIds { get; }
 
         [JsonProperty("activeWorkItemId")]
-        public string ActiveWorkItemId { get; }
+        public int? ActiveWorkItemId { get; }
 
         [JsonProperty("isActiveWorkItemRevealed")]
         public bool IsActiveWorkItemRevealed { get; }
@@ -26,9 +26,9 @@ namespace Doist.Estimate.Api.Entities
         public SprintEstimation(
             string sprintId,
             IEnumerable<string> userIds,
-            string activeWorkItemId,
+            int? activeWorkItemId,
             bool isActiveWorkItemRevealed,
-            IDictionary<string, string> activeWorkItemScores,
+            IDictionary<int, string> activeWorkItemScores,
             decimal? comittedScore)
         {
             SprintId = sprintId;

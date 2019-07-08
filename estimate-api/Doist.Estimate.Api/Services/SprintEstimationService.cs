@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Doist.Estimate.Api.Entities;
+using Sentry;
 
 namespace Doist.Estimate.Api.Services
 {
@@ -49,7 +50,7 @@ namespace Doist.Estimate.Api.Services
 
         public Task<SprintEstimation> ChangeActiveWorkItem(
             string sprintId,
-            string workItemId)
+            int? workItemId)
             => UpdateSprintEstimation(
                 sprintId,
                 estimation => new SprintEstimation(
@@ -62,8 +63,8 @@ namespace Doist.Estimate.Api.Services
 
         public Task<SprintEstimation> ScoreWorkItem(
             string sprintId,
+            int workItemId,
             string userId,
-            string workItemId,
             string score)
             => UpdateSprintEstimation(
                 sprintId,
@@ -87,7 +88,7 @@ namespace Doist.Estimate.Api.Services
 
         public Task<SprintEstimation> RevealWorkItemScores(
             string sprintId,
-            string workItemId)
+            int workItemId)
             => UpdateSprintEstimation(
                 sprintId,
                 estimation => new SprintEstimation(
@@ -103,7 +104,7 @@ namespace Doist.Estimate.Api.Services
 
         public Task<SprintEstimation> CommitNumericalScore(
             string sprintId,
-            string workItemId,
+            int workItemId,
             decimal? numericalScore)
             => UpdateSprintEstimation(
                 sprintId,

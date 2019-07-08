@@ -4,6 +4,6 @@
     {
         public decimal? Score { get; set; }
 
-        public string WorkItemId { get; set; }
+        public int WorkItemId { get; set; }
     }
 }
