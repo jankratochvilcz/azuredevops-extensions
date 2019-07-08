@@ -37,6 +37,7 @@ import EmptyState from "../EmptyState";
 import EstimationSessionStatus from "../EstimationSessionStatus";
 import PokerCardList from "../PokerCardList";
 import { selectUsersInCurrentTeam } from "../../selectors/usersSelectors";
+import { orderedWorkItems } from "../../selectors/workItemsSelectors";
 
 class EstimationSession extends Component {
     constructor(props) {
@@ -148,22 +149,17 @@ class EstimationSession extends Component {
             userId
         ));
 
-        const sortedWorkItems = _.sortBy(
-            workItems,
-            x => x.stackRank
-        );
-
         const currentWorkItemIndex = _.findIndex(
-            sortedWorkItems,
+            workItems,
             x => x.id === activeWorkItemId
         );
 
-        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItems.length - 1) {
+        if (currentWorkItemIndex < 0 || currentWorkItemIndex > workItems.length - 1) {
             return;
         }
 
         const nextWorkItem = _.find(
-            _.rest(sortedWorkItems, currentWorkItemIndex + 1),
+            _.rest(workItems, currentWorkItemIndex + 1),
             x => !x.storyPoints
         );
 
@@ -237,8 +233,6 @@ class EstimationSession extends Component {
 
         const storyPoints = this.getStoryPoints(votesForActiveWorkItem);
 
-        const workItemsOrdered = _.sortBy(workItems || [], x => x.stackRank);
-
         const iteration = _.find(iterations, x => x.path === iterationPath);
         const hasNoWorkItems = iteration && !iteration.workItemsLoading && workItems.length < 1;
 
@@ -257,7 +251,7 @@ class EstimationSession extends Component {
                                         : null)}
                                     onSelectedUserStoryIdChanged={(
                                         id => this.onSelectedWorkItemIdChanged(id))}
-                                    items={(workItemsOrdered.map(x => ({
+                                    items={(workItems.map(x => ({
                                         ...x,
                                         isBeingScored: x.id === activeWorkItemId
                                     })))}
@@ -324,7 +318,7 @@ class EstimationSession extends Component {
                                         items: [{
                                             key: "reset",
                                             text: "Reset and revote",
-                                            onClick: () => this.saveEstimate(storyPoints),
+                                            onClick: () => this.resetEstimate(),
                                             iconProps: {
                                                 iconName: "redo"
                                             }
@@ -360,7 +354,7 @@ class EstimationSession extends Component {
                                     items: [{
                                         key: "reset",
                                         text: "Reset and revote",
-                                        onClick: () => this.saveEstimate(storyPoints),
+                                        onClick: () => this.resetEstimate(),
                                         iconProps: {
                                             iconName: "redo"
                                         }
@@ -407,7 +401,8 @@ class EstimationSession extends Component {
 const mapStateToProps = (state, ownProps) => ({
     userId: state.applicationContext.userId,
     users: selectUsersInCurrentTeam(state),
-    workItems: state.workItem.filter(x => x.iterationPath === ownProps.match.params.iterationPath),
+    workItems: orderedWorkItems(state)
+        .filter(x => x.iterationPath === ownProps.match.params.iterationPath),
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,
     votes: state.vote,

@@ -59,7 +59,7 @@ namespace Doist.Estimate.Api.Services
                     workItemId,
                     false,
                     ImmutableDictionary<string, string>.Empty,
-                    estimation.ComittedNumericalScore));
+                    null));
 
         public Task<SprintEstimation> ScoreWorkItem(
             string sprintId,
@@ -117,7 +117,7 @@ namespace Doist.Estimate.Api.Services
                     numericalScore),
                 estimation =>
                     estimation.ActiveWorkItemId == workItemId &&
-                    estimation.IsActiveWorkItemRevealed);
+                    estimation.IsActiveWorkItemRevealed || !numericalScore.HasValue);
 
         private Task<SprintEstimation> UpdateSprintEstimation(
             string sprintId,

@@ -28,7 +28,7 @@ namespace Doist.Estimate.Api.Entities
             IEnumerable<string> userIds,
             int? activeWorkItemId,
             bool isActiveWorkItemRevealed,
-            IDictionary<int, string> activeWorkItemScores,
+            IDictionary<string, string> activeWorkItemScores,
             decimal? comittedScore)
         {
             SprintId = sprintId;

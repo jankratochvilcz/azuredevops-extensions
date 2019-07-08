@@ -172,6 +172,24 @@ namespace Doist.Estimate.Api.Test.Services
         }
 
         [Fact]
+        public async Task ChangeActiveWorkItem_PreviousComittedScore_SetsToNull()
+        {
+            var target = await GetTargetWithDefaultUserJoiningDefaultSprint();
+            await target.ChangeActiveWorkItem(DefaultSprintId, DefaultWorkItemId);
+            await target.ScoreWorkItem(DefaultSprintId, DefaultWorkItemId, DefaultUserId, DefaultScore);
+            await target.RevealWorkItemScores(DefaultSprintId, DefaultWorkItemId);
+
+            await target.CommitNumericalScore(
+                DefaultSprintId,
+                DefaultWorkItemId,
+                DefaultNumericalScore);
+
+            var actual = await target.ChangeActiveWorkItem(DefaultSprintId, OtherWorkItemId);
+
+            Assert.Null(actual.ComittedNumericalScore);
+        }
+
+        [Fact]
         public async Task ChangeActiveWorkItem_PreviousIsActiveWorkItemRevealed_SetsToFalse()
         {
             var target = await GetTargetWithDefaultUserJoiningDefaultSprint();
@@ -354,6 +372,21 @@ namespace Doist.Estimate.Api.Test.Services
                 DefaultNumericalScore);
 
             Assert.Equal(DefaultNumericalScore, actual.ComittedNumericalScore);
+        }
+
+        [Fact]
+        public async Task CommitNumericalScore_CommitNullWithoutReveal_ScoreComitted()
+        {
+            var target = await GetTargetWithDefaultUserJoiningDefaultSprint();
+            await target.ChangeActiveWorkItem(DefaultSprintId, DefaultWorkItemId);
+            await target.ScoreWorkItem(DefaultSprintId, DefaultWorkItemId, DefaultUserId, DefaultScore);
+
+            var actual = await target.CommitNumericalScore(
+                DefaultSprintId,
+                DefaultWorkItemId,
+                null);
+
+            Assert.Equal(null, actual.ComittedNumericalScore);
         }
 
         [Fact]
