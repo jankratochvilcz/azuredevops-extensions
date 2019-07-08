@@ -35,9 +35,9 @@ import {
 
 import { disconnected, STATUS_CHANGED } from "../actions/connection";
 
-const REQUEST_EVENT_JOIN = "join";
-// const CONNECTION_URL = "https://localhost:44378/estimate";
-const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/estimate";
+const REQUEST_EVENT_JOIN = "JoinSprintEstimation";
+// const CONNECTION_URL = "https://localhost:44378/sprint_estimation";
+const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/sprint_estimation";
 const CONNECTION_LOG_LEVEL = LogLevel.Information;
 
 // Handlers of messages incoming from SignalR
@@ -51,12 +51,12 @@ const receiveEventHandlers = [
 
 // Handlers of actions that should be sent to SingalR
 const invokableActions = [
-    { action: REQUEST_VOTE, event: "vote" },
-    { action: REQUEST_ACTIVEWORKITEM_CHANGED, event: "switchSelectedWorkItem" },
-    { action: REQUEST_VOTES_REVEALED, event: "reveal" },
+    { action: REQUEST_VOTE, event: "ScoreWorkItem" },
+    { action: REQUEST_ACTIVEWORKITEM_CHANGED, event: "ChangeActiveWorkItem" },
+    { action: REQUEST_VOTES_REVEALED, event: "RevealWorkItemScores" },
     {
         action: REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
-        event: "score",
+        event: "CommitNumericalScore",
         argsTransform: args => ({
             groupName: args.iterationPath,
             value: args.storyPoints,
@@ -66,7 +66,7 @@ const invokableActions = [
     },
     {
         action: REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
-        event: "score",
+        event: "CommitNumericalScore",
         argsTransform: args => ({
             groupName: args.iterationPath,
             value: null,
@@ -100,7 +100,7 @@ const connect = (connection, iterationPath, userId) => new Promise(resolve => {
         .then(() => {
             connection
                 .invoke(REQUEST_EVENT_JOIN, {
-                    groupName: iterationPath,
+                    sprintId: iterationPath,
                     userId: userId
                 })
                 .then(() => resolve({ }))
@@ -170,7 +170,6 @@ function* watchConnection(connection) {
     const connectionChannel = yield call(createConnectionEventsChannel, connection);
 
     while (true) {
-
         // In practical terms, this makes sure the saga doesn't attempt
         // to send incoming actions to a closed connection.
         const { cancel } = yield race({

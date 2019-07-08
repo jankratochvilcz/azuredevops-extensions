@@ -30,6 +30,6 @@ namespace Doist.Estimate.Api.Services
         Task<SprintEstimation> CommitNumericalScore(
             string sprintId,
             string workItemId,
-            decimal score);
+            decimal? score);
     }
 }

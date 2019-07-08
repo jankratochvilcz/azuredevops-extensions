@@ -104,7 +104,7 @@ namespace Doist.Estimate.Api.Services
         public Task<SprintEstimation> CommitNumericalScore(
             string sprintId,
             string workItemId,
-            decimal numericalScore)
+            decimal? numericalScore)
             => UpdateSprintEstimation(
                 sprintId,
                 estimation => new SprintEstimation(

@@ -2,7 +2,7 @@
 {
     public class CommitNumericalScoreRequest : RequestBase
     {
-        public decimal Score { get; set; }
+        public decimal? Score { get; set; }
 
         public string WorkItemId { get; set; }
     }
