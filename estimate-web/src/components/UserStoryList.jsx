@@ -9,9 +9,9 @@ import {
 import _ from "underscore";
 import "./UserStoryList.less";
 
-const getColumnClassName = item => {
-    return item.storyPoints == null ? "" : "item-scored";
-};
+const getColumnClassName = item => (
+    item.storyPoints == null ? "" : "item-scored"
+);
 
 class UserStoryList extends Component {
     constructor(props) {
