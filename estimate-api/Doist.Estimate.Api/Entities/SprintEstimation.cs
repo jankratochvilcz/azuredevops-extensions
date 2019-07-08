@@ -1,19 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Doist.Estimate.Api.Entities
 {
     public class SprintEstimation
     {
+        [JsonProperty("sprintId")]
         public string SprintId { get; }
 
+        [JsonProperty("userIds")]
         public IEnumerable<string> UserIds { get; }
 
+        [JsonProperty("activeWorkItemId")]
         public string ActiveWorkItemId { get; }
 
+        [JsonProperty("isActiveWorkItemRevealed")]
         public bool IsActiveWorkItemRevealed { get; }
 
+        [JsonProperty("activeWorkItemScores")]
         public IDictionary<string, string> ActiveWorkItemScores { get; }
 
+        [JsonProperty("comittedNumericalScore")]
         public decimal? ComittedNumericalScore { get; set; }
 
         public SprintEstimation(
