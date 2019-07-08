@@ -12,8 +12,8 @@ namespace Doist.Estimate.Api.Test.Services
         private const string OtherSprintId = nameof(OtherSprintId);
         private const string DefaultUserId = nameof(DefaultUserId);
         private const string OtherUserId = nameof(OtherUserId);
-        private const string DefaultWorkItemId = nameof(DefaultWorkItemId);
-        private const string OtherWorkItemId = nameof(OtherWorkItemId);
+        private const int DefaultWorkItemId = 1001;
+        private const int OtherWorkItemId = 1002;
         private const string DefaultScore = nameof(DefaultScore);
         private const string OtherScore = nameof(OtherScore);
         private const decimal DefaultNumericalScore = 8008;
@@ -162,8 +162,8 @@ namespace Doist.Estimate.Api.Test.Services
 
             await target.ScoreWorkItem(
                 DefaultSprintId,
-                DefaultUserId,
                 DefaultWorkItemId,
+                DefaultUserId,
                 DefaultScore);
 
             var actual = await target.ChangeActiveWorkItem(DefaultSprintId, OtherWorkItemId);
@@ -178,8 +178,8 @@ namespace Doist.Estimate.Api.Test.Services
             await target.ChangeActiveWorkItem(DefaultSprintId, DefaultWorkItemId);
             await target.ScoreWorkItem(
                 DefaultSprintId,
-                DefaultUserId,
                 DefaultWorkItemId,
+                DefaultUserId,
                 DefaultScore);
 
             await target.RevealWorkItemScores(DefaultSprintId, DefaultWorkItemId);
@@ -201,8 +201,8 @@ namespace Doist.Estimate.Api.Test.Services
 
             var actual = await target.ScoreWorkItem(
                 DefaultSprintId,
-                DefaultUserId,
                 DefaultWorkItemId,
+                DefaultUserId,
                 DefaultScore);
 
             Assert.Single(actual.ActiveWorkItemScores);
@@ -218,14 +218,14 @@ namespace Doist.Estimate.Api.Test.Services
 
             await target.ScoreWorkItem(
                 DefaultSprintId,
-                DefaultUserId,
                 DefaultWorkItemId,
+                DefaultUserId,
                 DefaultScore);
 
             var actual = await target.ScoreWorkItem(
                 DefaultSprintId,
-                DefaultUserId,
                 DefaultWorkItemId,
+                DefaultUserId,
                 OtherScore);
 
             Assert.Single(actual.ActiveWorkItemScores);
@@ -242,8 +242,8 @@ namespace Doist.Estimate.Api.Test.Services
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => target.ScoreWorkItem(
                     DefaultSprintId,
-                    OtherUserId,
                     DefaultWorkItemId,
+                    OtherUserId,
                     DefaultScore));
         }
 
@@ -252,8 +252,8 @@ namespace Doist.Estimate.Api.Test.Services
             => Assert.ThrowsAsync<InvalidOperationException>(
                 () => GetTarget().ScoreWorkItem(
                     DefaultSprintId,
-                    DefaultUserId,
                     DefaultWorkItemId,
+                    DefaultUserId,
                     DefaultScore));
 
         [Fact]
@@ -262,8 +262,8 @@ namespace Doist.Estimate.Api.Test.Services
                 async () => await (await GetTargetWithDefaultUserJoiningDefaultSprint())
                     .ScoreWorkItem(
                         DefaultSprintId,
-                        DefaultUserId,
                         DefaultWorkItemId,
+                        DefaultUserId,
                         DefaultScore));
 
         [Fact]
@@ -274,8 +274,8 @@ namespace Doist.Estimate.Api.Test.Services
 
             await target.ScoreWorkItem(
                 DefaultSprintId,
-                DefaultUserId,
                 DefaultWorkItemId,
+                DefaultUserId,
                 DefaultScore);
 
             await target.RevealWorkItemScores(DefaultSprintId, DefaultWorkItemId);
@@ -283,8 +283,8 @@ namespace Doist.Estimate.Api.Test.Services
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => target.ScoreWorkItem(
                     DefaultSprintId,
-                    DefaultUserId,
                     DefaultWorkItemId,
+                    DefaultUserId,
                     DefaultScore));
         }
 
@@ -300,8 +300,8 @@ namespace Doist.Estimate.Api.Test.Services
 
             await target.ScoreWorkItem(
                 DefaultSprintId,
-                DefaultUserId,
                 DefaultWorkItemId,
+                DefaultUserId,
                 DefaultScore);
 
             var actual = await target.RevealWorkItemScores(DefaultSprintId, DefaultWorkItemId);
@@ -345,7 +345,7 @@ namespace Doist.Estimate.Api.Test.Services
         {
             var target = await GetTargetWithDefaultUserJoiningDefaultSprint();
             await target.ChangeActiveWorkItem(DefaultSprintId, DefaultWorkItemId);
-            await target.ScoreWorkItem(DefaultSprintId, DefaultUserId, DefaultWorkItemId, DefaultScore);
+            await target.ScoreWorkItem(DefaultSprintId, DefaultWorkItemId, DefaultUserId, DefaultScore);
             await target.RevealWorkItemScores(DefaultSprintId, DefaultWorkItemId);
 
             var actual = await target.CommitNumericalScore(
@@ -361,7 +361,7 @@ namespace Doist.Estimate.Api.Test.Services
         {
             var target = await GetTargetWithDefaultUserJoiningDefaultSprint();
             await target.ChangeActiveWorkItem(DefaultSprintId, DefaultWorkItemId);
-            await target.ScoreWorkItem(DefaultSprintId, DefaultUserId, DefaultWorkItemId, DefaultScore);
+            await target.ScoreWorkItem(DefaultSprintId, DefaultWorkItemId, DefaultUserId, DefaultScore);
 
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => target.CommitNumericalScore(

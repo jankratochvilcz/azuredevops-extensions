@@ -2,6 +2,6 @@
 {
     public class ChangeActiveWorkitemRequest : RequestBase
     {
-        public string WorkItemId { get; set; }
+        public int WorkItemId { get; set; }
     }
 }

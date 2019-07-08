@@ -10,10 +10,15 @@ namespace Doist.Estimate.Api.Hubs
     public class SprintEstimationHub : Hub
     {
         private readonly ISprintEstimationService sprintEstimationService;
+        private readonly IAnalyticsService analyticsService;
 
         public SprintEstimationHub(
-            ISprintEstimationService sprintEstimationService)
-            => this.sprintEstimationService = sprintEstimationService;
+            ISprintEstimationService sprintEstimationService,
+            IAnalyticsService analyticsService)
+        {
+            this.sprintEstimationService = sprintEstimationService;
+            this.analyticsService = analyticsService;
+        }
 
         public async Task JoinSprintEstimation(JoinSprintEstimationRequest request)
         {
@@ -69,9 +74,15 @@ namespace Doist.Estimate.Api.Hubs
                 request.UserId))
                 return;
 
-            var result = await operation(sprintEstimationService);
-
-            await SprintEstimationUpdated(result);
+            try
+            {
+                var result = await operation(sprintEstimationService);
+                await SprintEstimationUpdated(result);
+            }
+            catch (Exception ex)
+            {
+                analyticsService.LogException(ex);
+            }
         }
 
         private Task SprintEstimationUpdated(SprintEstimation session) 

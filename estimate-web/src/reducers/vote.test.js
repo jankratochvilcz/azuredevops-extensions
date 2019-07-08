@@ -8,12 +8,12 @@ describe("Vote reducer", () => {
 
     test("Replaces existing vote", () => {
         const expectation = expect(vote([{
-            userId: 1,
+            userId: "1",
             workItemId: 11,
             value: "A"
         }], {
             type: RECEIVE_SPRINT_ESTIMATION_UPDATE,
-            userId: 1,
+            userId: "1",
             activeWorkItemId: 11,
             activeWorkItemScores: {
                 1: "B"
@@ -22,7 +22,7 @@ describe("Vote reducer", () => {
 
         expectation.toHaveLength(1);
         expectation.toEqual(expect.arrayContaining([expect.objectContaining({
-            userId: 1,
+            userId: "1",
             workItemId: 11,
             value: "B"
         })]));
