@@ -38,7 +38,7 @@ namespace Doist.Estimate.Api
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<EstimateHub>("/estimate");
+                routes.MapHub<SprintEstimationHub>("/sprint_estimation");
             });
 
             app.Run(async (context) =>
