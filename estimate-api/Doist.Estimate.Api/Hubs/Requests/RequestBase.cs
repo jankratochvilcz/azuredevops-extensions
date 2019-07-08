@@ -2,7 +2,7 @@
 {
     public abstract class RequestBase
     {
-        public string GroupName { get; set; }
+        public string SprintId { get; set; }
 
         public string UserId { get; set; }
     }
