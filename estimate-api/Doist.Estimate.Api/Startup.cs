@@ -26,6 +26,7 @@ namespace Doist.Estimate.Api
             services.AddSignalR();
 
             services.AddSingleton<ISprintEstimationService, SprintEstimationService>();
+            services.AddTransient<IAnalyticsService, SentryAnalyticsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
