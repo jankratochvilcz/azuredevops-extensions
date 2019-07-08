@@ -1,25 +1,20 @@
-import { mergeArrays } from "./infrastructure/merging";
-import { RECEIVE_VOTE, RECEIVE_ACTIVEWORKITEM_CHANGED } from "../actions/estimation";
+import { RECEIVE_SPRINT_ESTIMATION_UPDATE } from "../actions/estimation";
 
-const onReceiveVote = (state, action) => (
-    mergeArrays(state, [{
-        workItemId: action.workItemId,
-        userId: action.userId,
-        value: action.value
-    }], (x, y) => x.workItemId === y.workItemId && x.userId === y.userId));
-
-const onReceiveActiveWorkItemChanged = (state, action) => (
-    state.filter(x => x.workItemId !== action.workItemId));
+const onReceiveSprintEstimationUpdate = (state, { activeWorkItemId, activeWorkItemScores }) => (
+    Object.keys(activeWorkItemScores).map(key => ({
+        workItemId: activeWorkItemId,
+        userId: key,
+        value: activeWorkItemId[key]
+    }))
+);
 
 const vote = (
     state = [],
     action
 ) => {
     switch (action.type) {
-        case RECEIVE_VOTE:
-            return onReceiveVote(state, action);
-        case RECEIVE_ACTIVEWORKITEM_CHANGED:
-            return onReceiveActiveWorkItemChanged(state, action);
+        case RECEIVE_SPRINT_ESTIMATION_UPDATE:
+            return onReceiveSprintEstimationUpdate(state, action);
         default:
             return state;
     }

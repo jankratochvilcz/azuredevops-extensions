@@ -16,16 +16,12 @@ import { eventChannel } from "@redux-saga/core";
 import { HubConnectionBuilder, LogLevel } from "@aspnet/signalr";
 
 import {
-    receiveGroupUpdated,
-    receiveVote,
-    receiveVotesRevealed,
-    receiveActiveWorkItemChanged,
     REQUEST_GROUP_CONNECT,
     REQUEST_VOTE,
     REQUEST_GROUP_DISCONNECT,
     REQUEST_VOTES_REVEALED,
     REQUEST_ACTIVEWORKITEM_CHANGED,
-    receiveWorkItemScored
+    receiveSprintEstimationUpdate
 } from "../actions/estimation";
 
 import {
@@ -36,18 +32,9 @@ import {
 import { disconnected, STATUS_CHANGED } from "../actions/connection";
 
 const REQUEST_EVENT_JOIN = "JoinSprintEstimation";
-// const CONNECTION_URL = "https://localhost:44378/sprint_estimation";
-const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/sprint_estimation";
+const CONNECTION_URL = "https://localhost:44378/sprint_estimation";
+// const CONNECTION_URL = "https://doist-estimate-api.azurewebsites.net/sprint_estimation";
 const CONNECTION_LOG_LEVEL = LogLevel.Information;
-
-// Handlers of messages incoming from SignalR
-const receiveEventHandlers = [
-    { name: "groupUpdated", actionFactory: receiveGroupUpdated },
-    { name: "voted", actionFactory: receiveVote },
-    { name: "revealed", actionFactory: receiveVotesRevealed },
-    { name: "switched", actionFactory: receiveActiveWorkItemChanged },
-    { name: "scored", actionFactory: receiveWorkItemScored }
-];
 
 // Handlers of actions that should be sent to SingalR
 const invokableActions = [
@@ -58,8 +45,8 @@ const invokableActions = [
         action: REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
         event: "CommitNumericalScore",
         argsTransform: args => ({
-            groupName: args.iterationPath,
-            value: args.storyPoints,
+            sprintId: args.iterationPath,
+            score: args.storyPoints,
             userId: args.userId,
             workItemId: args.workItemId
         })
@@ -68,8 +55,8 @@ const invokableActions = [
         action: REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
         event: "CommitNumericalScore",
         argsTransform: args => ({
-            groupName: args.iterationPath,
-            value: null,
+            sprintId: args.iterationPath,
+            score: null,
             userId: args.userId,
             workItemId: args.workItemId
         })
@@ -80,10 +67,24 @@ const invokableActions = [
  *  Creates a channel that will generate actions based on incoming socket events.
  */
 const createConnectionEventsChannel = connection => eventChannel(emitter => {
-    receiveEventHandlers.forEach(({ name, actionFactory }) => connection.on(
-        name,
-        args => emitter(actionFactory(args))
-    ));
+    connection.on(
+        "sprintEstimationUpdated",
+        ({
+            sprintId,
+            userIds,
+            activeWorkItemId,
+            isActiveWorkItemRevealed,
+            activeWorkItemScores,
+            comittedNumericalScore
+        }) => emitter(receiveSprintEstimationUpdate(
+            sprintId,
+            userIds,
+            activeWorkItemId,
+            isActiveWorkItemRevealed,
+            activeWorkItemScores,
+            comittedNumericalScore
+        ))
+    );
 
     connection.onclose(() => emitter(disconnected()));
 
