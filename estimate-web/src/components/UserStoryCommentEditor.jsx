@@ -47,7 +47,7 @@ class UserStoryCommentEditor extends Component {
 
     render() {
         const { user, workItem } = this.props;
-        const { comment } = this.state;
+        const { comment, showMultipleLines } = this.state;
 
         const { addingComment } = workItem;
 
@@ -63,7 +63,8 @@ class UserStoryCommentEditor extends Component {
                     placeholder="Share your thoughts..."
                     onChange={this.onCommentChanged}
                     value={comment}
-                    multiline
+                    resizable={false}
+                    multiline={comment.length > 0}
                     autoAdjustHeight
                 />
                 <PrimaryButton
