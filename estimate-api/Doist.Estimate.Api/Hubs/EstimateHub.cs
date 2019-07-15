@@ -49,7 +49,7 @@ namespace Doist.Estimate.Api.Hubs
                     request.SprintId,
                     request.WorkItemId));
 
-        public Task ChangeActiveWorkItem(ChangeActiveWorkitemRequest request)
+        public Task ChangeActiveWorkItem(ChangeActiveWorkItemRequest request)
             => ExecuteSprintEstimationOperation(
                 request,
                 sprintEstimationService => sprintEstimationService.ChangeActiveWorkItem(
