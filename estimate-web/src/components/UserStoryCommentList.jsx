@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import {
-    Spinner, Persona, PersonaSize, Label
+    Spinner,
+    Persona,
+    Label,
+    PersonaSize,
+    FontSizes
 } from "office-ui-fabric-react";
 import { PropTypes } from "prop-types";
 import { connect } from "react-redux";
@@ -39,12 +43,12 @@ class UserStoryCommentList extends Component {
                     <React.Fragment key={comment.id}>
                         <Persona
                             key={comment.createdBy.id}
-                            size={PersonaSize.size40}
+                            size={PersonaSize.size32}
                             imageUrl={comment.createdBy.imageUrl}
                             hidePersonaDetails
                         />
                         <div className="user-story-comment">
-                            <Label>
+                            <Label style={{ fontSize: FontSizes.smallPlus }}>
                                 <span className="user-display-name">{comment.createdBy.displayName}</span>
                                 <span>{` commented ${timeAgo(comment.createdDate)}`}</span>
                             </Label>

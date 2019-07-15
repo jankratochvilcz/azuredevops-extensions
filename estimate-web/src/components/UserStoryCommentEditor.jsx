@@ -55,7 +55,7 @@ class UserStoryCommentEditor extends Component {
             <div className="user-story-comment-editor user-story-comment-grid-item">
                 <Persona
                     key={user.id}
-                    size={PersonaSize.size40}
+                    size={PersonaSize.size32}
                     imageUrl={user.imageUrl}
                     hidePersonaDetails
                 />
