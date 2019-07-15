@@ -6,7 +6,9 @@ import {
     Persona,
     PersonaSize,
     PrimaryButton,
-    Spinner
+    Spinner,
+    Label,
+    FontSizes
 } from "office-ui-fabric-react";
 
 import { connect } from "react-redux";
@@ -15,6 +17,8 @@ import { requestWorkItemAddComment } from "../actions/devops";
 import workItemShape from "../reducers/models/workItemShape";
 
 import "./UserStoryCommentEditor.less";
+
+const ENTER_KEY = 13;
 
 class UserStoryCommentEditor extends Component {
     state = {
@@ -36,7 +40,17 @@ class UserStoryCommentEditor extends Component {
         this.setState({ comment });
     };
 
-    onAddClicked = () => {
+    onEditorKeyDown = e => {
+        // We need to call this because React reuses synthetic events
+        // (in which it wraps the keydown event)
+        // by pooling them. Calling persist() removes the event from the pool
+        e.persist();
+        if (e.ctrlKey && e.keyCode === ENTER_KEY) {
+            this.onAddComment();
+        }
+    };
+
+    onAddComment = () => {
         const { addComment } = this.props;
         const { comment } = this.state;
 
@@ -65,19 +79,21 @@ class UserStoryCommentEditor extends Component {
                     placeholder="Share your thoughts..."
                     onChange={this.onCommentChanged}
                     value={comment}
+                    onKeyDown={this.onEditorKeyDown}
                     resizable={false}
                     multiline={comment.length > 0}
                     autoAdjustHeight
                 />
                 {showAddButton && (
                     <PrimaryButton
-                        onClick={this.onAddClicked}
+                        onClick={this.onAddComment}
                         className="add-button"
                     >
                         <span>Add Comment</span>
                         {addingComment && <Spinner className="adding-spinner" />}
                     </PrimaryButton>
                 )}
+                {showAddButton && <Label style={{ fontSize: FontSizes.small }}>Ctrl+Alt</Label>}
             </div>
         );
     }
