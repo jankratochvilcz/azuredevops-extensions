@@ -45,6 +45,8 @@ module.exports = {
             { from: "./node_modules/vss-web-extension-sdk/lib/VSS.SDK.min.js", to: "lib/VSS.SDK.min.js" },
             { from: "./node_modules/office-ui-fabric-react/dist/css/fabric.min.css", to: "lib/fabric.min.css" },
             { from: "./src/*.html", to: "./" },
-            { from: "./vss-extension.json", to: "vss-extension.json" }
+            { from: "./vss-extension.json", to: "vss-extension.json" },
+            { from: "./gallery/*.md", to: "." },
+            { from: "./gallery/images/*.png", to: "./" }
         ])]
 };
