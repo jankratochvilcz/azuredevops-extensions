@@ -10,13 +10,14 @@ import {
 import { executeOnWorkItemTrackingClient } from "./infrastructure/vssClient";
 
 import {
+    requestWorkItemGetComments,
     receiveWorkItemUpdate,
     REQUEST_WORKITEM_UPDATE_STORYPOINTS_UPDATE,
     REQUEST_WORKITEM_UPDATE_STORYPOINTS_REMOVE,
     REQUEST_WORKITEM_ADD_COMMENT
 } from "../actions/devops";
 
-import { requestWorkItemRefreshComments } from "../actions/estimation";
+// import { requestWorkItemRefreshComments } from "../actions/estimation";
 
 import { normalizeWorkItem } from "./infrastructure/vssEntityNormalization";
 
@@ -72,7 +73,9 @@ function* addComment(action) {
         workItemId
     );
 
-    yield put(requestWorkItemRefreshComments({ workItemId }));
+    // TODO (CK): change this to requestWorkItemRefreshComments
+    // when the SignalR communication is finalized
+    yield put(requestWorkItemGetComments(workItemId));
 }
 
 function* watchAddComment() {
