@@ -4,6 +4,7 @@ using Doist.Estimate.Api.Entities;
 using Doist.Estimate.Api.Hubs.Requests;
 using Doist.Estimate.Api.Services;
 using System;
+using Doist.Estimate.Api.Hubs.Responses;
 
 namespace Doist.Estimate.Api.Hubs
 {
@@ -63,6 +64,18 @@ namespace Doist.Estimate.Api.Hubs
                     request.SprintId,
                     request.WorkItemId,
                     request.Score));
+
+        public async Task RefreshComments(RefreshCommentsRequest request)
+        {
+            var response = new RefreshCommentsResponse
+            {
+                WorkItemId = request.WorkItemId
+            };
+
+            await Clients
+                .Group(request.SprintId)
+                .SendCoreAsync("refreshComments", new[] { response });
+        }
 
         private async Task ExecuteSprintEstimationOperation<T>(
             T request,
