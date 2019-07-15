@@ -30,17 +30,20 @@ class UserStoryCommentEditor extends Component {
     };
 
     onAddClicked = () => {
-        const { addComment, workItem } = this.props;
+        const { addComment } = this.props;
         const { comment } = this.state;
 
-        addComment(workItem.id, comment);
+        addComment(comment);
 
         this.setState({ comment: "" });
     };
 
     render() {
-        const { user } = this.props;
+        const { user, workItem } = this.props;
         const { comment } = this.state;
+
+        const { addingComment } = workItem;
+
         return (
             <div className="user-story-comment-editor">
                 <Persona
@@ -58,7 +61,7 @@ class UserStoryCommentEditor extends Component {
                 />
                 <PrimaryButton onClick={this.onAddClicked} className="add-button">
                     <span>Add Comment</span>
-                    {/* {addingComment && <Spinner className="adding-spinner" />} */}
+                    {addingComment && <Spinner className="adding-spinner" />}
                 </PrimaryButton>
             </div>
         );
@@ -71,8 +74,8 @@ UserStoryCommentEditor.propTypes = {
     addComment: PropTypes.func.isRequired
 };
 
-const mapDispatchToProps = dispatch => ({
-    addComment: (workItemId, comment) => dispatch(requestWorkItemAddComment(workItemId, comment))
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    addComment: comment => dispatch(requestWorkItemAddComment(ownProps.workItem.id, comment))
 });
 
 export default connect(null, mapDispatchToProps)(UserStoryCommentEditor);
