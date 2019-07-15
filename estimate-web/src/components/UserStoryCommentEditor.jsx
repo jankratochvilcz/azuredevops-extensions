@@ -66,7 +66,11 @@ class UserStoryCommentEditor extends Component {
                     multiline
                     autoAdjustHeight
                 />
-                <PrimaryButton onClick={this.onAddClicked} className="add-button">
+                <PrimaryButton
+                    onClick={this.onAddClicked}
+                    className="add-button"
+                    disabled={comment.length === 0}
+                >
                     <span>Add Comment</span>
                     {addingComment && <Spinner className="adding-spinner" />}
                 </PrimaryButton>
