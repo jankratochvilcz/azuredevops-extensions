@@ -3,7 +3,8 @@ import {
     fork,
     call,
     put,
-    take
+    take,
+    takeEvery
 } from "redux-saga/effects";
 
 import { executeOnWorkItemTrackingClient } from "./infrastructure/vssClient";
@@ -58,20 +59,23 @@ function* watchRemoveStoryPoints() {
     }
 }
 
+function* addComment(action) {
+    const { workItemId, comment } = action;
+    yield call(
+        updateWorkItem,
+        {
+            op: "add",
+            path: "/fields/System.History",
+            value: comment
+        },
+        workItemId
+    );
+
+    yield put(requestWorkItemGetComments(workItemId));
+}
+
 function* watchAddComment() {
-    while (true) {
-        const { workItemId, comment } = yield take(REQUEST_WORKITEM_ADD_COMMENT);
-        yield call(
-            updateWorkItem,
-            {
-                op: "add",
-                path: "/fields/System.History",
-                value: comment
-            },
-            workItemId
-        );
-        yield put(requestWorkItemGetComments(workItemId));
-    }
+    yield takeEvery(REQUEST_WORKITEM_ADD_COMMENT, addComment);
 }
 
 export default function* watchUpdateWorkItem() {
