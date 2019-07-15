@@ -163,9 +163,11 @@ class EstimationSession extends Component {
             x => !x.storyPoints
         );
 
-        if (nextWorkItem) {
-            dispatch(requestSwitchActiveWorkItem(iterationPath, userId, nextWorkItem.id));
-        }
+        dispatch(requestSwitchActiveWorkItem(
+            iterationPath,
+            userId,
+            nextWorkItem ? nextWorkItem.id : null
+        ));
     }
 
     resetEstimate() {
@@ -223,6 +225,11 @@ class EstimationSession extends Component {
         const selectedWorkItem = selectedWorkItemId !== null
             ? _.find(workItems, x => x.id === selectedWorkItemId)
             : null;
+
+        console.log(`selectedWorkItemId ${selectedWorkItemId}`);
+        console.log(`selectedWorkItem ${selectedWorkItem}`);
+        console.log(`activeWorkItemId ${activeWorkItemId}`);
+
 
         const isSelectedWorkItemInEstimation = activeWorkItemId != null
             && selectedWorkItemId === activeWorkItemId;

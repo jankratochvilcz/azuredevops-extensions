@@ -123,8 +123,10 @@ class UserStoryList extends Component {
         if (viewSelectionId !== selectedUserStoryId) {
             selection.setAllSelected(false);
 
-            const viewIndexToSelect = _.findIndex(items, x => x.id === selectedUserStoryId);
-            selection.setIndexSelected(viewIndexToSelect, true, true);
+            if (selectedUserStoryId) {
+                const viewIndexToSelect = _.findIndex(items, x => x.id === selectedUserStoryId);
+                selection.setIndexSelected(viewIndexToSelect, true, true);
+            }
         }
 
         return (
