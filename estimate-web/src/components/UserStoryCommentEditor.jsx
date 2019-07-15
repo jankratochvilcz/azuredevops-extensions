@@ -47,9 +47,11 @@ class UserStoryCommentEditor extends Component {
 
     render() {
         const { user, workItem } = this.props;
-        const { comment, showMultipleLines } = this.state;
+        const { comment } = this.state;
 
         const { addingComment } = workItem;
+
+        const showAddButton = addingComment || comment.length > 0;
 
         return (
             <div className="user-story-comment-editor user-story-comment-grid-item">
@@ -67,14 +69,15 @@ class UserStoryCommentEditor extends Component {
                     multiline={comment.length > 0}
                     autoAdjustHeight
                 />
-                <PrimaryButton
-                    onClick={this.onAddClicked}
-                    className="add-button"
-                    disabled={comment.length === 0}
-                >
-                    <span>Add Comment</span>
-                    {addingComment && <Spinner className="adding-spinner" />}
-                </PrimaryButton>
+                {showAddButton && (
+                    <PrimaryButton
+                        onClick={this.onAddClicked}
+                        className="add-button"
+                    >
+                        <span>Add Comment</span>
+                        {addingComment && <Spinner className="adding-spinner" />}
+                    </PrimaryButton>
+                )}
             </div>
         );
     }
