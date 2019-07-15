@@ -2,18 +2,25 @@ import React, { Component } from "react";
 import { PropTypes } from "prop-types";
 
 import {
-    TextField, Persona, PersonaSize, PrimaryButton, Spinner
+    TextField,
+    Persona,
+    PersonaSize,
+    PrimaryButton,
+    Spinner
 } from "office-ui-fabric-react";
 
-import "./UserStoryCommentEditor.less";
 import { connect } from "react-redux";
 import userShape from "../reducers/models/userShape";
 import { requestWorkItemAddComment } from "../actions/devops";
 import workItemShape from "../reducers/models/workItemShape";
 
+import "./UserStoryCommentEditor.less";
+
 class UserStoryCommentEditor extends Component {
     state = {
         comment: "",
+        // We're keeping the workItem in state so we can detect when the workItem
+        // changes to reset the comment
         workItem: undefined
     };
 
@@ -25,7 +32,7 @@ class UserStoryCommentEditor extends Component {
         return null;
     }
 
-    onChange = (e, comment) => {
+    onCommentChanged = (e, comment) => {
         this.setState({ comment });
     };
 
@@ -45,7 +52,7 @@ class UserStoryCommentEditor extends Component {
         const { addingComment } = workItem;
 
         return (
-            <div className="user-story-comment-editor">
+            <div className="user-story-comment-editor user-story-comment-grid-item">
                 <Persona
                     key={user.id}
                     size={PersonaSize.size40}
@@ -54,7 +61,7 @@ class UserStoryCommentEditor extends Component {
                 />
                 <TextField
                     placeholder="Share your thoughts..."
-                    onChange={this.onChange}
+                    onChange={this.onCommentChanged}
                     value={comment}
                     multiline
                     autoAdjustHeight

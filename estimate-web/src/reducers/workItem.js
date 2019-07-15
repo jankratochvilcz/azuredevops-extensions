@@ -22,7 +22,10 @@ const onReceiveComments = (state, action) => state.map(x => (x.id === action.wor
     : x));
 
 const onRequestWorkItemAddComment = (state, action) => state.map(x => (x.id === action.workItemId
-    ? { ...x, addingComment: true }
+    ? {
+        ...x,
+        addingComment: true
+    }
     : x));
 
 const onReceiveWorkItemUpdate = (state, action) => (

@@ -14,7 +14,7 @@ class UserStoryCommentList extends Component {
     componentDidMount() {
         const { workItem, requestComments } = this.props;
         if (!workItem.commentsFetched) {
-            requestComments(workItem.id);
+            requestComments();
         }
     }
 
@@ -24,7 +24,7 @@ class UserStoryCommentList extends Component {
         if (workItem.commentsFetched) return;
 
         if (workItem.id !== previousProps.workItem.id) {
-            requestComments(workItem.id);
+            requestComments();
         }
     }
 
@@ -34,7 +34,7 @@ class UserStoryCommentList extends Component {
             return <Spinner label="Loading comments..." />;
         }
         return (
-            <div className="user-story-comments">
+            <div className="user-story-comments user-story-comment-grid-item">
                 {workItem.comments.map(comment => (
                     <React.Fragment key={comment.id}>
                         <Persona
@@ -46,11 +46,7 @@ class UserStoryCommentList extends Component {
                         <div className="user-story-comment">
                             <Label>
                                 <span className="user-display-name">{comment.createdBy.displayName}</span>
-                                <span> commented</span>
-                                <span>
-                                    {" "}
-                                    {timeAgo(comment.createdDate)}
-                                </span>
+                                <span>{` commented ${timeAgo(comment.createdDate)}`}</span>
                             </Label>
                             <div
                                 className="body"
@@ -71,8 +67,8 @@ UserStoryCommentList.propTypes = {
     requestComments: PropTypes.func.isRequired
 };
 
-const mapDispatchToProps = dispatch => ({
-    requestComments: workItemId => dispatch(requestWorkItemGetComments(workItemId))
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    requestComments: () => dispatch(requestWorkItemGetComments(ownProps.workItem.id))
 });
 
 export default connect(null, mapDispatchToProps)(UserStoryCommentList);

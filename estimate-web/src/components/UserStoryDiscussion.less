@@ -2,5 +2,11 @@
 
 .user-story-discussion {
   margin: @base-margin;
+
+  & > .user-story-comment-grid-item {
+    display: grid;
+    grid-template-columns: 50px auto;
+    grid-template-rows: auto auto;
+  }
 }
 
