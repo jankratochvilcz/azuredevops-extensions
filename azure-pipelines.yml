@@ -1,0 +1,52 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  apiDirectory: $(System.DefaultWorkingDirectory)/estimate-api
+  webDirectory: $(System.DefaultWorkingDirectory)/estimate-web/
+
+steps:
+- task: DotNetCoreCLI@2
+  name: 'api_build'
+  displayName: 'API - Build'
+  inputs:
+    command: 'build'
+    projects: $(apiDirectory)
+    configuration: $(buildConfiguration)
+
+- task: DotNetCoreCLI@2
+  name: 'api_test'
+  displayName: 'API - Run Unit Tests '
+  inputs:
+    command: 'test'
+    projects: $(apiDirectory)
+
+- task: Npm@1
+  name: 'web_npm_install'
+  displayName: 'React - Install Dependancies'
+  inputs:
+    command: 'install'
+    workingDir: $(webDirectory)
+
+- task: Npm@1
+  name: 'web_test'
+  displayName: 'React - Run Unit Tests'
+  env:
+    JEST_JUNIT_OUTPUT: "reports/js-test-results.xml"
+  inputs:
+    command: 'custom'
+    customCommand: 'run test-ci'
+    workingDir: $(webDirectory)
+
+- task: PublishTestResults@2
+  name: 'web_test_publish'
+  displayName: 'React - Publish Unit Tests'
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: 'js-test-results.xml'
+    searchFolder: $(webDirectory)reports/
+    failTaskOnFailedTests: true
