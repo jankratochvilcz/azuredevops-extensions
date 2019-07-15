@@ -2,8 +2,8 @@
     "manifestVersion": 1,
     "id": "jankratochvil-estimate",
     "publisher": "JanKratochvil",
-    "version": "1.0.47",
-    "name": "Estimate",
+    "version": "1.0.52",
+    "name": "Estimate - Planning Poker Estimation",
     "description": "Real-time backlog estimation using planning poker",
     "public": false,
     "categories": ["Azure Boards"],
@@ -47,11 +47,33 @@
         {
             "path": "assets",
             "addressable": true
+        },
+        {
+            "path": "gallery",
+            "addressable": true
         }
     ],
     "icons": {
         "default": "assets/logo_128.png"
     },
+    "content": {
+        "details": {
+            "path": "gallery/overview.md"
+        },
+        "license": {
+            "path": "gallery/licence.md"
+        }
+    },
+    "links": {
+        "support": {
+            "uri": "kratochvil.jan@outlook.com"
+        }
+    },
+    "screenshots": [
+        {
+            "path": "gallery/images/banner.png"
+        }
+    ],
     "repository": {
         "type": "git",
         "uri": "https://github.com/jankratochvilcz/azuredevops-extensions"
