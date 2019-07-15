@@ -1,0 +1,38 @@
+@import "../resources/Measurements.less";
+@import "../resources/Colors.less";
+
+.empty-state-container
+{
+    display: flex;
+    flex-direction: column;
+    margin-top: 64px;
+    margin-bottom: 64px;
+}
+
+.illustration {
+    width: 100%;
+    max-width: 200px;
+    height: 100%;
+    max-height: 200px;
+    margin: auto;
+}
+
+.empty-state-title {
+    margin-top: @margin-extra-large;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.empty-state-body {
+    margin-top: @margin-large;
+    margin-left: auto;
+    margin-right: auto;
+    color: @foreground-light;
+    max-width: 350px;
+    word-wrap: break-word;
+    text-align: center;
+}
+
+.empty-state-children {
+    margin-top: @margin-large;
+}

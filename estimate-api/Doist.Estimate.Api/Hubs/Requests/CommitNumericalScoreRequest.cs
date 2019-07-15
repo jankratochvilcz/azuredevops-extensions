@@ -1,8 +1,8 @@
 ﻿namespace Doist.Estimate.Api.Hubs.Requests
 {
-    public class ScoreRequest : RequestBase
+    public class CommitNumericalScoreRequest : RequestBase
     {
-        public string Value { get; set; }
+        public decimal? Score { get; set; }
 
         public int WorkItemId { get; set; }
     }

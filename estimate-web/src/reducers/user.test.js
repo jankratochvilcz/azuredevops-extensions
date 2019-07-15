@@ -1,6 +1,6 @@
 import user from "./user";
-import { RECEIVE_GROUP_UPDATED } from "../actions/estimation";
 import { STATUS_CHANGED } from "../actions/connection";
+import { RECEIVE_SPRINT_ESTIMATION_UPDATE } from "../actions/estimation";
 
 describe("User reducer", () => {
     const sampleInitialState = [
@@ -20,8 +20,8 @@ describe("User reducer", () => {
 
     test("Should mark user as connected", () => {
         const expectation = expect(user(sampleInitialState, {
-            type: RECEIVE_GROUP_UPDATED,
-            connectedUserIds: [2]
+            type: RECEIVE_SPRINT_ESTIMATION_UPDATE,
+            userIds: [2]
         }));
 
         expectation.toHaveLength(2);
@@ -33,8 +33,8 @@ describe("User reducer", () => {
 
     test("Doesn't mark unrelated user as connected", () => {
         const expectation = expect(user(sampleInitialState, {
-            type: RECEIVE_GROUP_UPDATED,
-            connectedUserIds: [2]
+            type: RECEIVE_SPRINT_ESTIMATION_UPDATE,
+            userIds: [2]
         }));
 
         expectation.toHaveLength(2);
@@ -51,8 +51,8 @@ describe("User reducer", () => {
                 isConnected: true
             }
         ], {
-            type: RECEIVE_GROUP_UPDATED,
-            connectedUserIds: []
+            type: RECEIVE_SPRINT_ESTIMATION_UPDATE,
+            userIds: []
         }));
 
         expectation.toHaveLength(1);

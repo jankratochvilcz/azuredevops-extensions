@@ -8,6 +8,7 @@ import thunk from "redux-thunk";
 import createSagaMiddleware from "redux-saga";
 import { initializeIcons } from "@uifabric/icons";
 import { createStore, applyMiddleware, compose } from "redux";
+import LogRocket from "logrocket";
 
 import App from "./App";
 import reducer from "./reducers";
@@ -27,12 +28,21 @@ VSS.init({
 
 initializeIcons();
 
-VSS.ready(() => {
+LogRocket.init("u5npfg/estimate-develop", {
+    network: {
+        // Since socket comms are not captured, this option is not very useful in our case
+        isEnabled: false
+    }
+});
+
+VSS.ready(function () {
     const sagaMiddleware = createSagaMiddleware();
 
     const middleware = [
         sagaMiddleware,
         thunk
+        // Will be turned on when data scrubbing is implemented
+        // LogRocket.reduxMiddleware()
     ];
 
     /* eslint-disable no-underscore-dangle */

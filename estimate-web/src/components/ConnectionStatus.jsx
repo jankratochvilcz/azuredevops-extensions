@@ -4,13 +4,42 @@ import { connect } from "react-redux";
 import _ from "underscore";
 
 import "./ConnectionStatus.less";
+import { PersonaSize, Facepile, OverflowButtonType } from "office-ui-fabric-react";
 import { connectToGroup } from "../actions/estimation";
+import { selectUsersInCurrentTeam } from "../selectors/usersSelectors";
+import userShape from "../reducers/models/userShape";
 
 const ConnectionStatus = props => {
-    const { isConnected, isConnecting, isDisconnected } = props;
+    const {
+        isConnected,
+        isConnecting,
+        isDisconnected,
+        users
+    } = props;
 
     if (isConnected) {
-        return <div className="connection-status-connected">Connected</div>;
+        const personas = users.map(user => ({
+            imageUrl: user.imageUrl,
+            personaName: user.displayName
+        }));
+
+        return (
+            <Facepile
+                personaSize={PersonaSize.size24}
+                personas={personas}
+                maxDisplayablePersonas={3}
+                overflowButtonType={OverflowButtonType.descriptive}
+                getPersonaProps={() => ({
+                    hidePersonaDetails: true
+                })}
+                overflowButtonProps={{
+                    ariaLabel: "More users",
+                    style: {
+                        height: "24px" // There seems to be a bug in UI fabric that messes up the size
+                    }
+                }}
+            />
+        );
     }
 
     if (isConnecting) {
@@ -42,7 +71,8 @@ const mapStateToProps = (state, ownProps) => {
         isDisconnected: state.applicationContext.isDisconnected,
         isConnected: user != null && user.isConnected,
         iterationPath: ownProps.iterationPath,
-        userId: ownProps.userId
+        userId: ownProps.userId,
+        users: selectUsersInCurrentTeam(state)
     };
 };
 
@@ -56,7 +86,8 @@ ConnectionStatus.propTypes = {
     isDisconnected: PropTypes.bool.isRequired,
     connect: PropTypes.func.isRequired,
     iterationPath: PropTypes.string.isRequired,
-    userId: PropTypes.string.isRequired
+    userId: PropTypes.string.isRequired,
+    users: PropTypes.arrayOf(userShape).isRequired
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConnectionStatus);

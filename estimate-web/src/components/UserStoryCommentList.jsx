@@ -12,16 +12,16 @@ import timeAgo from "../utils/date";
 
 class UserStoryCommentList extends Component {
     componentDidMount() {
-        const { workItem, requestComments, commentsFetched } = this.props;
-        if (!commentsFetched) {
+        const { workItem, requestComments } = this.props;
+        if (!workItem.commentsFetched) {
             requestComments(workItem.id);
         }
     }
 
     componentDidUpdate(previousProps) {
-        const { workItem, requestComments, commentsFetched } = this.props;
+        const { workItem, requestComments } = this.props;
 
-        if (commentsFetched) return;
+        if (workItem.commentsFetched) return;
 
         if (workItem.id !== previousProps.workItem.id) {
             requestComments(workItem.id);
@@ -29,13 +29,13 @@ class UserStoryCommentList extends Component {
     }
 
     render() {
-        const { comments, commentsFetched } = this.props;
-        if (!commentsFetched) {
+        const { workItem } = this.props;
+        if (!workItem.commentsFetched) {
             return <Spinner label="Loading comments..." />;
         }
         return (
             <div className="user-story-comments">
-                {comments.map(comment => (
+                {workItem.comments.map(comment => (
                     <React.Fragment key={comment.id}>
                         <Persona
                             key={comment.createdBy.id}
@@ -68,26 +68,11 @@ class UserStoryCommentList extends Component {
 
 UserStoryCommentList.propTypes = {
     workItem: workItemShape.isRequired,
-    requestComments: PropTypes.func.isRequired,
-    comments: PropTypes.arrayOf(PropTypes.object),
-    commentsFetched: PropTypes.bool
+    requestComments: PropTypes.func.isRequired
 };
-
-UserStoryCommentList.defaultProps = {
-    commentsFetched: false,
-    comments: []
-};
-
-// TODO (CK): rewrite using filters
-const mapStateToProps = state => ({
-    comments: state.workItem
-        && state.workItem.find(x => x.id === state.applicationContext.selectedWorkItemId).comments,
-    commentsFetched: state.workItem.find(x => x.id === state.applicationContext.selectedWorkItemId)
-        .commentsFetched
-});
 
 const mapDispatchToProps = dispatch => ({
     requestComments: workItemId => dispatch(requestWorkItemGetComments(workItemId))
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserStoryCommentList);
+export default connect(null, mapDispatchToProps)(UserStoryCommentList);

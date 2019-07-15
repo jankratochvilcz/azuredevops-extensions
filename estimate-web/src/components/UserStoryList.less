@@ -1,11 +1,17 @@
 @import "../resources/Measurements.less";
 @import "../resources/ColorsPalette.less";
+@import "../resources/Colors.less";
+
+.item-scored {
+    color: @foreground-light;
+}
 
 .item-is-being-scored {
-    padding: @margin-small;
-    border-radius: @border-radius-base;
-    display: inline;
-    font-size: x-small;
-    background: @theme-primary;
-    cursor: pointer;
+    font-weight: bold;
+    color: @theme-dark;
+}
+
+/* We need to override the item-scored styling here */
+.item-scored.item-is-being-scored {
+    color: @theme-dark;
 }

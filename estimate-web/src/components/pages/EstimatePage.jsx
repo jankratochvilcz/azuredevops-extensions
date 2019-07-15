@@ -4,13 +4,12 @@ import { connect } from "react-redux";
 import _ from "underscore";
 import {
     PrimaryButton,
-    DefaultButton,
-    IconButton
+    Spinner,
+    SpinnerSize,
+    CompoundButton
 } from "office-ui-fabric-react";
 
-import "./EstimatePage.less";
 import UserStoryList from "../UserStoryList";
-import PokerCard from "../PokerCard";
 import {
     requestTeam,
     requestWorkItems,
@@ -20,16 +19,12 @@ import {
 } from "../../actions/devops";
 import {
     connectToGroup,
-    requestVote,
     requestSwitchActiveWorkItem,
-    requestVotesRevealed,
-    selectedWorkItemChanged
+    requestVotesRevealed
 } from "../../actions/estimation";
 import EstimatorPersona from "../EstimatorPersona";
-import { average, sum } from "../../utils/math";
+import { average } from "../../utils/math";
 import UserStoryDetail from "../UserStoryDetail";
-import ConnectionStatus from "../ConnectionStatus";
-import { selectIterationUrl } from "../../selectors/devOpsUrlSelectors";
 import iterationShape from "../../reducers/models/iterationShape";
 import { cardValueShape } from "../../reducers/models/cardDeckShape";
 import userShape from "../../reducers/models/userShape";
@@ -37,17 +32,25 @@ import voteShape from "../../reducers/models/voteShape";
 import workItemShape from "../../reducers/models/workItemShape";
 import UserStoryDiscussion from "../UserStoryDiscussion";
 
+import "./EstimatePage.less";
+import "../../resources/Containers.less";
+import EmptyState from "../EmptyState";
+import EstimationSessionStatus from "../EstimationSessionStatus";
+import PokerCardList from "../PokerCardList";
+import { selectUsersInCurrentTeam } from "../../selectors/usersSelectors";
+import { orderedWorkItems } from "../../selectors/workItemsSelectors";
+
 class EstimationSession extends Component {
     constructor(props) {
         super(props);
 
         this.onactiveWorkItemIdChanged = this.onSelectedWorkItemIdChanged.bind(this);
-        this.cardClicked = this.cardClicked.bind(this);
         this.saveEstimate = this.saveEstimate.bind(this);
         this.resetEstimate = this.resetEstimate.bind(this);
         this.revealVotes = this.revealVotes.bind(this);
         this.markSelectedWorkItemIdAsActive = this.markSelectedWorkItemIdAsActive.bind(this);
         this.getStoryPoints = this.getStoryPoints.bind(this);
+        this.getWorkItems = this.getWorkItems.bind(this);
 
         this.state = {
             selectedWorkItemId: null,
@@ -67,7 +70,7 @@ class EstimationSession extends Component {
             () => dispatch(connectToGroup(iterationPath, userId))
         ));
 
-        dispatch(requestWorkItems(iterationPath));
+        this.getWorkItems();
 
         if (iterations.length < 1) {
             dispatch(requestIterations());
@@ -90,8 +93,15 @@ class EstimationSession extends Component {
     }
 
     onSelectedWorkItemIdChanged(workItemId) {
-        const { dispatch } = this.props;
-        dispatch(selectedWorkItemChanged(workItemId));
+        this.setState({
+            selectedWorkItemId: workItemId
+        });
+    }
+
+    getWorkItems() {
+        const { iterationPath, dispatch } = this.props;
+
+        dispatch(requestWorkItems(iterationPath));
     }
 
     getStoryPoints(votes) {
@@ -140,22 +150,17 @@ class EstimationSession extends Component {
             userId
         ));
 
-        const sortedWorkItems = _.sortBy(
-            workItems,
-            x => x.stackRank
-        );
-
         const currentWorkItemIndex = _.findIndex(
-            sortedWorkItems,
+            workItems,
             x => x.id === activeWorkItemId
         );
 
-        if (currentWorkItemIndex < 0 || currentWorkItemIndex > sortedWorkItems.length - 1) {
+        if (currentWorkItemIndex < 0 || currentWorkItemIndex > workItems.length - 1) {
             return;
         }
 
         const nextWorkItem = _.find(
-            _.rest(sortedWorkItems, currentWorkItemIndex + 1),
+            _.rest(workItems, currentWorkItemIndex + 1),
             x => !x.storyPoints
         );
 
@@ -201,45 +206,31 @@ class EstimationSession extends Component {
         ));
     }
 
-    cardClicked(value) {
-        const {
-            userId,
-            iterationPath,
-            activeWorkItemId,
-            dispatch
-        } = this.props;
-
-        if (activeWorkItemId === null) {
-            return;
-        }
-
-        dispatch(requestVote(
-            userId,
-            iterationPath,
-            activeWorkItemId,
-            value
-        ));
-    }
-
     render() {
         const {
             workItems,
-            selectedWorkItemId,
-            cardValues,
             users,
-            votes,
             userId,
+            votes,
             activeWorkItemId,
             isActiveWorkItemRevealed,
             iterationPath,
-            dispatch,
-            iterations,
-            currentIterationUrl
+            iterations
         } = this.props;
+
+        const {
+            selectedWorkItemId
+        } = this.state;
 
         const selectedWorkItem = selectedWorkItemId !== null
             ? _.find(workItems, x => x.id === selectedWorkItemId)
             : null;
+
+        console.log("selectedWorkItemId", selectedWorkItemId);
+        console.log("selectedWorkItem", selectedWorkItem);
+        console.log("active work item Id", activeWorkItemId);
+        console.log("user", users.find(x => x.id === userId));
+
 
         const isSelectedWorkItemInEstimation = activeWorkItemId != null
             && selectedWorkItemId === activeWorkItemId;
@@ -250,103 +241,61 @@ class EstimationSession extends Component {
 
         const storyPoints = this.getStoryPoints(votesForActiveWorkItem);
 
-        const workItemsOrdered = _.sortBy(workItems, x => x.stackRank);
-        const storyPointsTotal = Math.round(sum(workItems
-            .filter(x => x.storyPoints !== null && x.storyPoints !== undefined)
-            .map(x => x.storyPoints)));
-
         const iteration = _.find(iterations, x => x.path === iterationPath);
+        const hasNoWorkItems = iteration && !iteration.workItemsLoading && workItems.length < 1;
 
         return (
             <div className="component-root">
                 <div className="left-pane">
                     <div className="to-vote-row">
-                        <div className="work-items-title-row">
-                            <h4>
-                                { iteration && <a href={currentIterationUrl} target="_blank" rel="noopener noreferrer">{iteration.name}</a> }
-                            </h4>
-                            <div>{`${workItemsOrdered.length} work items left`}</div>
-                            <div>{`${storyPointsTotal} total story points`}</div>
-                            <div className="refresh-button">
-                                <IconButton
-                                    className="refreshButton"
-                                    iconProps={{ iconName: "Refresh" }}
-                                    title="Reload User Stories"
-                                    ariaLabel="ReloadUserStories"
-                                    onClick={() => dispatch(requestWorkItemUpdateStoryPointsUpdate(iterationPath))}
+                        { iteration && !iteration.workItemsLoading && !hasNoWorkItems && (
+                            <>
+                                <EstimationSessionStatus iteration={iteration} />
+                                <UserStoryList
+                                    title="Work Items"
+                                    columns={["title", "storyPoints"]}
+                                    selectedUserStoryId={(selectedWorkItem != null
+                                        ? selectedWorkItem.id
+                                        : null)}
+                                    onSelectedUserStoryIdChanged={(
+                                        id => this.onSelectedWorkItemIdChanged(id))}
+                                    items={(workItems.map(x => ({
+                                        ...x,
+                                        isBeingScored: x.id === activeWorkItemId
+                                    })))}
                                 />
-                            </div>
-                        </div>
-                        <UserStoryList
-                            title="Work Items"
-                            columns={["title", "storyPoints"]}
-                            selectedUserStoryId={(selectedWorkItem != null
-                                ? selectedWorkItem.id
-                                : null)}
-                            onSelectedUserStoryIdChanged={(
-                                id => this.onSelectedWorkItemIdChanged(id))}
-                            items={(workItemsOrdered.map(x => ({
-                                ...x,
-                                isBeingScored: x.id === activeWorkItemId
-                            })))}
-                        />
+                            </>
+                        )}
+                        { hasNoWorkItems && iteration && !iteration.workItemsLoading && (
+                            <EmptyState
+                                image="https://doist-estimate-api.azurewebsites.net/assets/blank_canvas.svg"
+                                title="No user stories to score"
+                                body="There are no user stories and bugs in iteration to score just yet."
+                            />
+                        )}
+                        { (!iteration || iteration.workItemsLoading) && (
+                            <Spinner className="user-stories-spinner" size={SpinnerSize.large} />
+                        )}
                     </div>
                 </div>
                 <div className="center-pane">
-                    {/* https://stackoverflow.com/questions/21515042/scrolling-a-flexbox-with-overflowing-content */}
-                    <div className="scrollable-flex">
-                        <div className="vote-title-container">
-                            <h4 className="vote-title-text">Voting</h4>
-                            <ConnectionStatus
-                                iterationPath={iterationPath}
-                                userId={userId}
-                            />
-                        </div>
+                    {selectedWorkItem && (
+                        <React.Fragment>
+                            <UserStoryDetail workItem={selectedWorkItem} />
+                            <UserStoryDiscussion workItem={selectedWorkItem} user={users.find(x => x.id === userId)} />
+                        </React.Fragment>
+                    )}
+                </div>
+                <div className="right-pane">
+                    { iteration && isSelectedWorkItemInEstimation && (
                         <div className="cards-alignment-container">
-                            <div className="poker-cards-container">
-                                {cardValues.map(cardValue => (
-                                    <PokerCard
-                                        value={cardValue.title}
-                                        key={cardValue.title}
-                                        selected={_.some(
-                                            votes,
-                                            x => x.userId === userId
-                                            && x.workItemId === activeWorkItemId
-                                            && x.value === cardValue.title
-                                        )}
-                                        onClick={() => this.cardClicked(cardValue.title)}
-                                    />
-                                ))}
-                            </div>
-                            {!isSelectedWorkItemInEstimation && (
-                                <div
-                                    className="cards-overlay"
-                                    onKeyPress={() => this.markSelectedWorkItemIdAsActive()}
-                                    role="button"
-                                    tabIndex="0"
-                                    onClick={() => this.markSelectedWorkItemIdAsActive()}
-                                >
-                                    {selectedWorkItem != null && (
-                                        <div className="cards-overlay-info">
-                                            <div className="cards-overlay-title">
-                                                <span>Start scoring &nbsp;</span>
-                                                <span className="cards-overlay-info-work-item-title">{selectedWorkItem.title}</span>
-                                            </div>
-                                            <div>Click here to move the whole team to this work item and start scoring it.</div>
-                                        </div>
-                                    )}
-                                    {selectedWorkItem == null && (
-                                        <div className="cards-overlay-info">
-                                            <div className="cards-overlay-title">Pick a work item</div>
-                                            <div>Pick a work item from the &quot;Work Items&quot; list.</div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            <PokerCardList iteration={iteration} />
                         </div>
+                    )}
 
-                        <div className="users-container">
-                            {_.sortBy(users, x => !x.isConnected).map(user => (
+                    {isSelectedWorkItemInEstimation && (
+                        <div className="users-container" data-private>
+                            {users.map(user => (
                                 <EstimatorPersona
                                     key={user.id}
                                     user={user}
@@ -358,40 +307,104 @@ class EstimationSession extends Component {
                                 />
                             ))}
                         </div>
+                    )}
 
+                    {isSelectedWorkItemInEstimation && !isActiveWorkItemRevealed && (
+                        <>
                         <div className="voting-control-container">
-                            {isSelectedWorkItemInEstimation && !isActiveWorkItemRevealed && (
-                                <PrimaryButton
-                                    onClick={() => this.revealVotes()}
-                                    text="Reveal votes"
-                                    disabled={!_.some(votesForActiveWorkItem)}
-                                    style={{ marginRight: "10px" }}
-                                />
+                            <CompoundButton
+                                onClick={() => this.revealVotes()}
+                                primary={votesForActiveWorkItem.length === users.length}
+                                text="Reveal votes"
+                                split
+                                style={{
+                                    width: "299px",
+                                    maxWidth: "299px"
+                                }}
+                                secondaryText="Take you time to carefully consider the work item, but stay aware of time."
+                                disabled={!_.some(votesForActiveWorkItem)}
+                                iconProps={{
+                                    iconName: "view"
+                                }}
+                                menuProps={{
+                                    items: [{
+                                        key: "reset",
+                                        text: "Reset and revote",
+                                        onClick: () => this.resetEstimate(),
+                                        iconProps: {
+                                            iconName: "redo"
+                                        }
+                                    }]
+                                }}
+                            />
+                        </div>
+                        <div className="voting-illustration">
+                            <EmptyState
+                                image="https://doist-estimate-api.azurewebsites.net/assets/in_thought.svg"
+                                body="&quot;Give me six hours to chop down a tree and I will spend the first four sharpening the axe.&quot;"
+                            />
+                        </div>
+                        </>
+                    )}
+                    {isSelectedWorkItemInEstimation
+                     && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
+                        <div className="voting-control-container">
+                            <CompoundButton
+                                primary
+                                onClick={() => this.saveEstimate(storyPoints)}
+                                text={`Commit ${storyPoints} story points`}
+                                split
+                                secondaryText="If votes differ significantly, consider a short discussion and re-vote before comitting."
+                                disabled={!_.some(votesForActiveWorkItem)}
+                                iconProps={{
+                                    iconName: "commitments"
+                                }}
+                                style={{
+                                    width: "299px",
+                                    maxWidth: "299px"
+                                }}
+                                menuProps={{
+                                    items: [{
+                                        key: "reset",
+                                        text: "Reset and revote",
+                                        onClick: () => this.resetEstimate(),
+                                        iconProps: {
+                                            iconName: "redo"
+                                        }
+                                    }]
+                                }}
+                            />
+                        </div>
+                    )}
+
+
+                    {!isSelectedWorkItemInEstimation && (
+                        <div
+                            className="cards-overlay"
+                        >
+                            {selectedWorkItem != null && (
+                                <EmptyState
+                                    image="https://doist-estimate-api.azurewebsites.net/assets/playing_cards.svg"
+                                    title={selectedWorkItem.title}
+                                    body="Click here to move the whole team to this work item and start estimating it."
+                                >
+                                    <PrimaryButton
+                                        onClick={() => this.markSelectedWorkItemIdAsActive()}
+                                        text="Start estimating"
+                                    />
+                                </EmptyState>
                             )}
-                            {isSelectedWorkItemInEstimation
-                                && isActiveWorkItemRevealed && !Number.isNaN(storyPoints) && (
-                                <PrimaryButton
-                                    onClick={() => this.saveEstimate(storyPoints)}
-                                    text={`Save ${storyPoints} story points`}
-                                    style={{ marginRight: "10px" }}
-                                />
-                            )}
-                            {(!Number.isNaN(storyPoints) || (isSelectedWorkItemInEstimation && selectedWorkItem.storyPoints && !Number.isNaN(selectedWorkItem.storyPoints))) && (
-                                <DefaultButton
-                                    text="Reset story points &amp; vote"
-                                    onClick={() => this.resetEstimate()}
-                                />
+                            {selectedWorkItem == null && (
+                                <div className="cards-overlay-info">
+                                    <EmptyState
+                                        image="https://doist-estimate-api.azurewebsites.net/assets/waiting_for_you.svg"
+                                        title="Pick a work item"
+                                        body="Start scoring by picking a work item from the list on the left."
+                                    />
+                                </div>
                             )}
                         </div>
-
-                        {selectedWorkItem && (
-                            <React.Fragment>
-                                <UserStoryDetail workItem={selectedWorkItem} />
-                                <UserStoryDiscussion workItem={selectedWorkItem} user={users.find(x => x.id === userId)} />
-                            </React.Fragment>
-                        )
-                        }
-                    </div>
+                    )}
                 </div>
             </div>
         );
@@ -400,23 +413,21 @@ class EstimationSession extends Component {
 
 const mapStateToProps = (state, ownProps) => ({
     userId: state.applicationContext.userId,
-    users: state.user.filter(x => x.teamId === state.applicationContext.teamId),
-    workItems: state.workItem.filter(x => x.iterationPath === ownProps.match.params.iterationPath),
+    users: selectUsersInCurrentTeam(state),
+    workItems: orderedWorkItems(state)
+        .filter(x => x.iterationPath === ownProps.match.params.iterationPath),
     cardValues: state.enums.cardDecks[0].cardValues,
     iterationPath: ownProps.match.params.iterationPath,
     votes: state.vote,
-    selectedWorkItemId: state.applicationContext.selectedWorkItemId,
     activeWorkItemId: state.applicationContext.activeWorkItemId,
     isActiveWorkItemRevealed: state.applicationContext.isActiveWorkItemRevealed,
-    currentIterationUrl: selectIterationUrl(state, ownProps.match.params.iterationPath),
     iterations: state.iteration
 });
 
 EstimationSession.defaultProps = {
     workItems: [],
     users: [],
-    activeWorkItemId: null,
-    selectedWorkItemId: null
+    activeWorkItemId: null
 };
 
 EstimationSession.propTypes = {
@@ -427,11 +438,9 @@ EstimationSession.propTypes = {
     users: PropTypes.arrayOf(userShape),
     votes: PropTypes.arrayOf(voteShape).isRequired,
     activeWorkItemId: PropTypes.number,
-    selectedWorkItemId: PropTypes.number,
     isActiveWorkItemRevealed: PropTypes.bool.isRequired,
     cardValues: PropTypes.arrayOf(cardValueShape).isRequired,
-    iterations: PropTypes.arrayOf(iterationShape).isRequired,
-    currentIterationUrl: PropTypes.string.isRequired
+    iterations: PropTypes.arrayOf(iterationShape).isRequired
 };
 
 export default connect(mapStateToProps)(EstimationSession);

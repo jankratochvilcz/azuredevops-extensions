@@ -24,6 +24,13 @@ const insertIterationOptionsGroupHeader = (
     }
 };
 
+// We need to use custom rendering so we can inject data-private to prevent leaking user's data
+// ESLint incorrectly requires a prop-type here
+// eslint-disable-next-line react/prop-types
+const getDropdownOption = ({ text }) => (
+    <span data-private>{text}</span>
+);
+
 const IterationPicker = props => {
     const { onSelectedIterationChanged, selectedIteration, iterations } = props;
 
@@ -59,10 +66,10 @@ const IterationPicker = props => {
         <Dropdown
             placeholder="Loading interations ..."
             className="main-content-child"
-            label="Iteration"
             onChange={onSelectedIterationChanged}
             selectedKey={selectedIteration != null ? selectedIteration.id : null}
             options={iterationOptions}
+            onRenderOption={getDropdownOption}
         />
     );
 };

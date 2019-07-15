@@ -1,0 +1,1 @@
+export const selectUsersInCurrentTeam = (state) => state.user.filter(x => x.teamId === state.applicationContext.teamId && x.isConnected);

@@ -1,8 +1,8 @@
 {
     "manifestVersion": 1,
-    "id": "doist-estimate",
-    "publisher": "Doist",
-    "version": "1.0.40",
+    "id": "jankratochvil-estimate",
+    "publisher": "JanKratochvil",
+    "version": "1.0.47",
     "name": "Estimate",
     "description": "Real-time backlog estimation using planning poker",
     "public": false,

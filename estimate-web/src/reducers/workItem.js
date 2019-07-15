@@ -7,14 +7,17 @@ import {
     REQUEST_WORKITEM_ADD_COMMENT
 } from "../actions/devops";
 import { mergeArraysUsingId } from "./infrastructure/merging";
-import { RECEIVE_WORKITEM_SCORED } from "../actions/estimation";
+import { RECEIVE_SPRINT_ESTIMATION_UPDATE } from "../actions/estimation";
 
 const onReceiveWorkItems = (state, action) => (
     mergeArraysUsingId(state, action.workItems));
 
 const onReceiveComments = (state, action) => state.map(x => (x.id === action.workItemId
     ? {
-        ...x, comments: action.comments, commentsFetched: true, addingComment: false
+        ...x,
+        comments: action.comments,
+        commentsFetched: true,
+        addingComment: false
     }
     : x));
 
@@ -25,14 +28,18 @@ const onRequestWorkItemAddComment = (state, action) => state.map(x => (x.id === 
 const onReceiveWorkItemUpdate = (state, action) => (
     mergeArraysUsingId(state, [action.workItem]));
 
-const onReceiveWorkItemScored = (state, action) => {
-    const workItem = _.find(state, x => x.id === action.workItemId);
+const onReceiveSprintEstimationUpdate = (state, { activeWorkItemId, comittedNumericalScore }) => {
+    if (!comittedNumericalScore) {
+        return state;
+    }
+
+    const workItem = _.find(state, x => x.id === activeWorkItemId);
 
     if (!workItem) return state;
 
     const workItemWithUpdatedStoryPoints = {
         ...workItem,
-        storyPoints: action.storyPoints
+        storyPoints: comittedNumericalScore
     };
 
     return mergeArraysUsingId(state, [workItemWithUpdatedStoryPoints]);
@@ -49,10 +56,10 @@ const workItem = (
             return onReceiveWorkItemUpdate(state, action);
         case RECEIVE_WORKITEM_COMMENTS:
             return onReceiveComments(state, action);
-        case RECEIVE_WORKITEM_SCORED:
-            return onReceiveWorkItemScored(state, action);
         case REQUEST_WORKITEM_ADD_COMMENT:
             return onRequestWorkItemAddComment(state, action);
+        case RECEIVE_SPRINT_ESTIMATION_UPDATE:
+            return onReceiveSprintEstimationUpdate(state, action);
         default:
             return state;
     }

@@ -1,134 +1,93 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Doist.Estimate.Api.Entities;
-using Doist.Estimate.Api.Hubs.Responses;
 using Doist.Estimate.Api.Hubs.Requests;
+using Doist.Estimate.Api.Services;
+using System;
 
 namespace Doist.Estimate.Api.Hubs
 {
-    public class EstimateHub : Hub
+    public class SprintEstimationHub : Hub
     {
-        private const string GroupUpdatedMessageName = "groupUpdated";
-        private const string VotedMessageName = "voted";
-        private const string RevealedMessageName = "revealed";
-        private const string SwitchToWorkItemMessageName = "switched";
-        private const string ScoreDataMessageName = "scored";
-        private const string RefreshCommentsMessageName = "refreshComments";
+        private readonly ISprintEstimationService sprintEstimationService;
+        private readonly IAnalyticsService analyticsService;
 
-        private static Dictionary<string, EstimationSession> groups = new Dictionary<string, EstimationSession>();
-
-        public async Task Join(JoinRequest request)
+        public SprintEstimationHub(
+            ISprintEstimationService sprintEstimationService,
+            IAnalyticsService analyticsService)
         {
-            if (!groups.ContainsKey(request.GroupName))
-                groups.Add(request.GroupName, new EstimationSession());
-
-            groups[request.GroupName].Users = groups[request.GroupName].Users.Where(x => x.UserId != request.UserId);
-
-            await this.Groups.AddToGroupAsync(this.Context.ConnectionId, request.GroupName);
-
-            groups[request.GroupName].Users = groups[request.GroupName].Users.Union(new[] { new EstimationUser
-            {
-                UserId = request.UserId,
-                ConnectionId = this.Context.ConnectionId
-            } });
-
-            var response = new JoinResponse
-            {
-                GroupName = request.GroupName,
-                PresentUserIds = groups[request.GroupName].Users.Select(x => x.UserId),
-                ActiveWorkItemId = groups[request.GroupName].ActiveWorkItemId
-            };
-
-            await SendToGroup(GroupUpdatedMessageName, request, response);
+            this.sprintEstimationService = sprintEstimationService;
+            this.analyticsService = analyticsService;
         }
 
-        public async Task Vote(VoteRequest request)
+        public async Task JoinSprintEstimation(JoinSprintEstimationRequest request)
         {
-            if (IsInvalidRequest(request))
+            var result = await sprintEstimationService.JoinSprintEstimation(
+                request.SprintId, 
+                request.UserId);
+
+            await this.Groups.AddToGroupAsync(
+                this.Context.ConnectionId, 
+                result.SprintId);
+
+            await SprintEstimationUpdated(result);
+        }
+
+        public Task ScoreWorkItem(ScoreWorkItemRequest request)
+            => ExecuteSprintEstimationOperation(
+                request,
+                sprintEstimationService => sprintEstimationService.ScoreWorkItem(
+                    request.SprintId,
+                    request.WorkItemId,
+                    request.UserId,
+                    request.Score));
+
+        public Task RevealWorkItemScores(RevealWorkItemScoresRequest request)
+            => ExecuteSprintEstimationOperation(
+                request,
+                sprintEstimationService => sprintEstimationService.RevealWorkItemScores(
+                    request.SprintId,
+                    request.WorkItemId));
+
+        public Task ChangeActiveWorkItem(ChangeActiveWorkitemRequest request)
+            => ExecuteSprintEstimationOperation(
+                request,
+                sprintEstimationService => sprintEstimationService.ChangeActiveWorkItem(
+                    request.SprintId,
+                    request.WorkItemId));
+
+        public Task CommitNumericalScore(CommitNumericalScoreRequest request)
+            => ExecuteSprintEstimationOperation(
+                request,
+                sprintEstimationService => sprintEstimationService.CommitNumericalScore(
+                    request.SprintId,
+                    request.WorkItemId,
+                    request.Score));
+
+        private async Task ExecuteSprintEstimationOperation<T>(
+            T request,
+            Func<ISprintEstimationService, Task<SprintEstimation>> operation)
+            where T : RequestBase
+        {
+            if (!await sprintEstimationService.HasUserJoinedSprintEstimation(
+                request.SprintId,
+                request.UserId))
                 return;
 
-            var response = new VoteResponse
+            try
             {
-                GroupName = request.GroupName,
-                UserId = request.UserId,
-                Value = request.Value,
-                WorkItemId = request.WorkItemId
-            };
-
-            await SendToGroup(VotedMessageName, request, response);
+                var result = await operation(sprintEstimationService);
+                await SprintEstimationUpdated(result);
+            }
+            catch (Exception ex)
+            {
+                analyticsService.LogException(ex);
+            }
         }
 
-        public async Task Reveal(RevealRequest request)
-        {
-            if (IsInvalidRequest(request))
-                return;
-
-            var response = new RevealResponse
-            {
-                GroupName = request.GroupName,
-                UserId = request.UserId,
-                WorkItemId = request.WorkItemId
-            };
-
-            await SendToGroup(RevealedMessageName, request, response);
-        }
-
-        public async Task SwitchSelectedWorkItem(SwitchSelectedWorkItemRequest request)
-        {
-            if (IsInvalidRequest(request))
-                return;
-
-            groups[request.GroupName].ActiveWorkItemId = request.WorkItemId;
-
-            var response = new SwitchSelectedWorkItemResponse
-            {
-                GroupName = request.GroupName,
-                UserId = request.UserId,
-                WorkItemId = request.WorkItemId
-            };
-
-            await SendToGroup(SwitchToWorkItemMessageName, request, response);
-        }
-
-        public async Task Score(ScoreRequest request)
-        {
-            if (IsInvalidRequest(request))
-                return;
-
-            var valueResult = decimal.TryParse(request.Value, out var valueParsed)
-                ? valueParsed
-                : (decimal?)null;
-
-            var response = new ScoreResponse
-            {
-                GroupName = request.GroupName,
-                WorkItemId = request.WorkItemId,
-                Value = valueResult
-            };
-
-            await SendToGroup(ScoreDataMessageName, request, response);
-        }
-
-        public async Task RefreshComments(RefreshCommentsRequest request)
-        {
-            if (IsInvalidRequest(request))
-                return;
-
-            var response = new RefreshCommentsResponse
-            {
-                GroupName = request.GroupName,
-                WorkItemId = request.WorkItemId,
-            };
-
-            await SendToGroup(RefreshCommentsMessageName, request, response);
-        }
-
-        private bool IsInvalidRequest(RequestBase request)
-            => !groups.TryGetValue(request.GroupName, out var session) || !session.Users.Any(x => x.UserId == request.UserId);
-
-        private Task SendToGroup<TResponse>(string messageName, RequestBase request, TResponse response) where TResponse : class
-            => Clients.Group(request.GroupName).SendCoreAsync(messageName, new[] { response });
+        private Task SprintEstimationUpdated(SprintEstimation session) 
+            => Clients
+                .Group(session.SprintId)
+                .SendCoreAsync("sprintEstimationUpdated", new[] { session });
     }
 }

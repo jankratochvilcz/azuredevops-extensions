@@ -19,7 +19,7 @@ const mixInTargetBlankAttributes = (tagName, attribs) => ({
 const UserStoryDetail = props => {
     const { workItem, urlRoot } = props;
 
-    const sanitizedDescription = sanitizeHtml(
+    const sanitizedDescription = workItem.description && sanitizeHtml(
         workItem.description,
         {
             transformTags: {
@@ -30,15 +30,26 @@ const UserStoryDetail = props => {
 
     return (
         <div className="user-story-container">
-            <h4 style={{ marginLeft: "0", marginBottom: "0" }}>{workItem.title}</h4>
-            <a href={`${urlRoot}${workItem.id}`} className="user-story-title-row" target="_blank" rel="noopener noreferrer">
+            <h4 style={{ marginLeft: "0", marginBottom: "0" }} data-private>{workItem.title}</h4>
+            <a
+                href={`${urlRoot}${workItem.id}`}
+                className="user-story-title-row"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-private
+            >
                 <span>{`${workItem.workItemType.toLowerCase()} #${workItem.id} by ${workItem.createdBy.displayName}`}</span>
             </a>
 
-            <div dangerouslySetInnerHTML={{
-                __html: sanitizedDescription
-            }}
-            />
+            { sanitizedDescription && (
+                <div
+                    data-private
+                    // eslint-disable-next-line react/no-danger
+                    dangerouslySetInnerHTML={{
+                        __html: sanitizedDescription
+                    }}
+                />
+            ) }
         </div>
     );
 };

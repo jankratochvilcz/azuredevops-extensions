@@ -26,7 +26,7 @@ function* updateWorkItem(payload, workItemId) {
 
     const normalizedUpdatedWorkItem = normalizeWorkItem(updatedWorkItem);
 
-    put(receiveWorkItemUpdate(normalizedUpdatedWorkItem));
+    yield put(receiveWorkItemUpdate(normalizedUpdatedWorkItem));
 }
 
 function* watchUpdateStoryPoints() {

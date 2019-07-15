@@ -1,4 +1,5 @@
 ﻿using Doist.Estimate.Api.Hubs;
+using Doist.Estimate.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -23,12 +24,16 @@ namespace Doist.Estimate.Api
             }));
 
             services.AddSignalR();
+
+            services.AddSingleton<ISprintEstimationService, SprintEstimationService>();
+            services.AddTransient<IAnalyticsService, SentryAnalyticsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseCors(DefaultCorsPolicy);
+            app.UseStaticFiles();
 
             if (env.IsDevelopment())
             {
@@ -37,7 +42,7 @@ namespace Doist.Estimate.Api
 
             app.UseSignalR(routes =>
             {
-                routes.MapHub<EstimateHub>("/estimate");
+                routes.MapHub<SprintEstimationHub>("/sprint_estimation");
             });
 
             app.Run(async (context) =>

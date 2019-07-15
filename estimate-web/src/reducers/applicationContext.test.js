@@ -1,63 +1,24 @@
 import applicationContext from "./applicationContext";
-import { RECEIVE_VOTES_REVEALED, RECEIVE_ACTIVEWORKITEM_CHANGED, RECEIVE_GROUP_UPDATED } from "../actions/estimation";
+import { RECEIVE_SPRINT_ESTIMATION_UPDATE } from "../actions/estimation";
 
 describe("Application Context reducer", () => {
     test("Should return initial state", () => {
         expect(applicationContext(undefined, {})).not.toBeNull();
     });
 
-    test("Updates reveal status of current work item", () => {
+    test("Processes RECEIVE_SPRINT_ESTIMATION_UPDATE", () => {
         expect(applicationContext(
             {
-                activeWorkItemId: 1,
+                activeWorkItemId: 2,
                 isActiveWorkItemRevealed: false
             },
             {
-                type: RECEIVE_VOTES_REVEALED,
-                workItemId: 1
+                type: RECEIVE_SPRINT_ESTIMATION_UPDATE,
+                isActiveWorkItemRevealed: true,
+                activeWorkItemId: 1
             }
         )).toMatchObject({
             activeWorkItemId: 1,
-            isActiveWorkItemRevealed: true
-        });
-    });
-
-    test("Doesn't reveal status of current work item if bad work item ID", () => {
-        expect(applicationContext(
-            {
-                activeWorkItemId: 1,
-                isActiveWorkItemRevealed: false
-            },
-            {
-                type: RECEIVE_VOTES_REVEALED,
-                workItemId: 2
-            }
-        )).toMatchObject({
-            activeWorkItemId: 1,
-            isActiveWorkItemRevealed: false
-        });
-    });
-
-    test("Resets revealed status when a selected work item changes", () => {
-        expect(applicationContext({
-            activeWorkItemId: 1,
-            isActiveWorkItemRevealed: true
-        }, {
-            type: RECEIVE_ACTIVEWORKITEM_CHANGED,
-            workItemId: 2
-        })).toMatchObject({
-            isActiveWorkItemRevealed: false
-        });
-    });
-
-    test("Doesnt reset reveal status if active work item stays the same", () => {
-        expect(applicationContext({
-            activeWorkItemId: 1,
-            isActiveWorkItemRevealed: true
-        }, {
-            type: RECEIVE_ACTIVEWORKITEM_CHANGED,
-            workItemId: 1
-        })).toMatchObject({
             isActiveWorkItemRevealed: true
         });
     });
@@ -66,9 +27,10 @@ describe("Application Context reducer", () => {
         expect(applicationContext({
             isConnecting: true
         }, {
-            type: RECEIVE_GROUP_UPDATED
+            type: RECEIVE_SPRINT_ESTIMATION_UPDATE
         })).toMatchObject({
-            isConnecting: false
+            isConnecting: false,
+            isDisconnected: false
         });
     });
 });

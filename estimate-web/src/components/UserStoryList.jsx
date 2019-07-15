@@ -9,6 +9,23 @@ import {
 import _ from "underscore";
 import "./UserStoryList.less";
 
+const itemScoredClassName = "item-scored";
+const itemBeingScoredClassName = "item-is-being-scored";
+
+const getColumnClassName = item => {
+    const classes = [];
+
+    if (item.storyPoints) {
+        classes.push(itemScoredClassName);
+    }
+
+    if (item.isBeingScored) {
+        classes.push(itemBeingScoredClassName);
+    }
+
+    return classes.reduce((acc, current) => `${acc} ${current}`, "");
+};
+
 class UserStoryList extends Component {
     constructor(props) {
         super(props);
@@ -26,7 +43,7 @@ class UserStoryList extends Component {
                 isRowHeader: true,
                 data: "string",
                 isPadded: false,
-                onRender: item => <span>{item.id}</span>
+                onRender: item => <span className={getColumnClassName(item)}>{item.id}</span>
             },
             {
                 key: "title",
@@ -37,7 +54,7 @@ class UserStoryList extends Component {
                 isRowHeader: true,
                 data: "string",
                 isPadded: true,
-                onRender: item => <span>{item.title}</span>
+                onRender: item => <span className={getColumnClassName(item)} data-private>{item.title}</span>
             },
             {
                 key: "storyPoints",
@@ -47,10 +64,7 @@ class UserStoryList extends Component {
                 maxWidth: 25,
                 data: "string",
                 isPadded: true,
-                onRender: item => (item.isBeingScored
-                    ? <span className="item-is-being-scored" role="img" aria-label="Scoring">⏳</span>
-                    : <span>{item.storyPoints}</span>
-                )
+                onRender: item => <span className={getColumnClassName(item)}>{item.storyPoints}</span>
             }
         ];
 

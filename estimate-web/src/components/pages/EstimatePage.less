@@ -1,11 +1,12 @@
 @import "../../resources/Measurements.less";
 @import "../../resources/Borders.less";
 @import "../../resources/Colors.less";
+@import "../../resources/Containers.less";
 
 .component-root {
     display: grid;
     height: 100%;
-    grid-template-columns: [left-pane] 1fr [center-pane] 1.5fr;
+    grid-template-columns: [left-pane] minmax(380px, 1fr) [center-pane] 1.5fr [right-pane] 361px;
     grid-column-gap: 10px;
     justify-items: stretch;
 }
@@ -24,6 +25,15 @@
     flex-direction: column;
 }
 
+.right-pane {
+    display: grid;
+    grid-template-rows: [scoring-cards] auto [users] auto [actions] auto [empty-state] 1fr;
+    grid-row-gap: @margin-extra-large;
+    border-left: @base-border;
+    padding-left: @base-margin;
+    justify-items: stretch;
+}
+
 .scrollable-flex {
     min-height: min-content;
     display: flex;
@@ -33,20 +43,18 @@
 .work-items-title-row {
     display: flex;
     flex-direction: row;
-    align-items: baseline;
+    align-items: center;
     margin-top: 14px;
     margin-bottom: @margin-large;
 }
 
-.work-items-title-row > div {
+.work-items-title-row-member {
     color: @foreground-light;
     font-size: small;
     font-weight: lighter;
 }
 
 .work-items-title-row > * {
-    margin-top: 0;
-    margin-bottom: 0;
     margin-right: @margin-large;
 }
 
@@ -62,20 +70,13 @@
     position: relative;
 }
 
-.poker-cards-container {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
 .users-container {
+    grid-area: users;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
-    margin-top: @base-margin;
     margin-left: @base-margin;
-    margin-bottom: @margin-extra-large;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .users-container > * {
@@ -83,20 +84,21 @@
 }    
 
 .cards-overlay {
-    background: @background-lighter;
+    display: flex;
+    flex-direction: column;
+    grid-row-start: 1;
+    grid-row-end: 5;
     height: 100%;
     width: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: flex;
-    padding-left: @margin-large;
-    padding-right: @margin-large;
-    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .cards-alignment-container {
+    grid-area: scoring-cards;
     position: relative;
+    margin-top: @base-margin;
 }
 
 .cards-overlay-info {
@@ -114,8 +116,8 @@
 }
 
 .voting-control-container {
+    grid-area: actions;
     margin-left: @base-margin;
-    margin-bottom: @base-margin;
 }
 
 .vote-title-text {
@@ -135,6 +137,13 @@
 
 .refresh-button {
     display: inline-flex;
-    position: relative;
-    top: 4px;
+}
+
+.user-stories-spinner {
+    margin-top: @margin-extra-large;
+}
+
+.voting-illustration {
+    grid-area: empty-state;
+    align-self: end;
 }
