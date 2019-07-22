@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { PropTypes } from "prop-types";
+import KeyCode from "key-code";
 
 import {
     TextField,
@@ -18,20 +19,23 @@ import workItemShape from "../reducers/models/workItemShape";
 
 import "./UserStoryCommentEditor.less";
 
-const ENTER_KEY = 13;
-
 class UserStoryCommentEditor extends Component {
     state = {
         comment: "",
         // We're keeping the workItem in state so we can detect when the workItem
         // changes to reset the comment
-        workItem: undefined
+        workItem: undefined,
+        hasFocus: false
     };
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.workItem !== prevState.workItem) {
             // Clear comment when workItem changes
-            return { comment: "", workItem: nextProps.workItem };
+            return {
+                comment: "",
+                workItem: nextProps.workItem,
+                hasFocus: false
+            };
         }
         return null;
     }
@@ -45,8 +49,21 @@ class UserStoryCommentEditor extends Component {
         // (in which it wraps the keydown event)
         // by pooling them. Calling persist() removes the event from the pool
         e.persist();
-        if (e.ctrlKey && e.keyCode === ENTER_KEY) {
+        if (e.ctrlKey && e.keyCode === KeyCode.ENTER) {
             this.onAddComment();
+        }
+    };
+
+    onGotFocus = () => {
+        setTimeout(() => {
+            this.toggleHasFocus(true);
+        }, 0);
+    };
+
+    toggleHasFocus = targetValue => {
+        const { editorHasFocus } = this.state;
+        if (editorHasFocus !== targetValue) {
+            this.setState({ hasFocus: targetValue });
         }
     };
 
@@ -56,37 +73,42 @@ class UserStoryCommentEditor extends Component {
 
         addComment(comment);
 
-        this.setState({ comment: "" });
+        this.setState({ comment: "", hasFocus: false });
     };
 
     render() {
         const { user, workItem } = this.props;
-        const { comment } = this.state;
+        const { comment, hasFocus } = this.state;
 
         const { addingComment } = workItem;
 
-        const showAddButton = addingComment || comment.length > 0;
+        const showAddButton = addingComment || hasFocus;
 
         return (
-            <div className="user-story-comment-editor user-story-comment-grid-item">
+            <div
+                className="user-story-comment-editor user-story-comment-grid-item"
+            >
                 <Persona
                     key={user.id}
                     size={PersonaSize.size32}
                     imageUrl={user.imageUrl}
                     hidePersonaDetails
                 />
+
                 <TextField
                     placeholder="Share your thoughts..."
                     onChange={this.onCommentChanged}
                     value={comment}
                     onKeyDown={this.onEditorKeyDown}
                     resizable={false}
-                    multiline={comment.length > 0}
+                    onFocus={this.onGotFocus}
+                    multiline={hasFocus}
                     autoAdjustHeight
                 />
                 {showAddButton && (
                     <PrimaryButton
                         onClick={this.onAddComment}
+                        disabled={comment.length === 0}
                         className="add-button"
                     >
                         <span>Add Comment</span>

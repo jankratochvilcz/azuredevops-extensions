@@ -20,6 +20,7 @@
     "@aspnet/signalr": "^1.1.0",
     "@redux-saga/core": "^1.0.2",
     "jest-theories": "^1.0.3",
+    "key-code": "0.0.1",
     "logrocket": "^1.0.1",
     "office-ui-fabric-react": "^6.189.2",
     "prop-types": "^15.6.2",

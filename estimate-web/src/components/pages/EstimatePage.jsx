@@ -229,8 +229,6 @@ class EstimationSession extends Component {
         console.log("selectedWorkItemId", selectedWorkItemId);
         console.log("selectedWorkItem", selectedWorkItem);
         console.log("active work item Id", activeWorkItemId);
-        console.log("user", users.find(x => x.id === userId));
-
 
         const isSelectedWorkItemInEstimation = activeWorkItemId != null
             && selectedWorkItemId === activeWorkItemId;
@@ -282,7 +280,10 @@ class EstimationSession extends Component {
                     {selectedWorkItem && (
                         <React.Fragment>
                             <UserStoryDetail workItem={selectedWorkItem} />
-                            <UserStoryDiscussion workItem={selectedWorkItem} user={users.find(x => x.id === userId)} />
+                            <UserStoryDiscussion
+                                workItem={selectedWorkItem}
+                                user={users.find(x => x.id === userId)}
+                            />
                         </React.Fragment>
                     )}
                 </div>
