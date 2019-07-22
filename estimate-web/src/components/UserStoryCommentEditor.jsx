@@ -93,7 +93,7 @@ class UserStoryCommentEditor extends Component {
                         {addingComment && <Spinner className="adding-spinner" />}
                     </PrimaryButton>
                 )}
-                {showAddButton && <Label style={{ fontSize: FontSizes.small }}>Ctrl+Enter</Label>}
+                {showAddButton && <Label className="save-shortcut-hint" style={{ fontSize: FontSizes.small }}>Ctrl+Enter to submit</Label>}
             </div>
         );
     }
