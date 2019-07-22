@@ -35,7 +35,7 @@ class UserStoryCommentList extends Component {
     render() {
         const { workItem } = this.props;
         if (!workItem.commentsFetched) {
-            return <Spinner label="Loading comments..." />;
+            return <Spinner className="fetching-comments-spinner" label="Loading comments..." />;
         }
         return (
             <div className="user-story-comments user-story-comment-grid-item">
